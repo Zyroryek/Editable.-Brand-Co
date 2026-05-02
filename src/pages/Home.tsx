@@ -130,15 +130,27 @@ export default function Home() {
               <div className="w-12 h-[1px] bg-ink/20 hidden md:block" />
             </div>
 
-            <div className="pt-10 md:pt-16">
+            <div className="pt-10 md:pt-16 flex flex-col sm:flex-row items-center justify-center gap-4">
               <Link to="/packages">
                 <Magnetic>
                   <motion.button 
                     whileHover={{ scale: 1.05, backgroundColor: "#ff4d00", color: "#121212" }}
                     whileTap={{ scale: 0.95 }}
-                    className="px-8 py-4 bg-ink text-bg rounded-full text-[10px] uppercase tracking-[0.3em] font-bold border border-transparent transition-all shadow-2xl shadow-accent-purple/20"
+                    className="px-8 py-4 bg-ink text-bg rounded-full text-[10px] uppercase tracking-[0.3em] font-bold border border-transparent transition-all shadow-2xl shadow-accent-purple/20 w-48 sm:w-auto"
                   >
                     Explore Packages
+                  </motion.button>
+                </Magnetic>
+              </Link>
+
+              <Link to="/contact">
+                <Magnetic>
+                  <motion.button 
+                    whileHover={{ scale: 1.05, backgroundColor: "rgba(18, 18, 18, 0.05)" }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-8 py-4 bg-transparent text-ink rounded-full text-[10px] uppercase tracking-[0.3em] font-bold border border-ink/20 transition-all w-48 sm:w-auto"
+                  >
+                    Contact Us
                   </motion.button>
                 </Magnetic>
               </Link>
@@ -210,100 +222,67 @@ export default function Home() {
           className="text-[10vw] font-display font-bold uppercase opacity-[0.03] select-none"
         />
 
-        {/* 4. Packages */}
+        {/* 4. Packages - Refactored to Line-by-Line List */}
         <section id="packages-section" className="section-spacing mb-24 max-w-[1440px] mx-auto px-6 lg:px-20 relative">
           <div className="absolute -top-24 -left-24 w-64 h-64 md:w-96 md:h-96 bg-accent-purple/5 rounded-full blur-[80px] md:blur-[100px] -z-10" />
-          <div className="flex flex-col lg:flex-row gap-16 lg:gap-32 items-center">
-            <motion.div 
-              className="w-full lg:flex-1 flex flex-col gap-6 md:gap-8"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={{
-                hidden: { opacity: 0 },
-                visible: {
-                  opacity: 1,
-                  transition: { staggerChildren: 0.1 }
-                }
-              }}
-            >
-              <div className="flex items-center gap-4 mb-4 md:mb-8">
-                <span className="text-[10px] uppercase tracking-[0.2em] font-bold opacity-30">Our Ecosystem</span>
-                <div className="h-px flex-1 bg-gradient-to-r from-ink/10 to-transparent" />
-              </div>
-              
-              {/* Horizontal scroll on mobile, vertical list on desktop */}
-              <div className="flex flex-row lg:flex-col overflow-x-auto lg:overflow-visible pb-4 lg:pb-0 gap-8 lg:gap-6 scrollbar-hide snap-x">
-                {PACKAGES.map((pkg) => (
-                  <motion.button
-                    key={pkg.id}
-                    variants={{
-                      hidden: { x: -20, opacity: 0 },
-                      visible: { x: 0, opacity: 1 }
-                    }}
-                    onMouseEnter={() => setActivePackage(pkg)}
-                    onClick={() => setActivePackage(pkg)}
-                    className={cn(
-                      "text-3xl md:text-5xl lg:text-6xl font-display font-bold text-left transition-all duration-500 whitespace-nowrap lg:whitespace-normal snap-center",
-                      activePackage.id === pkg.id ? "text-accent lg:pl-6 scale-105" : "text-ink/10 hover:text-ink/40"
-                    )}
-                  >
-                    {pkg.name}
-                  </motion.button>
-                ))}
-              </div>
-            </motion.div>
-            
-            <div className="w-full lg:flex-1 pt-0 lg:pt-20">
-              <AnimatePresence mode="wait" initial={false}>
-                <motion.div
-                  key={activePackage.id}
-                  initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 1.02, y: -10 }}
-                  transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-                  className="glass-card p-8 md:p-12 space-y-8 md:space-y-10 relative overflow-hidden"
-                  style={{ willChange: "transform, opacity" }}
-                >
-                  <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 bg-accent/20 rounded-full blur-2xl md:blur-3xl -z-10 animate-pulse" />
-                  <div className="absolute bottom-0 left-0 w-24 h-24 md:w-40 md:h-40 bg-accent-purple/10 rounded-full blur-2xl md:blur-3xl -z-10" />
-                  
-                  <div className="space-y-2">
-                    <p className="text-[10px] uppercase tracking-[0.3em] opacity-40 font-bold">Financial Guide</p>
-                    <p className="text-2xl md:text-4xl lg:text-5xl font-display font-bold tracking-tight text-gradient-alt">{activePackage.price}</p>
-                  </div>
-                  
-                  <p className="text-base md:text-lg opacity-80 leading-relaxed max-w-md font-light italic font-serif">
-                    &ldquo;{activePackage.desc}&rdquo;
-                  </p>
+          
+          <div className="mb-16 md:mb-24 flex items-center gap-6">
+            <h2 className="text-5xl md:text-7xl font-display font-bold uppercase tracking-tight mb-0">Packages</h2>
+            <div className="h-px flex-1 bg-gradient-to-r from-ink/10 to-transparent" />
+          </div>
 
-                  <div className="grid grid-cols-2 gap-8 pt-6 border-t border-white/20">
-                    {activePackage.includes.slice(0, 4).map(item => (
-                      <div key={item} className="flex items-center gap-3">
-                          <motion.div 
-                            animate={{ scale: [1, 1.5, 1], backgroundColor: ["#ff4d00", "#7000ff", "#ff4d00"] }}
-                            transition={{ duration: 3, repeat: Infinity, delay: Math.random() }}
-                            className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_8px_rgba(255,77,0,0.5)]" 
-                          />
-                          <span className="text-[10px] uppercase tracking-widest font-bold opacity-60">{item}</span>
-                      </div>
+          <div className="grid grid-cols-1 gap-6 md:gap-10">
+            {PACKAGES.map((pkg, index) => (
+              <motion.div
+                key={pkg.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
+                className="glass group p-8 md:p-12 lg:p-16 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10 hover:border-accent transition-all duration-500 overflow-hidden relative"
+              >
+                {/* Visual Accent */}
+                <div className="absolute top-0 right-0 w-32 h-32 md:w-64 md:h-64 bg-accent/5 rounded-full blur-[60px] md:blur-[100px] -z-10 group-hover:bg-accent/10 transition-colors" />
+                
+                <div className="space-y-6 lg:max-w-xl">
+                  <div className="space-y-2">
+                    <span className="text-[10px] uppercase tracking-[0.4em] font-bold opacity-30">Option 0{index + 1}</span>
+                    <h3 className="text-4xl md:text-6xl font-display font-bold uppercase tracking-tighter leading-none group-hover:text-accent transition-colors">
+                      {pkg.name}
+                    </h3>
+                  </div>
+                  <p className="text-lg opacity-60 font-light leading-relaxed max-w-md">
+                    {pkg.desc}
+                  </p>
+                  <div className="flex flex-wrap gap-4 pt-4">
+                    {pkg.includes.map(item => (
+                      <span key={item} className="px-4 py-1.5 rounded-full border border-ink/5 bg-ink/[0.02] text-[10px] uppercase tracking-widest font-bold opacity-40">
+                        {item}
+                      </span>
                     ))}
                   </div>
+                </div>
 
-                  <Link to="/book" className="inline-block mt-8 w-full">
+                <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end gap-8 w-full lg:w-auto pt-10 lg:pt-0 border-t lg:border-t-0 lg:border-l border-ink/5 lg:pl-16">
+                  <div className="space-y-1 lg:text-right">
+                    <p className="text-[10px] uppercase tracking-[0.3em] opacity-30 font-bold">Investment</p>
+                    <p className="text-3xl md:text-4xl font-display font-bold text-gradient-alt">{pkg.price}</p>
+                  </div>
+                  
+                  <Link to="/book" className="w-full sm:w-auto">
                     <Magnetic>
                       <motion.div 
-                        className="book-btn w-full text-center py-6 bg-accent text-ink font-bold uppercase tracking-[0.3em] text-xs shadow-xl shadow-accent/20 rounded-full"
-                        whileHover={{ scale: 1.02, backgroundColor: "#121212", color: "#e8e8e8" }}
-                        whileTap={{ scale: 0.98 }}
+                        whileHover={{ scale: 1.05, backgroundColor: "#121212", color: "#fff" }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-10 py-5 bg-accent text-ink font-bold uppercase tracking-[0.3em] text-[10px] rounded-full shadow-lg shadow-accent/10 whitespace-nowrap cursor-pointer"
                       >
                         Initiate Project
                       </motion.div>
                     </Magnetic>
                   </Link>
-                </motion.div>
-              </AnimatePresence>
-            </div>
+                </div>
+              </motion.div>
+            ))}
           </div>
         </section>
 

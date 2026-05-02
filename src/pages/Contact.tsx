@@ -1,120 +1,82 @@
 import { motion } from "motion/react";
 import PageTransition from "../components/PageTransition";
-import { Instagram, Linkedin, ArrowUpRight, Mail, Phone } from "lucide-react";
-import { useState } from "react";
+import { ArrowUpRight, Instagram, MessageCircle } from "lucide-react";
 
 export default function Contact() {
-  const [formData, setFormData] = useState({
-    name: "",
-    interest: ""
-  });
-
-  const socialLinks = [
-    { name: "Instagram", icon: Instagram, href: "https://www.instagram.com/official_editable?igsh=MWt6OWtvYm41bTEyZQ==" },
-    { name: "LinkedIn", icon: Linkedin, href: "https://linkedin.com" },
-    { name: "Gmail", icon: Mail, href: "mailto:editable.freelancing@gmail.com" },
-    { name: "WhatsApp", icon: Phone, href: "https://wa.me/917604969891" }
+  const contactMethods = [
+    {
+      name: "WhatsApp",
+      description: "Fastest response for quick inquiries",
+      icon: MessageCircle,
+      href: "https://wa.me/917604969891",
+      color: "bg-[#25D366]/10 text-[#25D366]",
+      label: "Open Chat"
+    },
+    {
+      name: "Instagram",
+      description: "Follow us for daily creative inspiration",
+      icon: Instagram,
+      href: "https://www.instagram.com/official_editable?utm_source=ig_web_button_share_sheet&igsh=ZDNlZDc0MzIxNw==",
+      color: "bg-[#E4405F]/10 text-[#E4405F]",
+      label: "View Profile"
+    }
   ];
-
-  const handleWhatsApp = () => {
-    const phone = "917604969891";
-    const nameStr = formData.name ? `Hello, I'm ${formData.name}.` : "Hello!";
-    const interestStr = formData.interest ? ` I'm interested in ${formData.interest} and would like to discuss a project.` : " I'm interested in your creative services.";
-    const message = encodeURIComponent(`${nameStr}${interestStr}`);
-    window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
-  };
 
   return (
     <PageTransition>
       <div className="min-h-screen pt-40 pb-24 flex flex-col justify-center">
-        <header className="mb-20">
-          <span className="text-xs uppercase tracking-widest opacity-40 font-mono mb-4 block">Get in touch</span>
-          <h1 className="text-5xl md:text-[10vw] font-display font-medium tracking-tighter leading-none">
-            Hello.<br/>Editable.
+        <header className="mb-16 md:mb-24">
+          <span className="text-[10px] uppercase tracking-[0.4em] opacity-40 font-bold mb-4 block">Let's Connect</span>
+          <h1 className="text-4xl md:text-[12vw] font-display font-medium tracking-tight leading-none text-gradient-alt">
+            Work With Us.
           </h1>
         </header>
 
-        <div className="grid md:grid-cols-2 gap-20">
-          <div className="space-y-16">
-            <div className="space-y-6">
-              <p className="text-sm uppercase tracking-widest opacity-40 font-mono">Quick Contact</p>
-              <div className="flex flex-col gap-6">
-                <div>
-                  <input 
-                    type="text" 
-                    placeholder="YOUR NAME"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full bg-transparent border-b border-ink/10 py-4 focus:border-accent outline-none text-xl md:text-2xl font-display transition-colors placeholder:opacity-20"
-                  />
-                </div>
-                <div>
-                  <input 
-                    type="text" 
-                    placeholder="I'M INTERESTED IN..."
-                    value={formData.interest}
-                    onChange={(e) => setFormData({ ...formData, interest: e.target.value })}
-                    className="w-full bg-transparent border-b border-ink/10 py-4 focus:border-accent outline-none text-xl md:text-2xl font-display transition-colors placeholder:opacity-20"
-                  />
-                </div>
+        <div className="grid md:grid-cols-2 gap-8 md:gap-12 lg:gap-16">
+          {contactMethods.map((method, index) => (
+            <motion.a
+              key={method.name}
+              href={method.href}
+              target="_blank"
+              rel="noreferrer"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              className="glass p-10 md:p-16 flex flex-col gap-10 group hover:border-accent transition-all duration-500 overflow-hidden relative"
+            >
+              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all">
+                <method.icon size={120} strokeWidth={1} />
               </div>
               
-              <div className="pt-8">
-                <button 
-                  onClick={handleWhatsApp}
-                  className="flex items-center gap-4 py-4 px-10 border border-ink/20 rounded-full hover:border-accent group transition-all"
-                >
-                  <span className="text-sm uppercase tracking-widest font-bold">WhatsApp Us</span>
-                  <div className="w-10 h-10 rounded-full bg-accent text-bg flex items-center justify-center group-hover:scale-110 transition-transform">
-                     →
-                  </div>
-                </button>
+              <div className="space-y-4 relative z-10">
+                <div className={`w-12 h-12 ${method.color} rounded-full flex items-center justify-center`}>
+                  <method.icon size={20} />
+                </div>
+                <h2 className="text-3xl md:text-5xl font-display font-bold uppercase tracking-tighter">{method.name}</h2>
+                <p className="text-lg opacity-40 max-w-xs leading-relaxed">{method.description}</p>
               </div>
-            </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 opacity-60">
-              <div className="space-y-4">
-                <p className="text-[10px] uppercase tracking-widest font-bold">Email</p>
-                <a href="mailto:editable.freelancing@gmail.com" className="text-sm border-b border-ink/20 pb-1 hover:text-accent hover:border-accent transition-all">
-                  editable.freelancing@gmail.com
-                </a>
+              <div className="mt-auto flex justify-between items-center relative z-10 pt-10 border-t border-ink/5">
+                <span className="text-xs uppercase tracking-[0.2em] font-bold opacity-60 group-hover:opacity-100 transition-opacity">
+                  {method.label}
+                </span>
+                <div className="w-12 h-12 rounded-full border border-ink/10 flex items-center justify-center group-hover:bg-accent group-hover:border-accent group-hover:text-bg transition-all duration-500">
+                  <ArrowUpRight size={20} />
+                </div>
               </div>
-              <div className="space-y-4">
-                <p className="text-[10px] uppercase tracking-widest font-bold">Phone</p>
-                <a href="tel:7604969891" className="text-sm border-b border-ink/20 pb-1 hover:text-accent hover:border-accent transition-all">
-                  +91 76049 69891
-                </a>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-col justify-end space-y-12">
-            <div className="space-y-6">
-                <p className="text-sm uppercase tracking-widest opacity-40 font-mono">Location</p>
-                <p className="text-xl md:text-2xl font-light opacity-60 leading-relaxed">
-                  Design Studio International<br/>
-                  Global Presence
-                </p>
-            </div>
-
-            <div className="flex flex-col gap-6 pt-10 border-t border-ink/5">
-                {socialLinks.map((link) => (
-                  <a 
-                    key={link.name} 
-                    href={link.href} 
-                    target="_blank"
-                    rel="noreferrer"
-                    className="flex justify-between items-center group py-2"
-                  >
-                    <span className="text-xl md:text-2xl font-display opacity-40 group-hover:opacity-100 group-hover:text-accent transition-all uppercase">
-                        {link.name}
-                    </span>
-                    <ArrowUpRight size={24} className="opacity-0 group-hover:opacity-100 group-hover:text-accent transition-all" />
-                  </a>
-                ))}
-            </div>
-          </div>
+            </motion.a>
+          ))}
         </div>
+
+        <footer className="mt-24 md:mt-32 pt-16 border-t border-ink/5 flex flex-col md:flex-row justify-between items-start md:items-center gap-10">
+          <div className="space-y-2">
+             <p className="text-[10px] uppercase tracking-[0.3em] opacity-40 font-bold leading-relaxed">Design Studio International<br />Creative Network</p>
+          </div>
+          <div className="flex flex-wrap gap-8 text-[10px] uppercase tracking-[0.3em] font-bold opacity-60">
+             <a href="https://www.instagram.com/official_editable?igsh=MWt6OWtvYm41bTEyZQ==" target="_blank" rel="noreferrer" className="hover:text-accent transition-colors">Instagram</a>
+             <a href="https://linkedin.com" target="_blank" rel="noreferrer" className="hover:text-accent transition-colors">LinkedIn</a>
+          </div>
+        </footer>
       </div>
     </PageTransition>
   );

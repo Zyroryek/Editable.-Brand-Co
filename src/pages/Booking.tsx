@@ -214,12 +214,16 @@ export default function Booking() {
                     <h1 className="text-4xl md:text-6xl font-display font-medium">Your request is in.</h1>
                     <p className="text-xl opacity-60 max-w-md mx-auto">We’ll reach out to you within 24 hours to begin the process.</p>
                 </div>
-                <button 
-                  onClick={() => window.location.href = "/"}
-                  className="px-12 py-5 bg-ink text-bg rounded-full text-xs uppercase tracking-[0.3em] font-bold"
+                <motion.a 
+                  href="https://wa.me/917604969891?text=Hi%20Editable%20Team,%20I've%20made%20the%20payment%20for%20my%20booking.%20Here%20is%20the%20proof."
+                  target="_blank"
+                  rel="noreferrer"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className="inline-block px-12 py-5 bg-ink text-bg rounded-full text-xs uppercase tracking-[0.3em] font-bold"
                 >
-                  Return Home
-                </button>
+                  Send Payment Proof
+                </motion.a>
               </motion.div>
             )}
           </AnimatePresence>

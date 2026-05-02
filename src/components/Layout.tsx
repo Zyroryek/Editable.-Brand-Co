@@ -19,8 +19,6 @@ const NavLink = ({ to, label, onClick }: { to: string; label: string; onClick?: 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "light");
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const [isHovering, setIsHovering] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
   const location = useLocation();
   const lenisRef = useRef<Lenis | null>(null);
@@ -54,14 +52,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
     requestAnimationFrame(raf);
 
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-      
-      const target = e.target as HTMLElement;
-      const isClickable = target.closest('a, button, [role="button"]');
-      setIsHovering(!!isClickable);
-    };
-
     const handleScroll = () => {
       const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
       const currentScroll = window.scrollY;
@@ -69,11 +59,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     };
 
     lenis.on('scroll', handleScroll);
-    window.addEventListener("mousemove", handleMouseMove);
     
     return () => {
       lenis.destroy();
-      window.removeEventListener("mousemove", handleMouseMove);
     };
   }, []);
 
@@ -96,30 +84,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, [location.pathname]);
 
   return (
-    <div className="relative min-h-screen cursor-none">
+    <div className="relative min-h-screen">
       <div className="grain" aria-hidden="true" />
-      
-      {/* Custom Cursor */}
-      <motion.div
-        className="fixed top-0 left-0 w-4 h-4 bg-accent rounded-full pointer-events-none z-[9999] mix-blend-difference hidden md:block"
-        animate={{
-          x: mousePos.x - 8,
-          y: mousePos.y - 8,
-          scale: isHovering ? 4 : 1,
-          opacity: 1
-        }}
-        transition={{ type: "spring", damping: 30, stiffness: 400, mass: 0.5 }}
-      />
-      <motion.div
-        className="fixed top-0 left-0 w-12 h-12 border border-accent rounded-full pointer-events-none z-[9998] hidden md:block"
-        animate={{
-          x: mousePos.x - 24,
-          y: mousePos.y - 24,
-          scale: isHovering ? 1.5 : 1,
-          opacity: isHovering ? 0 : 0.5
-        }}
-        transition={{ type: "spring", damping: 20, stiffness: 200, mass: 1 }}
-      />
 
       {/* Scroll Progress Bar */}
       <motion.div 
@@ -175,6 +141,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <NavLink to="/reviews" label="Reviews" onClick={toggleMenu} />
               <NavLink to="/profile" label="Profile" onClick={toggleMenu} />
               <NavLink to="/book" label="Book Now" onClick={toggleMenu} />
+              <NavLink to="/contact" label="Contact" onClick={toggleMenu} />
             </div>
             
               <div className="flex flex-col items-center gap-4 border-t border-ink/5 pt-12 w-full max-w-xs">
