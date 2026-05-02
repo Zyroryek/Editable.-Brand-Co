@@ -4,8 +4,7 @@ import PageTransition from "../components/PageTransition";
 import { cn } from "@/src/lib/utils";
 import { db, handleFirestoreError, OperationType } from "@/src/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { X, QrCode, Mail, ArrowUpRight } from "lucide-react";
-import { QRCodeSVG } from "qrcode.react";
+import { X, QrCode, ArrowUpRight } from "lucide-react";
 
 type Step = 1 | 2 | 3;
 
@@ -45,26 +44,6 @@ export default function Booking() {
   };
 
   const handlePaymentConfirmation = () => {
-    // 1. Construct Email Content
-    const subject = encodeURIComponent(`Project Inquiry: ${form.package} - ${form.name}`);
-    const bodyText = encodeURIComponent(
-      `Hi Editable Team,\n\n` +
-      `I have made the payment for the inquiry.\n\n` +
-      `----- PROJECT DETAILS -----\n` +
-      `Package: ${form.package}\n` +
-      `Name: ${form.name}\n` +
-      `Email: ${form.email}\n` +
-      `Phone: ${form.phone}\n\n` +
-      `Details:\n${form.details}\n\n` +
-      `--------------------------\n` +
-      `Best regards,\n${form.name}`
-    );
-    
-    const mailtoUrl = `mailto:editable.freelancing@gmail.com?subject=${subject}&body=${bodyText}`;
-    
-    // Open email client
-    window.location.href = mailtoUrl;
-    
     // UI state updates
     setShowQR(false);
     setTimeout(() => {
@@ -240,36 +219,43 @@ export default function Booking() {
                   initial={{ scale: 0.95, y: 10 }}
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0.95, y: 10 }}
-                  className="glass p-6 md:p-10 max-w-[calc(100vw-2rem)] md:max-w-sm w-full relative space-y-6 md:space-y-8 text-center"
+                  className="glass p-8 md:p-12 max-w-[calc(100vw-2rem)] md:max-w-md w-full relative space-y-8 text-center"
                 >
                   <button 
                     onClick={handlePaymentConfirmation}
-                    className="absolute top-4 right-4 md:top-6 md:right-6 p-2 hover:bg-ink/5 rounded-full transition-colors"
+                    className="absolute top-6 right-6 p-2 hover:bg-ink/5 rounded-full transition-colors"
                   >
-                    <X className="w-5 h-5 md:w-6 md:h-6" />
+                    <X className="w-6 h-6" />
                   </button>
                   
-                  <div className="space-y-2 md:space-y-4 pt-2 md:pt-4">
-                    <h2 className="text-2xl md:text-3xl font-display font-bold uppercase tracking-tight">Scan to Pay</h2>
-                    <div className="flex flex-col items-center gap-1 md:gap-2">
-                       <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] opacity-40">UPI ID</span>
-                       <span className="text-xs md:text-sm font-mono bg-ink/5 px-4 py-1 rounded-full">7604969891@ybl</span>
+                  <div className="space-y-4">
+                    <h2 className="text-3xl md:text-4xl font-display font-bold uppercase tracking-tight">Scan to Pay</h2>
+                    <div className="flex flex-col items-center gap-2">
+                       <span className="text-[10px] uppercase tracking-[0.3em] opacity-40">Payment Details</span>
+                       <span className="text-sm font-mono bg-ink/5 px-6 py-2 rounded-full border border-ink/5">7604969891@ybl</span>
                     </div>
                   </div>
 
-                  <div className="aspect-square bg-white rounded-[32px] p-8 flex items-center justify-center border border-ink/5 shadow-2xl">
-                    <QRCodeSVG 
-                      value={`upi://pay?pa=7604969891@ybl&pn=Editable%20Freelancing&cu=INR`}
-                      size={256}
-                      level="H"
-                      includeMargin={false}
-                      className="w-full h-full"
+                  <motion.div 
+                    whileHover={{ scale: 1.02 }}
+                    className="aspect-square bg-[#0a0a0a] rounded-[32px] overflow-hidden flex items-center justify-center border border-white/10 shadow-2xl p-6 relative group"
+                  >
+                    <img 
+                      src="/payment-qr.png" 
+                      alt="Payment QR Code"
+                      className="w-full h-full object-contain"
                     />
-                  </div>
+                    <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                  </motion.div>
 
-                  <p className="text-[10px] uppercase tracking-[0.2em] opacity-40 leading-relaxed max-w-[200px] mx-auto">
-                    Take a screenshot after payment and wait for our team to contact you.
-                  </p>
+                  <div className="space-y-4">
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-accent font-bold">
+                      Step 1: Scan & Pay via any UPI App
+                    </p>
+                    <p className="text-[10px] uppercase tracking-[0.15em] opacity-50 leading-relaxed max-w-[240px] mx-auto">
+                      Please take a <span className="text-ink font-bold opacity-100">clear screenshot</span> of the successful payment page and keep it ready.
+                    </p>
+                  </div>
 
                   <button 
                     onClick={handlePaymentConfirmation}
