@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { Menu, X, Moon, Sun } from "lucide-react";
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/lib/utils";
 import Lenis from "lenis";
 
 const NavLink = ({ to, label, onClick }: { to: string; label: string; onClick?: () => void }) => (
@@ -138,9 +138,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="flex flex-col gap-6 text-center">
               <NavLink to="/" label="Home" onClick={toggleMenu} />
               <NavLink to="/packages" label="Packages" onClick={toggleMenu} />
-              <NavLink to="/reviews" label="Reviews" onClick={toggleMenu} />
               <NavLink to="/profile" label="Profile" onClick={toggleMenu} />
-              <NavLink to="/book" label="Book Now" onClick={toggleMenu} />
               <NavLink to="/contact" label="Contact" onClick={toggleMenu} />
             </div>
             

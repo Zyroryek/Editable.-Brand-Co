@@ -23,17 +23,17 @@ export default function TextReveal({ text, className, delay = 0 }: TextRevealPro
       y: 0,
       transition: {
         type: "spring",
-        damping: 12,
-        stiffness: 100,
+        damping: 25,
+        stiffness: 120,
       },
     },
     hidden: {
       opacity: 0,
-      y: 20,
+      y: 40,
       transition: {
         type: "spring",
-        damping: 12,
-        stiffness: 100,
+        damping: 25,
+        stiffness: 120,
       },
     },
   };

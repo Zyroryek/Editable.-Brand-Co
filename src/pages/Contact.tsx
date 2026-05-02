@@ -39,21 +39,32 @@ export default function Contact() {
               href={method.href}
               target="_blank"
               rel="noreferrer"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+              initial={{ opacity: 0, y: 50, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ 
+                delay: index * 0.2, 
+                duration: 1, 
+                ease: [0.22, 1, 0.36, 1] 
+              }}
+              whileHover={{ 
+                y: -10,
+                transition: { duration: 0.4, ease: "easeOut" }
+              }}
               className="glass p-10 md:p-16 flex flex-col gap-10 group hover:border-accent transition-all duration-500 overflow-hidden relative"
             >
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all">
+              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-30 group-hover:scale-125 group-hover:rotate-6 transition-all duration-700">
                 <method.icon size={120} strokeWidth={1} />
               </div>
               
               <div className="space-y-4 relative z-10">
-                <div className={`w-12 h-12 ${method.color} rounded-full flex items-center justify-center`}>
+                <motion.div 
+                  whileHover={{ scale: 1.1, rotate: 10 }}
+                  className={`w-12 h-12 ${method.color} rounded-full flex items-center justify-center`}
+                >
                   <method.icon size={20} />
-                </div>
-                <h2 className="text-3xl md:text-5xl font-display font-bold uppercase tracking-tighter">{method.name}</h2>
-                <p className="text-lg opacity-40 max-w-xs leading-relaxed">{method.description}</p>
+                </motion.div>
+                <h2 className="text-3xl md:text-5xl font-display font-bold uppercase tracking-tighter transition-transform group-hover:translate-x-2 duration-500">{method.name}</h2>
+                <p className="text-lg opacity-40 max-w-xs leading-relaxed group-hover:opacity-60 transition-opacity duration-500">{method.description}</p>
               </div>
 
               <div className="mt-auto flex justify-between items-center relative z-10 pt-10 border-t border-ink/5">

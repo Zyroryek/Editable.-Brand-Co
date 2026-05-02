@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from "react-route
 import { AnimatePresence } from "motion/react";
 import Layout from "./components/Layout";
 import Home from "./pages/Home";
-import Reviews from "./pages/Reviews";
 import Packages from "./pages/Packages";
 import Profile from "./pages/Profile";
 import Booking from "./pages/Booking";
@@ -15,7 +14,6 @@ function AnimatedRoutes() {
     <AnimatePresence mode="wait">
       <Routes location={location}>
         <Route path="/" element={<Home />} />
-        <Route path="/reviews" element={<Reviews />} />
         <Route path="/packages" element={<Packages />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/book" element={<Booking />} />

@@ -2,7 +2,7 @@ import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "mot
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
 import PageTransition from "../components/PageTransition";
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/lib/utils";
 import Magnetic from "../components/Magnetic";
 import TextReveal from "../components/TextReveal";
 import Marquee from "../components/Marquee";
@@ -67,67 +67,99 @@ export default function Home() {
         <section className="h-screen flex flex-col items-center justify-center text-center relative overflow-hidden">
           {/* Multi-layered dynamic background blobs - reactive to mouse and scroll */}
           <motion.div 
-            className="absolute top-1/4 left-1/4 w-[60vw] h-[60vw] bg-accent/10 rounded-full blur-[120px] -z-10"
-            style={{ y: useTransform(smoothProgress, [0, 0.5], [0, -150]) }}
+            className="absolute top-1/4 left-1/4 w-[60vw] h-[60vw] bg-accent/10 rounded-full blur-[80px] -z-10"
+            style={{ 
+              y: useTransform(smoothProgress, [0, 0.5], [0, -200]),
+              willChange: "transform",
+            }}
             animate={{ 
-              x: (mousePos.x - (typeof window !== "undefined" ? window.innerWidth : 0) / 2) * 0.05,
+              x: (mousePos.x - (typeof window !== "undefined" ? window.innerWidth : 0) / 2) * 0.08,
               scale: [1, 1.1, 1],
             }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-          />
-          <motion.div 
-            className="absolute top-1/2 right-1/4 w-[40vw] h-[40vw] bg-accent-purple/5 rounded-full blur-[100px] -z-10"
-            style={{ y: useTransform(smoothProgress, [0, 0.5], [0, 50]) }}
-            animate={{ 
-              x: (mousePos.x - (typeof window !== "undefined" ? window.innerWidth : 0) / 2) * -0.03,
-              scale: [1.1, 1, 1.1],
+            transition={{ 
+              x: { duration: 0.8, ease: "easeOut" },
+              scale: { duration: 15, repeat: Infinity, ease: "easeInOut" },
             }}
-            transition={{ duration: 0.8, ease: "easeOut" }}
           />
           <motion.div 
-            className="absolute bottom-1/4 right-1/4 w-[50vw] h-[50vw] bg-accent-blue/10 rounded-full blur-[100px] -z-10"
-            style={{ y: useTransform(smoothProgress, [0, 0.5], [0, 100]) }}
+            className="absolute top-1/2 right-1/4 w-[40vw] h-[40vw] bg-accent-purple/5 rounded-full blur-[60px] -z-10"
+            style={{ 
+              y: useTransform(smoothProgress, [0, 0.5], [0, 80]),
+              willChange: "transform",
+            }}
             animate={{ 
               x: (mousePos.x - (typeof window !== "undefined" ? window.innerWidth : 0) / 2) * -0.05,
               scale: [1.1, 1, 1.1],
             }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
+            transition={{ 
+              x: { duration: 1, ease: "easeOut" },
+              scale: { duration: 12, repeat: Infinity, ease: "easeInOut" },
+            }}
+          />
+          <motion.div 
+            className="absolute bottom-1/4 right-1/4 w-[50vw] h-[50vw] bg-accent-blue/10 rounded-full blur-[70px] -z-10"
+            style={{ 
+              y: useTransform(smoothProgress, [0, 0.5], [0, 150]),
+              willChange: "transform",
+            }}
+            animate={{ 
+              x: (mousePos.x - (typeof window !== "undefined" ? window.innerWidth : 0) / 2) * -0.08,
+              scale: [1.05, 1, 1.05],
+            }}
+            transition={{ 
+              x: { duration: 0.7, ease: "easeOut" },
+              scale: { duration: 18, repeat: Infinity, ease: "easeInOut" },
+            }}
           />
           
-          <div className="overflow-hidden mb-8 md:mb-12">
+          <div className="overflow-hidden mb-8 md:mb-12 relative">
             <motion.h1 
               className="text-[18vw] lg:text-[15vw] font-display font-bold leading-[0.85] tracking-[-0.06em] uppercase relative text-accent-purple"
-              style={{ willChange: "transform, opacity" }}
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+              style={{ 
+                willChange: "transform, opacity",
+                skewX: textSkew,
+                y: textY
+              }}
+              initial={{ y: "110%", rotate: 5 }}
+              animate={{ y: 0, rotate: 0 }}
+              transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
             >
               Editable.
               <motion.span 
-                className="absolute -top-4 -right-4 w-8 h-8 bg-accent rounded-full hidden md:block shadow-[0_0_20px_rgba(255,77,0,0.5)]"
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 1.5, type: "spring" }}
+                className="absolute -top-4 -right-4 w-8 h-8 bg-accent rounded-full hidden md:block shadow-[0_0_30px_rgba(255,77,0,0.6)]"
+                initial={{ scale: 0, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 1.5, type: "spring", stiffness: 200, damping: 10 }}
               />
             </motion.h1>
           </div>
           
           <motion.div 
-            className="mt-12 space-y-4"
-            initial={{ opacity: 0, y: 20 }}
+            className="mt-12 space-y-6"
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.8, duration: 1 }}
+            transition={{ delay: 1, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
             style={{ translateZ: 0 }}
           >
-            <p className="text-[10px] tracking-[0.4em] font-bold opacity-30 uppercase">
+            <p className="text-[10px] tracking-[0.6em] font-bold opacity-30 uppercase">
               Design Studio International / Global Presence
             </p>
             <div className="flex items-center gap-6 justify-center">
-              <div className="w-12 h-[1px] bg-ink/20 hidden md:block" />
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: 48 }}
+                transition={{ delay: 1.2, duration: 1 }}
+                className="h-[1px] bg-ink/20 hidden md:block" 
+              />
               <p className="text-lg md:text-2xl italic font-serif opacity-60">
                 Creative Studio focused on visceral design
               </p>
-              <div className="w-12 h-[1px] bg-ink/20 hidden md:block" />
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: 48 }}
+                transition={{ delay: 1.2, duration: 1 }}
+                className="h-[1px] bg-ink/20 hidden md:block" 
+              />
             </div>
 
             <div className="pt-10 md:pt-16 flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -172,6 +204,58 @@ export default function Home() {
           </motion.div>
         </section>
 
+        {/* Simplified Packages List - Moved to Top */}
+        <section id="packages-section" className="py-20 md:py-32 max-w-[1440px] mx-auto px-6 lg:px-20 relative">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-64 bg-accent/5 rounded-full blur-[120px] -z-10" />
+          
+          <div className="mb-12 md:mb-16 flex items-center gap-6">
+            <h2 className="text-4xl md:text-6xl font-display font-bold uppercase tracking-tight mb-0">Our Packages</h2>
+            <div className="h-[1px] flex-1 bg-gradient-to-r from-ink/10 to-transparent" />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {PACKAGES.map((pkg, index) => (
+              <motion.div
+                key={pkg.id}
+                initial={{ opacity: 0, y: 40, scale: 0.95 }}
+                whileInView={{ opacity: 1, y: 0, scale: 1 }}
+                viewport={{ once: true, margin: "-10%" }}
+                transition={{ 
+                  duration: 0.8, 
+                  delay: index * 0.15,
+                  ease: [0.22, 1, 0.36, 1]
+                }}
+                whileHover={{ 
+                  y: -8,
+                  transition: { duration: 0.3, ease: "easeOut" }
+                }}
+                className="glass group p-6 md:p-8 flex flex-col justify-center gap-4 hover:border-accent transition-all duration-500 overflow-hidden relative"
+                style={{ willChange: "transform, opacity" }}
+              >
+                <motion.div 
+                  className="absolute inset-0 bg-accent/5 translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-[0.22, 1, 0.36, 1]"
+                />
+                <div className="flex items-center justify-between relative z-10">
+                  <h3 className="text-xl md:text-2xl font-display font-bold uppercase group-hover:text-accent transition-colors">
+                    {pkg.name}
+                  </h3>
+                  <Link to="/packages">
+                    <motion.span 
+                      whileHover={{ x: 5 }}
+                      className="text-[11px] uppercase tracking-[0.2em] font-black opacity-100 text-accent transition-all flex items-center gap-2"
+                    >
+                      Details <span className="text-[14px]">→</span>
+                    </motion.span>
+                  </Link>
+                </div>
+                <p className="text-xs opacity-50 font-light leading-relaxed line-clamp-1 relative z-10">
+                  {pkg.desc}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        </section>
+
         {/* 2. Statement with TextReveal */}
         <section className="section-spacing flex items-center justify-center px-6 relative overflow-hidden">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-purple/20 to-transparent" />
@@ -183,34 +267,49 @@ export default function Home() {
         </section>
 
         {/* Why Us Section */}
-        <section className="section-spacing px-6 md:px-12 lg:px-20 max-w-[1440px] mx-auto">
-          <div className="mb-24 md:mb-32 flex flex-col md:flex-row md:items-end justify-between gap-10">
-            <h2 className="text-6xl md:text-8xl lg:text-9xl font-display font-bold uppercase tracking-tighter leading-[0.8] mb-0">Why Us<span className="text-accent">?</span></h2>
-            <div className="text-[10px] md:text-xs uppercase tracking-[0.3em] opacity-40 max-w-[250px] leading-relaxed">
+        <section className="py-20 md:py-32 px-6 md:px-12 lg:px-20 max-w-[1440px] mx-auto">
+          <div className="mb-12 md:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-10">
+            <h2 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold uppercase tracking-tighter leading-[0.9] mb-0">Why Us<span className="text-accent">?</span></h2>
+            <div className="text-[10px] md:text-xs uppercase tracking-[0.3em] opacity-40 max-w-[280px] leading-relaxed">
               Design is a competitive advantage. We ensure yours is unparalleled through precision and vision.
             </div>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 lg:gap-12">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {reasons.map((reason, i) => (
               <motion.div 
                 key={i}
-                initial={{ opacity: 0, y: 50, scale: 0.95 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 1, ease: [0.22, 1, 0.36, 1], delay: i * 0.1 }}
-                className="group relative p-12 glass rounded-[32px] overflow-hidden min-h-[400px] flex flex-col justify-end"
+                initial={{ opacity: 0, y: 50, rotateX: -15 }}
+                whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+                viewport={{ once: true, margin: "-5%" }}
+                transition={{ 
+                  duration: 1, 
+                  ease: [0.22, 1, 0.36, 1], 
+                  delay: i * 0.2 
+                }}
+                whileHover={{ 
+                  scale: 1.02,
+                  zIndex: 20,
+                  transition: { duration: 0.4, ease: [0.33, 1, 0.68, 1] }
+                }}
+                className="group relative p-5 md:p-6 glass rounded-[24px] overflow-hidden min-h-[160px] md:min-h-[200px] flex flex-col justify-end perspective-1000"
+                style={{ willChange: "transform, opacity" }}
               >
-                <div className={cn("absolute inset-0 opacity-20 group-hover:opacity-40 transition-opacity duration-700", reason.color)} />
-                <div className="relative z-10 space-y-6">
-                  <div className="w-12 h-12 rounded-full border border-ink/10 flex items-center justify-center text-[10px] font-bold group-hover:border-accent transition-colors">
+                <div className={cn("absolute inset-0 opacity-10 group-hover:opacity-30 transition-opacity duration-700", reason.color)} />
+                <motion.div 
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
+                  transition={{ delay: 0.5 + i * 0.2, duration: 1 }}
+                  className="relative z-10 space-y-3"
+                >
+                  <div className="w-8 h-8 rounded-full border border-ink/10 flex items-center justify-center text-[8px] font-bold group-hover:border-accent transition-colors group-hover:bg-accent group-hover:text-bg">
                     0{i + 1}
                   </div>
-                  <h3 className="text-3xl font-display font-bold uppercase leading-none">{reason.title}</h3>
-                  <p className="text-sm opacity-60 leading-relaxed font-light">
+                  <h3 className="text-lg md:text-xl font-display font-bold uppercase leading-none">{reason.title}</h3>
+                  <p className="text-[10px] opacity-50 leading-relaxed font-light">
                     {reason.desc}
                   </p>
-                </div>
+                </motion.div>
               </motion.div>
             ))}
           </div>
@@ -222,163 +321,8 @@ export default function Home() {
           className="text-[10vw] font-display font-bold uppercase opacity-[0.03] select-none"
         />
 
-        {/* 4. Packages - Refactored to Line-by-Line List */}
-        <section id="packages-section" className="section-spacing mb-24 max-w-[1440px] mx-auto px-6 lg:px-20 relative">
-          <div className="absolute -top-24 -left-24 w-64 h-64 md:w-96 md:h-96 bg-accent-purple/5 rounded-full blur-[80px] md:blur-[100px] -z-10" />
-          
-          <div className="mb-16 md:mb-24 flex items-center gap-6">
-            <h2 className="text-5xl md:text-7xl font-display font-bold uppercase tracking-tight mb-0">Packages</h2>
-            <div className="h-px flex-1 bg-gradient-to-r from-ink/10 to-transparent" />
-          </div>
 
-          <div className="grid grid-cols-1 gap-6 md:gap-10">
-            {PACKAGES.map((pkg, index) => (
-              <motion.div
-                key={pkg.id}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.8, delay: index * 0.1, ease: [0.16, 1, 0.3, 1] }}
-                className="glass group p-8 md:p-12 lg:p-16 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-10 hover:border-accent transition-all duration-500 overflow-hidden relative"
-              >
-                {/* Visual Accent */}
-                <div className="absolute top-0 right-0 w-32 h-32 md:w-64 md:h-64 bg-accent/5 rounded-full blur-[60px] md:blur-[100px] -z-10 group-hover:bg-accent/10 transition-colors" />
-                
-                <div className="space-y-6 lg:max-w-xl">
-                  <div className="space-y-2">
-                    <span className="text-[10px] uppercase tracking-[0.4em] font-bold opacity-30">Option 0{index + 1}</span>
-                    <h3 className="text-4xl md:text-6xl font-display font-bold uppercase tracking-tighter leading-none group-hover:text-accent transition-colors">
-                      {pkg.name}
-                    </h3>
-                  </div>
-                  <p className="text-lg opacity-60 font-light leading-relaxed max-w-md">
-                    {pkg.desc}
-                  </p>
-                  <div className="flex flex-wrap gap-4 pt-4">
-                    {pkg.includes.map(item => (
-                      <span key={item} className="px-4 py-1.5 rounded-full border border-ink/5 bg-ink/[0.02] text-[10px] uppercase tracking-widest font-bold opacity-40">
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
 
-                <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end gap-8 w-full lg:w-auto pt-10 lg:pt-0 border-t lg:border-t-0 lg:border-l border-ink/5 lg:pl-16">
-                  <div className="space-y-1 lg:text-right">
-                    <p className="text-[10px] uppercase tracking-[0.3em] opacity-30 font-bold">Investment</p>
-                    <p className="text-3xl md:text-4xl font-display font-bold text-gradient-alt">{pkg.price}</p>
-                  </div>
-                  
-                  <Link to="/book" className="w-full sm:w-auto">
-                    <Magnetic>
-                      <motion.div 
-                        whileHover={{ scale: 1.05, backgroundColor: "#121212", color: "#fff" }}
-                        whileTap={{ scale: 0.95 }}
-                        className="px-10 py-5 bg-accent text-ink font-bold uppercase tracking-[0.3em] text-[10px] rounded-full shadow-lg shadow-accent/10 whitespace-nowrap cursor-pointer"
-                      >
-                        Initiate Project
-                      </motion.div>
-                    </Magnetic>
-                  </Link>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        {/* 5. Reviews Mini-Grid */}
-        <section className="section-spacing bg-ink/[0.02] -mx-4 px-8 md:px-20 border-y border-ink/5 relative overflow-hidden">
-          <div className="absolute top-1/2 left-1/4 w-[60vw] h-[60vw] bg-accent-blue/5 rounded-full blur-[120px] -z-10" />
-          <div className="max-w-[1440px] mx-auto relative z-10">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-20 gap-10">
-              <div className="space-y-6">
-                <span className="text-[10px] md:text-xs uppercase tracking-[0.3em] opacity-40 font-bold">Social Proof</span>
-                <h2 className="text-5xl md:text-7xl font-display font-medium leading-[0.9]">Loved by <span className="text-gradient-alt italic font-serif">innovators.</span></h2>
-              </div>
-              <Link to="/reviews">
-                <motion.span 
-                  whileHover={{ x: 5, color: "#ff4d00" }}
-                  className="text-[10px] md:text-xs uppercase tracking-[0.3em] font-bold border-b border-ink/40 pb-2 cursor-pointer hover:border-accent transition-all"
-                >
-                  View all reviews
-                </motion.span>
-              </Link>
-            </div>
-
-            <motion.div 
-              className="grid grid-cols-1 md:grid-cols-3 gap-8"
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              variants={{
-                hidden: { opacity: 0 },
-                visible: {
-                  opacity: 1,
-                  transition: { staggerChildren: 0.15 }
-                }
-              }}
-            >
-              {[
-                { text: "The brand identity overhaul exceeded all our expectations. The team really understood our vision.", author: "Arjun Mehta", role: "CEO, TechFlow" },
-                { text: "Minimalist, professional, and extremely easy to work with. They made us look like a luxury label.", author: "Sanya Gupta", role: "Founder, Bloom & Co" },
-                { text: "Speed and precision. They delivered a high-converting landing page in record time without compromise.", author: "Rohan Das", role: "Marketing Head, Velocity" }
-              ].map((review, i) => (
-                <motion.div 
-                  key={i}
-                  variants={{
-                    hidden: { y: 30, opacity: 0 },
-                    visible: { y: 0, opacity: 1, transition: { duration: 1, ease: [0.16, 1, 0.3, 1] } }
-                  }}
-                  className="glass-card p-10 space-y-6 group hover:translate-y--4 transition-all duration-700"
-                >
-                  <p className="text-lg italic font-light group-hover:text-ink transition-colors leading-relaxed">"{review.text}"</p>
-                  <div className="pt-6 border-t border-ink/5">
-                    <p className="text-xs font-bold uppercase tracking-widest text-accent-purple group-hover:text-accent transition-colors">{review.author}</p>
-                    <p className="text-[10px] opacity-40 uppercase font-mono mt-1">{review.role}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </motion.div>
-          </div>
-        </section>
-
-        {/* Space Section - Creative Moment */}
-        <section className="py-48 flex items-center justify-center overflow-hidden">
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }}
-            className="relative group"
-          >
-              <motion.div 
-                animate={{ rotate: 360 }}
-                transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-                className="w-72 h-72 md:w-96 md:h-96 border border-ink/5 rounded-full flex items-center justify-center p-14 relative"
-              >
-                <div className="text-[9px] uppercase tracking-[0.6em] font-bold text-center opacity-10">
-                  Design / Studio / Vision / Space / International / Design / Studio / Vision / Space / International
-                </div>
-                {/* Orbiting dot */}
-                <motion.div 
-                  className="absolute top-0 left-1/2 -translate-x-1/2 w-2 h-2 bg-accent rounded-full"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                  style={{ transformOrigin: "0 192px" }}
-                />
-              </motion.div>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <Magnetic>
-                  <motion.div 
-                    whileHover={{ scale: 1.3, rotate: 10 }}
-                    className="w-20 h-20 bg-accent rounded-full flex items-center justify-center font-bold text-ink shadow-2xl shadow-accent/20"
-                  >
-                    E.
-                  </motion.div>
-                </Magnetic>
-              </div>
-          </motion.div>
-        </section>
 
         {/* 6. Final Moment */}
         <section className="h-screen flex flex-col items-center justify-center text-center px-4 overflow-hidden relative">
@@ -393,28 +337,33 @@ export default function Home() {
           
           <div className="space-y-16 z-10 max-w-6xl">
             <motion.h2
-              initial={{ opacity: 0, y: 50 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+              initial={{ opacity: 0, y: 100, filter: "blur(10px)" }}
+              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              viewport={{ once: true, margin: "-20%" }}
+              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
               className="text-6xl md:text-[8vw] font-display font-bold leading-[0.9] tracking-[-0.04em] uppercase text-gradient"
             >
               Let’s craft your <span className="text-accent italic font-serif lowercase opacity-100!">distinctive</span> edge.
             </motion.h2>
             <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              whileInView={{ opacity: 1, scale: 1 }}
+              initial={{ opacity: 0, scale: 0.8, y: 40 }}
+              whileInView={{ opacity: 1, scale: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: 0.3, duration: 1 }}
+              transition={{ delay: 0.5, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
             >
-              <Link to="/book">
+              <Link to="/contact">
                 <Magnetic>
                   <motion.button 
-                    whileHover={{ scale: 1.05, backgroundColor: "#ff4d00", color: "#121212" }}
+                    whileHover={{ 
+                      scale: 1.05, 
+                      backgroundColor: "#ff4d00", 
+                      color: "#121212",
+                      boxShadow: "0 0 40px rgba(255,77,0,0.4)"
+                    }}
                     whileTap={{ scale: 0.95 }}
                     className="px-20 py-8 bg-ink text-bg rounded-full text-xs uppercase tracking-[0.4em] font-bold border border-transparent transition-all shadow-2xl shadow-accent-purple/20"
                   >
-                    Book Now
+                    Contact Us
                   </motion.button>
                 </Magnetic>
               </Link>

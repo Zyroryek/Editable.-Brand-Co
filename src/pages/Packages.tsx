@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import PageTransition from "../components/PageTransition";
-import { cn } from "@/src/lib/utils";
+import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import Magnetic from "../components/Magnetic";
 import TextReveal from "../components/TextReveal";
@@ -148,23 +148,29 @@ export default function Packages() {
                   <p className="text-sm uppercase tracking-widest opacity-40 font-mono">What's Inside</p>
                   <ul className="space-y-3">
                     {selected.includes.map((item, i) => (
-                      <li key={i} className="flex items-start gap-3 text-sm uppercase font-medium tracking-wide">
+                      <motion.li 
+                        key={i} 
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.3 + i * 0.05, duration: 0.5 }}
+                        className="flex items-start gap-3 text-sm uppercase font-medium tracking-wide"
+                      >
                         <span className="text-accent">•</span> {item}
-                      </li>
+                      </motion.li>
                     ))}
                   </ul>
                 </div>
               </div>
 
               <div className="pt-12 flex justify-center">
-                <Link to="/book" className="w-full">
+                <Link to="/contact" className="w-full">
                   <Magnetic>
                     <motion.button 
                       whileHover={{ scale: 1.02, backgroundColor: "#121212", color: "#e8e8e8" }}
                       whileTap={{ scale: 0.98 }}
                       className="w-full py-8 bg-accent text-ink rounded-full text-xs uppercase tracking-[0.4em] font-bold transition-all duration-300 shadow-xl shadow-accent/20"
                     >
-                      Book Now
+                      Contact Us
                     </motion.button>
                   </Magnetic>
                 </Link>

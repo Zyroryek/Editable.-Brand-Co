@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import PageTransition from "../components/PageTransition";
 import { User, Package, Settings, LogOut, ChevronRight, Chrome } from "lucide-react";
-import { cn } from "@/src/lib/utils";
-import { auth, db, handleFirestoreError, OperationType } from "@/src/lib/firebase";
+import { cn } from "@/lib/utils";
+import { auth, db, handleFirestoreError, OperationType } from "@/lib/firebase";
 import { 
   signInWithPopup, 
   GoogleAuthProvider, 

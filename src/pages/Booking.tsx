@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import PageTransition from "../components/PageTransition";
-import { cn } from "@/src/lib/utils";
-import { db, handleFirestoreError, OperationType } from "@/src/lib/firebase";
+import { cn } from "@/lib/utils";
+import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { X, QrCode, ArrowUpRight, Copy, Check } from "lucide-react";
 
@@ -66,9 +66,11 @@ export default function Booking() {
             {step === 1 && (
               <motion.div
                 key="step1"
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                style={{ willChange: "transform, opacity" }}
                 className="space-y-8 md:space-y-12"
               >
                 <header>
@@ -116,7 +118,7 @@ export default function Booking() {
                       <option value="Growth Combo" className="bg-bg text-ink">Growth Combo</option>
                     </select>
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
-                      <ArrowUpRight size={20} className="rotate-90" />
+                      <ArrowUpRight size={20} />
                     </div>
                     <label className="text-[10px] uppercase tracking-widest opacity-30 mt-2 block">Selected Service</label>
                   </div>
@@ -144,9 +146,11 @@ export default function Booking() {
             {step === 2 && (
               <motion.div
                 key="step2"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 1.05 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                style={{ willChange: "transform, opacity" }}
                 className="space-y-12"
               >
                 <header>
@@ -184,6 +188,8 @@ export default function Booking() {
                 key="step3"
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+                style={{ willChange: "transform, opacity" }}
                 className="text-center space-y-12"
               >
                 <div className="w-24 h-24 bg-accent rounded-full flex items-center justify-center mx-auto mb-8">
