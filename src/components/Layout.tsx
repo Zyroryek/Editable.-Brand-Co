@@ -128,9 +128,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-bg/80 backdrop-blur-2xl flex flex-col items-center justify-center p-6 md:p-10 overflow-y-auto"
+            className="fixed inset-0 z-40 bg-bg/80 backdrop-blur-2xl flex flex-col items-center justify-start p-6 md:p-10 overflow-y-auto"
           >
-            <div className="w-full max-w-4xl flex flex-col items-center justify-center space-y-8 md:space-y-12 py-20 min-h-full">
+            <div className="w-full max-w-4xl flex flex-col items-center justify-start space-y-8 md:space-y-12 py-24 md:py-32 lg:py-40 min-h-full">
             {/* Background Accent Blobs for Menu */}
             <div className="absolute top-0 -right-20 w-[50vw] h-[50vw] bg-accent/5 rounded-full blur-[100px] -z-10" />
             <div className="absolute -bottom-20 -left-20 w-[60vw] h-[60vw] bg-accent-muted/5 rounded-full blur-[120px] -z-10" />

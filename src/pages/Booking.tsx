@@ -4,7 +4,7 @@ import PageTransition from "../components/PageTransition";
 import { cn } from "@/src/lib/utils";
 import { db, handleFirestoreError, OperationType } from "@/src/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
-import { X, QrCode, ArrowUpRight } from "lucide-react";
+import { X, QrCode, ArrowUpRight, Copy, Check } from "lucide-react";
 
 type Step = 1 | 2 | 3;
 
@@ -12,6 +12,13 @@ export default function Booking() {
   const [step, setStep] = useState<Step>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showQR, setShowQR] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopyUPI = () => {
+    navigator.clipboard.writeText("7604969891@ybl");
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -232,15 +239,42 @@ export default function Booking() {
                     <h2 className="text-3xl md:text-4xl font-display font-bold uppercase tracking-tight">Scan to Pay</h2>
                     <div className="flex flex-col items-center gap-2">
                        <span className="text-[10px] uppercase tracking-[0.3em] opacity-40">Payment Details</span>
-                       <span className="text-sm font-mono bg-ink/5 px-6 py-2 rounded-full border border-ink/5">7604969891@ybl</span>
+                       <button 
+                        onClick={handleCopyUPI}
+                        className="flex items-center gap-3 text-sm font-mono bg-ink/5 px-6 py-2 rounded-full border border-ink/5 hover:bg-ink hover:text-bg transition-all group/copy"
+                       >
+                         <span>7604969891@ybl</span>
+                         {isCopied ? (
+                           <Check className="w-3.5 h-3.5 text-accent" />
+                         ) : (
+                           <Copy className="w-3.5 h-3.5 opacity-40 group-hover/copy:opacity-100 transition-opacity" />
+                         )}
+                       </button>
                     </div>
                   </div>
 
                   <motion.div 
-                    whileHover={{ scale: 1.02 }}
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ 
+                      scale: 1, 
+                      opacity: 1,
+                      transition: { 
+                        type: "spring",
+                        stiffness: 260,
+                        damping: 20
+                      }
+                    }}
                     className="aspect-square bg-[#0a0a0a] rounded-[32px] overflow-hidden flex items-center justify-center border border-white/10 shadow-2xl p-6 relative group"
                   >
-                    <img 
+                    <motion.img 
+                      animate={{ 
+                        scale: [1, 1.02, 1],
+                      }}
+                      transition={{
+                        duration: 3,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                      }}
                       src="/payment-qr.png" 
                       alt="Payment QR Code"
                       className="w-full h-full object-contain"
