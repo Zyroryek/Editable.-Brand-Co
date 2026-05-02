@@ -1,0 +1,97 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() { return request.auth != null; }
+    function isVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    
+    // Admin check - simple collection lookup
+    function isAdmin() { 
+      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); 
+    }
+
+    // --- Entity Validations ---
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['userId', 'email', 'createdAt']) &&
+             data.keys().size() >= 3 && data.keys().size() <= 6 &&
+             data.userId is string && data.userId.size() <= 128 &&
+             data.email is string && data.email.size() <= 256 &&
+             data.createdAt == request.time;
+    }
+
+    function isValidInquiry(data) {
+      return data.keys().hasAll(['name', 'email', 'phone', 'details', 'package', 'status', 'createdAt']) &&
+             data.keys().size() == 7 &&
+             data.name is string && data.name.size() > 0 && data.name.size() <= 100 &&
+             data.email is string && data.email.size() <= 256 &&
+             data.phone is string && data.phone.size() <= 20 &&
+             data.details is string && data.details.size() <= 5000 &&
+             data.package is string && data.package.size() <= 100 &&
+             data.status in ['pending', 'contacted', 'project_started', 'closed'] &&
+             data.createdAt == request.time;
+    }
+
+    function isValidProject(data) {
+      return data.keys().hasAll(['clientId', 'title', 'status', 'createdAt']) &&
+             data.keys().size() >= 4 &&
+             data.clientId is string && data.clientId.size() <= 128 &&
+             data.title is string && data.title.size() <= 200 &&
+             data.status in ['discovery', 'in_development', 'review', 'completed'] &&
+             data.createdAt == request.time;
+    }
+
+    function isValidInvoice(data) {
+      return data.keys().hasAll(['projectId', 'clientId', 'amount', 'status', 'createdAt']) &&
+             data.keys().size() >= 5 &&
+             data.projectId is string && data.projectId.size() <= 128 &&
+             data.clientId is string && data.clientId.size() <= 128 &&
+             data.amount is number && data.amount >= 0 &&
+             data.status in ['pending', 'paid', 'void'] &&
+             data.createdAt == request.time;
+    }
+
+    // --- Collection Routes ---
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['fullName', 'updatedAt']) &&
+        incoming().updatedAt == request.time
+      );
+    }
+
+    match /inquiries/{inquiryId} {
+      allow create: if isValidId(inquiryId) && isValidInquiry(incoming());
+      allow read, list: if isAdmin();
+    }
+
+    match /projects/{projectId} {
+      allow get: if isAdmin() || (isSignedIn() && existing().clientId == request.auth.uid);
+      allow list: if isAdmin() || (isSignedIn() && resource.data.clientId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+
+    match /projects/{projectId}/invoices/{invoiceId} {
+      allow get: if isAdmin() || (isSignedIn() && existing().clientId == request.auth.uid);
+      allow list: if isAdmin() || (isSignedIn() && resource.data.clientId == request.auth.uid);
+      allow create, update, delete: if isAdmin();
+    }
+    
+    // Admins collection - read only via admin console, or internal check
+    match /admins/{adminId} {
+      allow read: if isSignedIn(); // Allow checking if self is admin
+    }
+  }
+}

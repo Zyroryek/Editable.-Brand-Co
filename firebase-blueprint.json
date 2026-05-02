@@ -1,0 +1,77 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account information and settings.",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "The unique UID from Firebase Auth" },
+        "fullName": { "type": "string", "description": "Full name of the user" },
+        "email": { "type": "string", "format": "email" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "email", "createdAt"]
+    },
+    "Inquiry": {
+      "title": "Project Inquiry",
+      "description": "Potential client requests sent via the booking form.",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "phone": { "type": "string" },
+        "details": { "type": "string" },
+        "package": { "type": "string" },
+        "status": { "type": "string", "enum": ["pending", "contacted", "project_started", "closed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "email", "phone", "details", "package", "status", "createdAt"]
+    },
+    "Project": {
+      "title": "Studio Project",
+      "description": "An active or completed project for a client.",
+      "type": "object",
+      "properties": {
+        "clientId": { "type": "string", "description": "Reference to the User document" },
+        "title": { "type": "string" },
+        "status": { "type": "string", "enum": ["discovery", "in_development", "review", "completed"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["clientId", "title", "status", "createdAt"]
+    },
+    "Invoice": {
+      "title": "Client Invoice",
+      "description": "Financial records for project phases.",
+      "type": "object",
+      "properties": {
+        "projectId": { "type": "string" },
+        "clientId": { "type": "string" },
+        "amount": { "type": "number" },
+        "status": { "type": "string", "enum": ["pending", "paid", "void"] },
+        "description": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["projectId", "clientId", "amount", "status", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Collection of user profiles."
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": "Inquiry",
+      "description": "Project inquiries sent by potential clients."
+    },
+    "/projects/{projectId}": {
+      "schema": "Project",
+      "description": "Active projects managed by the studio."
+    },
+    "/projects/{projectId}/invoices/{invoiceId}": {
+      "schema": "Invoice",
+      "description": "Invoices tied to specific projects."
+    }
+  }
+}
