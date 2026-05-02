@@ -1,5 +1,5 @@
-import { motion, AnimatePresence, useScroll, useTransform, useSpring } from "motion/react";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue } from "motion/react";
 import { Link } from "react-router-dom";
 import PageTransition from "../components/PageTransition";
 import { cn } from "@/lib/utils";
@@ -7,11 +7,109 @@ import Magnetic from "../components/Magnetic";
 import TextReveal from "../components/TextReveal";
 import Marquee from "../components/Marquee";
 
+interface TiltCardProps {
+  children: React.ReactNode;
+  className: string;
+  i: number;
+  color: string;
+}
+
+const TiltCard: React.FC<TiltCardProps> = ({ children, className, i, color }) => {
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+
+  const rotateX = useTransform(y, [-0.5, 0.5], [8, -8]);
+  const rotateY = useTransform(x, [-0.5, 0.5], [-8, 8]);
+
+  const springConfig = { stiffness: 150, damping: 20 };
+  const springRotateX = useSpring(rotateX, springConfig);
+  const springRotateY = useSpring(rotateY, springConfig);
+
+  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+    
+    x.set(mouseX / width - 0.5);
+    y.set(mouseY / height - 0.5);
+  };
+
+  const handleMouseLeave = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50, rotateX: -15 }}
+      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
+      viewport={{ once: true, margin: "-5%" }}
+      transition={{ 
+        duration: 1, 
+        ease: [0.22, 1, 0.36, 1], 
+        delay: i * 0.2 
+      }}
+      whileHover={{ 
+        scale: 1.02,
+        zIndex: 20,
+        transition: { duration: 0.4, ease: [0.33, 1, 0.68, 1] }
+      }}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      style={{
+        rotateX: springRotateX,
+        rotateY: springRotateY,
+        transformStyle: "preserve-3d",
+        perspective: "1000px"
+      }}
+      className={className}
+    >
+      <div className={cn("absolute inset-0 opacity-10 group-hover:opacity-30 transition-opacity duration-700", color)} />
+      <div style={{ transform: "translateZ(30px)", transformStyle: "preserve-3d" }} className="relative z-10 flex flex-col h-full">
+        {children}
+      </div>
+    </motion.div>
+  );
+};
+
 const PACKAGES = [
-  { id: "bf", name: "Brand Foundation", price: "₹2,000 – ₹15,000", desc: "For startups looking to find their visual voice. Includes logo system, color strategy, and basic guidelines.", includes: ["Logo Suite", "Style Guide", "Visual Strategy"] },
-  { id: "ui", name: "UI/UX & Website", price: "₹5,000 – ₹20,000", desc: "Digital-first experiences that convert. High-performance websites tailored to your product.", includes: ["Wireframes", "Interactive Prototyping", "Full Development"] },
-  { id: "cv", name: "Content & Video", price: "₹3,000 – ₹12,000", desc: "Storytelling through moving pixels. Production and post-production for modern brands.", includes: ["Commercial Shoots", "Social Strategy", "VFX & Motion"] },
-  { id: "gc", name: "Growth Combo", price: "₹5,000 – ₹25,000", desc: "The ultimate creative powerhouse. We manage your entire digital presence and design.", includes: ["All Core Services", "Retainer Support", "Analytics Insights"] }
+  { 
+    id: "bf", 
+    name: "Brand Foundation", 
+    price: "₹2,000 – ₹15,000", 
+    desc: "We build your brand from scratch with a strong, modern identity.", 
+    includes: ["Logo design", "Brand colors & typography", "Basic guidelines"] 
+  },
+  { 
+    id: "ui", 
+    name: "UI/UX & Website", 
+    price: "₹5,000 – ₹20,000", 
+    desc: "We design clean, user-focused digital experiences that convert.", 
+    includes: ["UX research", "Wireframes", "UI design (Figma)"] 
+  },
+  { 
+    id: "cv", 
+    name: "Content & Video", 
+    price: "₹3,000 – ₹12,000", 
+    desc: "We turn your content into scroll-stopping visuals.", 
+    includes: ["Reel editing", "Motion graphics", "Thumbnails"] 
+  },
+  { 
+    id: "gc", 
+    name: "Growth Combo", 
+    price: "₹5,000 – ₹25,000", 
+    desc: "A complete creative system to build, launch, and grow your brand.", 
+    includes: ["Full Creative System", "Monthly Support", "Video Content"] 
+  },
+  { 
+    id: "mr", 
+    name: "Monthly Retainer", 
+    price: "Custom Monthly", 
+    desc: "Your dedicated creative team, on demand.", 
+    includes: ["Fixed Task Slots", "Continuous Editing", "Priority Support"] 
+  }
 ];
 
 export default function Home() {
@@ -46,18 +144,25 @@ export default function Home() {
     { 
       title: "Strategic Minimalism", 
       desc: "We strip away the noise to find the core essence of your brand. Purposeful design that speaks louder by saying less.",
+      impact: "Reduced interface clutter for 'Zenit' by 45%, leading to a 30% boost in conversion rates.",
       color: "bg-accent-purple/10" 
     },
     { 
       title: "Visceral Impact", 
       desc: "We create digital artifacts that aren't just seen—they are felt. Design that triggers emotion and commands attention.", 
+      impact: "Developed the viral 'Aura' campaign which generated 2.5M impressions within the first 48 hours.",
       color: "bg-accent-blue/10" 
     },
     { 
       title: "Future-Ready", 
       desc: "Scalable systems built for the modern frontier. We ensure your brand evolves ahead of the digital curve.", 
+      impact: "Designed a universal design system for 'Nexus Corp' that successfully scaled to 50+ regional sub-brands.",
       color: "bg-accent/10" 
     }
+  ];
+
+  const clientLogos = [
+    "InfrontOfUs", "Sparknest", "ThurikaSchoolOfArts"
   ];
 
   return (
@@ -104,7 +209,7 @@ export default function Home() {
             }}
             animate={{ 
               x: (mousePos.x - (typeof window !== "undefined" ? window.innerWidth : 0) / 2) * -0.08,
-              scale: [1.05, 1, 1.05],
+              scale: [1.1, 1, 1.1],
             }}
             transition={{ 
               x: { duration: 0.7, ease: "easeOut" },
@@ -114,7 +219,7 @@ export default function Home() {
           
           <div className="overflow-hidden mb-8 md:mb-12 relative">
             <motion.h1 
-              className="text-[18vw] lg:text-[15vw] font-display font-bold leading-[0.85] tracking-[-0.06em] uppercase relative text-accent-purple"
+              className="text-[18vw] lg:text-[15vw] font-display font-bold leading-[0.85] tracking-[-0.06em] uppercase relative"
               style={{ 
                 willChange: "transform, opacity",
                 skewX: textSkew,
@@ -126,7 +231,7 @@ export default function Home() {
             >
               Editable.
               <motion.span 
-                className="absolute -top-4 -right-4 w-8 h-8 bg-accent rounded-full hidden md:block shadow-[0_0_30px_rgba(255,77,0,0.6)]"
+                className="absolute -top-4 -right-4 w-8 h-8 bg-accent rounded-full hidden md:block"
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: 1.5, type: "spring", stiffness: 200, damping: 10 }}
@@ -213,7 +318,7 @@ export default function Home() {
             <div className="h-[1px] flex-1 bg-gradient-to-r from-ink/10 to-transparent" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {PACKAGES.map((pkg, index) => (
               <motion.div
                 key={pkg.id}
@@ -277,41 +382,61 @@ export default function Home() {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {reasons.map((reason, i) => (
-              <motion.div 
+              <TiltCard 
                 key={i}
-                initial={{ opacity: 0, y: 50, rotateX: -15 }}
-                whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-                viewport={{ once: true, margin: "-5%" }}
-                transition={{ 
-                  duration: 1, 
-                  ease: [0.22, 1, 0.36, 1], 
-                  delay: i * 0.2 
-                }}
-                whileHover={{ 
-                  scale: 1.02,
-                  zIndex: 20,
-                  transition: { duration: 0.4, ease: [0.33, 1, 0.68, 1] }
-                }}
-                className="group relative p-5 md:p-6 glass rounded-[24px] overflow-hidden min-h-[160px] md:min-h-[200px] flex flex-col justify-end perspective-1000"
-                style={{ willChange: "transform, opacity" }}
+                i={i}
+                color={reason.color}
+                className="group relative p-8 md:p-10 glass rounded-[32px] overflow-hidden min-h-[300px] border border-ink/5"
               >
-                <div className={cn("absolute inset-0 opacity-10 group-hover:opacity-30 transition-opacity duration-700", reason.color)} />
-                <motion.div 
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  whileInView={{ scale: 1, opacity: 1 }}
-                  transition={{ delay: 0.5 + i * 0.2, duration: 1 }}
-                  className="relative z-10 space-y-3"
-                >
-                  <div className="w-8 h-8 rounded-full border border-ink/10 flex items-center justify-center text-[8px] font-bold group-hover:border-accent transition-colors group-hover:bg-accent group-hover:text-bg">
+                <div className="flex items-center justify-between mb-8">
+                  <div className="w-10 h-10 rounded-full border border-ink/10 flex items-center justify-center text-[10px] font-bold group-hover:border-accent transition-colors group-hover:bg-accent group-hover:text-bg">
                     0{i + 1}
                   </div>
-                  <h3 className="text-lg md:text-xl font-display font-bold uppercase leading-none">{reason.title}</h3>
-                  <p className="text-[10px] opacity-50 leading-relaxed font-light">
+                </div>
+
+                <div className="space-y-4">
+                  <h3 className="text-2xl md:text-3xl font-display font-bold uppercase leading-none">{reason.title}</h3>
+                  <p className="text-sm opacity-50 leading-relaxed font-light">
                     {reason.desc}
                   </p>
+                </div>
+
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.8 + i * 0.1 }}
+                  className="mt-8 pt-6 border-t border-ink/5"
+                >
+                  <span className="text-[10px] uppercase tracking-[0.2em] text-accent font-black block mb-2">Case Study Impact</span>
+                  <p className="text-xs font-serif italic text-ink/70">
+                    &ldquo;{reason.impact}&rdquo;
+                  </p>
                 </motion.div>
-              </motion.div>
+              </TiltCard>
             ))}
+          </div>
+        </section>
+
+        {/* Client Logos Marquee */}
+        <section className="py-20 border-y border-ink/5 overflow-hidden">
+          <div className="px-6 mb-12 text-center">
+            <span className="text-[10px] uppercase tracking-[0.5em] opacity-30 font-bold">In Trusted Partnership With</span>
+          </div>
+          <div className="flex gap-20 overflow-hidden relative group">
+            <motion.div 
+              animate={{ x: [0, -1000] }}
+              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+              className="flex gap-20 items-center justify-around min-w-full"
+            >
+              {[...clientLogos, ...clientLogos].map((logo, index) => (
+                <div 
+                  key={index} 
+                  className="text-2xl md:text-4xl font-display font-black tracking-tighter opacity-20 hover:opacity-100 hover:text-accent transition-all duration-500 cursor-default px-4"
+                >
+                  {logo}.
+                </div>
+              ))}
+            </motion.div>
           </div>
         </section>
 

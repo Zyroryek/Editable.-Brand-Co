@@ -11,64 +11,64 @@ const PACKAGES = [
     id: "bf", 
     name: "Brand Foundation", 
     price: "₹2,000 – ₹15,000", 
-    bestFor: "Early stage startups and solo innovators",
-    desc: "A core identity system that defines your brand's soul. We focus on creating a memorable visual impact through minimalist but powerful design elements that work across all mediums.", 
+    bestFor: "startups, new businesses",
+    desc: "We build your brand from scratch with a strong, modern identity.", 
     includes: [
-      "Primary Logo (Vector & Raster)",
-      "Iconography System",
-      "Brand Color Palette",
-      "Typography Guidelines",
-      "Business Card Design",
-      "Basic Social Media Kit",
-      "1 Week Delivery"
+      "Logo design",
+      "Brand colors & typography",
+      "Basic brand guidelines",
+      "Social media starter kit (DP, posts)"
     ] 
   },
   { 
     id: "ui", 
     name: "UI/UX & Website", 
     price: "₹5,000 – ₹20,000", 
-    bestFor: "D2C brands and tech products",
-    desc: "Conversion-centric digital architecture. We combine high-end aesthetic with functional UX to ensure your website isn't just a gallery, but a powerful business asset.", 
+    bestFor: "businesses going digital",
+    desc: "We design clean, user-focused digital experiences that convert.", 
     includes: [
-      "Strategic UX Map",
-      "High-Fidelity UI Design",
-      "Custom React/Next.js Build",
-      "Responsive Layouts",
-      "On-page SEO setup",
-      "CMS Implementation",
-      "Post-launch Support"
+      "UX research (basic)",
+      "Wireframes",
+      "UI design (Figma)",
+      "Responsive layouts (mobile + desktop)",
+      "Optional add-on: developer handoff"
     ] 
   },
   { 
     id: "cv", 
     name: "Content & Video", 
     price: "₹3,000 – ₹12,000", 
-    bestFor: "Campaign launches and social presence",
-    desc: "Storytelling through moving pixels. We craft cinematic content that captures attention in a crowded digital landscape, from product trailers to viral social media loops.", 
+    bestFor: "social media growth",
+    desc: "We turn your content into scroll-stopping visuals.", 
     includes: [
-      "Creative Scriptwriting",
-      "3D Motion Graphics",
-      "Color Grading & VFX",
-      "Sound Design & Selection",
-      "Vertical Video Formatting",
-      "Promo Video Snippets",
-      "High-res Exports"
+      "Reel/video editing",
+      "Motion graphics",
+      "Thumbnails / covers",
+      "Content styling aligned with brand"
     ] 
   },
   { 
     id: "gc", 
     name: "Growth Combo", 
     price: "₹5,000 – ₹25,000", 
-    bestFor: "Established brands ready for scale",
-    desc: "Your comprehensive design partner. This package integrates all our core disciplines into a unified growth strategy, serving as your virtual creative department.", 
+    bestFor: "serious clients",
+    desc: "A complete creative system to build, launch, and grow your brand.", 
     includes: [
-      "All Services Combined",
-      "Monthly Creative Audit",
-      "Priority Turnaround",
-      "Dedicated Project Lead",
-      "Ad Creative Generation",
-      "Unlimited Minor Iterations",
-      "Strategic Partnership"
+      "Branding + UI/UX + Content",
+      "Monthly design support",
+      "Ongoing video content"
+    ] 
+  },
+  { 
+    id: "mr", 
+    name: "Monthly Retainer", 
+    price: "Custom Monthly", 
+    bestFor: "long-term clients",
+    desc: "Your dedicated creative team, on demand.", 
+    includes: [
+      "Fixed number of design tasks",
+      "Continuous video editing",
+      "Priority support"
     ] 
   }
 ];

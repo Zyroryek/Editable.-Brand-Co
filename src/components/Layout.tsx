@@ -23,8 +23,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const lenisRef = useRef<Lenis | null>(null);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-
   const toggleTheme = () => {
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
@@ -93,33 +91,43 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         style={{ scaleX: scrollProgress }}
       />
 
-      {/* Top Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 p-6 md:p-12 lg:p-16 flex justify-between items-center pointer-events-none">
-        <Link to="/" className="pointer-events-auto">
-          <span className="text-2xl font-display font-bold tracking-tighter">Editable.</span>
-        </Link>
+      {/* Top Fixed Actions */}
+      <div className="fixed top-0 right-0 z-[60] p-6 md:p-12 lg:p-16 flex items-center gap-4 pointer-events-none">
         <div className="flex items-center gap-4 pointer-events-auto">
           <button 
             onClick={toggleTheme}
-            className="w-10 h-10 flex items-center justify-center rounded-full glass hover:border-accent transition-all group"
+            className="w-12 h-12 flex items-center justify-center rounded-full glass hover:border-accent transition-all group shadow-xl"
             title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
           >
             {theme === "light" ? <Moon size={18} /> : <Sun size={18} className="text-accent" />}
           </button>
           
           <button 
-            onClick={toggleMenu}
-            className="flex items-center gap-2 group focus:outline-none"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="flex items-center gap-4 group focus:outline-none pl-6 pr-2 py-2 rounded-full glass hover:border-accent transition-all shadow-xl"
           >
-            <span className="hidden sm:block text-[11px] uppercase tracking-[0.2em] font-bold opacity-60 group-hover:opacity-100 group-hover:text-accent transition-all">
+            <span className="hidden sm:block text-[10px] uppercase tracking-[0.3em] font-black opacity-60 group-hover:opacity-100 group-hover:text-accent transition-all">
               {isMenuOpen ? "Dismiss" : "Menu"}
             </span>
-            <div className="w-12 h-12 flex items-center justify-center rounded-full glass group-hover:border-accent transition-all">
-              {isMenuOpen ? <X size={18} className="text-accent" /> : <Menu size={18} />}
+            <div className="w-12 h-12 flex items-center justify-center rounded-full bg-accent text-white group-hover:scale-110 transition-transform shadow-lg shadow-accent/20">
+              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </div>
           </button>
         </div>
-      </nav>
+      </div>
+
+      {/* Persistent Logo */}
+      <div className="fixed top-0 left-0 z-50 p-6 md:p-12 lg:p-16 pointer-events-none">
+        <Link to="/" className="pointer-events-auto">
+          <motion.span 
+            className="text-2xl font-display font-black tracking-tighter block"
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+          >
+            Editable.
+          </motion.span>
+        </Link>
+      </div>
 
       {/* Fullscreen Menu Overlay */}
       <AnimatePresence>
@@ -136,10 +144,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <div className="absolute -bottom-20 -left-20 w-[60vw] h-[60vw] bg-accent-muted/5 rounded-full blur-[120px] -z-10" />
 
             <div className="flex flex-col gap-6 text-center">
-              <NavLink to="/" label="Home" onClick={toggleMenu} />
-              <NavLink to="/packages" label="Packages" onClick={toggleMenu} />
-              <NavLink to="/profile" label="Profile" onClick={toggleMenu} />
-              <NavLink to="/contact" label="Contact" onClick={toggleMenu} />
+              <NavLink to="/" label="Home" onClick={() => setIsMenuOpen(false)} />
+              <NavLink to="/about" label="About" onClick={() => setIsMenuOpen(false)} />
+              <NavLink to="/packages" label="Packages" onClick={() => setIsMenuOpen(false)} />
+              <NavLink to="/profile" label="Profile" onClick={() => setIsMenuOpen(false)} />
+              <NavLink to="/contact" label="Contact" onClick={() => setIsMenuOpen(false)} />
             </div>
             
               <div className="flex flex-col items-center gap-4 border-t border-ink/5 pt-12 w-full max-w-xs">

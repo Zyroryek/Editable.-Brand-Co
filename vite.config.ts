@@ -22,10 +22,10 @@ export default defineConfig(({mode}) => {
     },
     build: {
       outDir: 'dist',
-      assetsDir: 'assets',
+      assetsDir: '',
       emptyOutDir: true,
       reportCompressedSize: false,
-      chunkSizeWarningLimit: 1000,
+      chunkSizeWarningLimit: 2000,
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.
