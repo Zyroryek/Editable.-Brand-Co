@@ -92,35 +92,35 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       />
 
       {/* Top Fixed Actions */}
-      <div className="fixed top-0 right-0 z-[60] p-6 md:p-12 lg:p-16 flex items-center gap-4 pointer-events-none">
-        <div className="flex items-center gap-4 pointer-events-auto">
+      <div className="fixed top-0 right-0 z-[999] p-4 md:p-8 lg:p-12 flex items-center gap-3 pointer-events-none">
+        <div className="flex items-center gap-3 pointer-events-auto">
           <button 
             onClick={toggleTheme}
-            className="w-12 h-12 flex items-center justify-center rounded-full glass hover:border-accent transition-all group shadow-xl"
+            className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full glass hover:border-accent transition-all group shadow-2xl"
             title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
           >
-            {theme === "light" ? <Moon size={18} /> : <Sun size={18} className="text-accent" />}
+            {theme === "light" ? <Moon size={16} className="md:size-[18px]" /> : <Sun size={16} className="md:size-[18px] text-accent" />}
           </button>
           
           <button 
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="flex items-center gap-4 group focus:outline-none pl-6 pr-2 py-2 rounded-full glass hover:border-accent transition-all shadow-xl"
+            className="flex items-center gap-3 group focus:outline-none pl-5 pr-2 py-2 rounded-full glass border border-white/20 hover:border-accent transition-all shadow-2xl backdrop-blur-xl"
           >
-            <span className="hidden sm:block text-[10px] uppercase tracking-[0.3em] font-black opacity-60 group-hover:opacity-100 group-hover:text-accent transition-all">
-              {isMenuOpen ? "Dismiss" : "Menu"}
+            <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-black opacity-70 group-hover:opacity-100 group-hover:text-accent transition-all">
+              {isMenuOpen ? "Close" : "Menu"}
             </span>
-            <div className="w-12 h-12 flex items-center justify-center rounded-full bg-accent text-white group-hover:scale-110 transition-transform shadow-lg shadow-accent/20">
-              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-accent text-white group-hover:scale-110 transition-transform shadow-lg shadow-accent/20">
+              {isMenuOpen ? <X size={18} className="md:size-5" /> : <Menu size={18} className="md:size-5" />}
             </div>
           </button>
         </div>
       </div>
 
       {/* Persistent Logo */}
-      <div className="fixed top-0 left-0 z-50 p-6 md:p-12 lg:p-16 pointer-events-none">
+      <div className="fixed top-0 left-0 z-[999] p-6 md:p-8 lg:p-12 pointer-events-none">
         <Link to="/" className="pointer-events-auto">
           <motion.span 
-            className="text-2xl font-display font-black tracking-tighter block"
+            className="text-xl md:text-2xl font-display font-black tracking-tighter block mix-blend-difference"
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
           >
