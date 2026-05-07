@@ -83,8 +83,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative min-h-screen">
-      <div className="grain" aria-hidden="true" />
-
       {/* Scroll Progress Bar */}
       <motion.div 
         className="fixed top-0 left-0 h-1 bg-accent z-[100] origin-left"
