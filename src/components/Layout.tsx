@@ -4,6 +4,9 @@ import { motion, AnimatePresence } from "motion/react";
 import { Menu, X, Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Lenis from "lenis";
+import { BackgroundWaves } from "./BackgroundWaves";
+import { CustomCursor } from "./CustomCursor";
+import Magnetic from "./Magnetic";
 
 const NavLink = ({ to, label, onClick }: { to: string; label: string; onClick?: () => void }) => (
   <Link to={to} onClick={onClick}>
@@ -82,7 +85,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }, [location.pathname]);
 
   return (
-    <div className="relative min-h-screen">
+    <div className="relative min-h-screen bg-transparent">
+      <CustomCursor />
       {/* Scroll Progress Bar */}
       <motion.div 
         className="fixed top-0 left-0 h-1 bg-accent z-[100] origin-left"
@@ -92,39 +96,68 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Top Fixed Actions */}
       <div className="fixed top-0 right-0 z-[999] p-4 md:p-8 lg:p-12 flex items-center gap-3 pointer-events-none">
         <div className="flex items-center gap-3 pointer-events-auto">
-          <button 
-            onClick={toggleTheme}
-            className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full glass hover:border-accent transition-all group shadow-2xl"
-            title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-          >
-            {theme === "light" ? <Moon size={16} className="md:size-[18px]" /> : <Sun size={16} className="md:size-[18px] text-accent" />}
-          </button>
+          <Magnetic>
+            <button 
+              onClick={toggleTheme}
+              className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full glass hover:border-accent transition-all group shadow-2xl"
+              title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            >
+              {theme === "light" ? <Moon size={16} className="md:size-[18px]" /> : <Sun size={16} className="md:size-[18px] text-accent" />}
+            </button>
+          </Magnetic>
           
-          <button 
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="flex items-center gap-3 group focus:outline-none pl-5 pr-2 py-2 rounded-full glass border border-white/20 hover:border-accent transition-all shadow-2xl backdrop-blur-xl"
-          >
-            <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-black opacity-70 group-hover:opacity-100 group-hover:text-accent transition-all">
-              {isMenuOpen ? "Close" : "Menu"}
-            </span>
-            <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-accent text-white group-hover:scale-110 transition-transform shadow-lg shadow-accent/20">
-              {isMenuOpen ? <X size={18} className="md:size-5" /> : <Menu size={18} className="md:size-5" />}
-            </div>
-          </button>
+          <Magnetic>
+            <button 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="flex items-center gap-3 group focus:outline-none pl-5 pr-2 py-2 rounded-full glass border border-white/20 hover:border-accent transition-all shadow-2xl backdrop-blur-xl"
+            >
+              <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-black opacity-70 group-hover:opacity-100 group-hover:text-accent transition-all">
+                {isMenuOpen ? "Close" : "Menu"}
+              </span>
+              <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full bg-accent text-white group-hover:scale-110 transition-transform shadow-lg shadow-accent/20">
+                {isMenuOpen ? <X size={18} className="md:size-5" /> : <Menu size={18} className="md:size-5" />}
+              </div>
+            </button>
+          </Magnetic>
         </div>
       </div>
 
       {/* Persistent Logo */}
       <div className="fixed top-0 left-0 z-[999] p-6 md:p-8 lg:p-12 pointer-events-none">
-        <Link to="/" className="pointer-events-auto">
-          <motion.span 
-            className="text-xl md:text-2xl font-display font-black tracking-tighter block mix-blend-difference"
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-          >
-            Editable.
-          </motion.span>
-        </Link>
+        <Magnetic>
+          <Link to="/" className="pointer-events-auto block">
+            <motion.div 
+              className="w-10 h-10 md:w-16 md:h-16 rounded-xl overflow-hidden shadow-2xl border border-white/20"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ scale: 1.05 }}
+            >
+              <img 
+                src="/logo.jpg" 
+                alt="Editable Logo" 
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  // Fallback to text if image fails to load
+                  e.currentTarget.style.display = 'none';
+                  const parent = e.currentTarget.parentElement;
+                  if (parent) {
+                    const span = document.createElement('span');
+                    span.className = "text-xl md:text-2xl font-display font-black tracking-tighter block mix-blend-difference";
+                    span.innerText = "Editable.";
+                    parent.appendChild(span);
+                    parent.style.width = 'auto';
+                    parent.style.height = 'auto';
+                    parent.style.borderRadius = '0';
+                    parent.style.overflow = 'visible';
+                    parent.style.border = 'none';
+                    parent.style.boxShadow = 'none';
+                  }
+                }}
+              />
+            </motion.div>
+          </Link>
+        </Magnetic>
       </div>
 
       {/* Fullscreen Menu Overlay */}
@@ -137,10 +170,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             className="fixed inset-0 z-40 bg-bg/80 backdrop-blur-2xl flex flex-col items-center justify-start p-6 md:p-10 overflow-y-auto"
           >
             <div className="w-full max-w-4xl flex flex-col items-center justify-start space-y-8 md:space-y-12 py-24 md:py-32 lg:py-40 min-h-full">
-            {/* Background Accent Blobs for Menu */}
-            <div className="absolute top-0 -right-20 w-[50vw] h-[50vw] bg-accent/5 rounded-full blur-[100px] -z-10" />
-            <div className="absolute -bottom-20 -left-20 w-[60vw] h-[60vw] bg-accent-muted/5 rounded-full blur-[120px] -z-10" />
-
             <div className="flex flex-col gap-6 text-center">
               <NavLink to="/" label="Home" onClick={() => setIsMenuOpen(false)} />
               <NavLink to="/about" label="About" onClick={() => setIsMenuOpen(false)} />
@@ -162,7 +191,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         )}
       </AnimatePresence>
 
-      <main className="relative z-10 px-6 md:px-12 lg:px-20 max-w-[1920px] mx-auto">
+      <main className="app-content px-6 md:px-12 lg:px-20 max-w-[1920px] mx-auto">
         {children}
       </main>
     </div>

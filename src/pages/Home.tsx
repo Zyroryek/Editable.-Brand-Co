@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import Magnetic from "../components/Magnetic";
 import TextReveal from "../components/TextReveal";
 import Marquee from "../components/Marquee";
+import { CharacterReveal } from "../components/CharacterReveal";
 
 interface TiltCardProps {
   children: React.ReactNode;
@@ -170,73 +171,19 @@ export default function Home() {
       <div ref={containerRef} className="relative">
         {/* 1. Opening Frame */}
         <section className="h-screen flex flex-col items-center justify-center text-center relative overflow-hidden">
-          {/* Multi-layered dynamic background blobs - reactive to mouse and scroll */}
-          <motion.div 
-            className="absolute top-1/4 left-1/4 w-[60vw] h-[60vw] bg-accent/10 rounded-full blur-[80px] -z-10"
-            style={{ 
-              y: useTransform(smoothProgress, [0, 0.5], [0, -200]),
-              willChange: "transform",
-            }}
-            animate={{ 
-              x: (mousePos.x - (typeof window !== "undefined" ? window.innerWidth : 0) / 2) * 0.08,
-              scale: [1, 1.1, 1],
-            }}
-            transition={{ 
-              x: { duration: 0.8, ease: "easeOut" },
-              scale: { duration: 15, repeat: Infinity, ease: "easeInOut" },
-            }}
-          />
-          <motion.div 
-            className="absolute top-1/2 right-1/4 w-[40vw] h-[40vw] bg-accent-purple/5 rounded-full blur-[60px] -z-10"
-            style={{ 
-              y: useTransform(smoothProgress, [0, 0.5], [0, 80]),
-              willChange: "transform",
-            }}
-            animate={{ 
-              x: (mousePos.x - (typeof window !== "undefined" ? window.innerWidth : 0) / 2) * -0.05,
-              scale: [1.1, 1, 1.1],
-            }}
-            transition={{ 
-              x: { duration: 1, ease: "easeOut" },
-              scale: { duration: 12, repeat: Infinity, ease: "easeInOut" },
-            }}
-          />
-          <motion.div 
-            className="absolute bottom-1/4 right-1/4 w-[50vw] h-[50vw] bg-accent-blue/10 rounded-full blur-[70px] -z-10"
-            style={{ 
-              y: useTransform(smoothProgress, [0, 0.5], [0, 150]),
-              willChange: "transform",
-            }}
-            animate={{ 
-              x: (mousePos.x - (typeof window !== "undefined" ? window.innerWidth : 0) / 2) * -0.08,
-              scale: [1.1, 1, 1.1],
-            }}
-            transition={{ 
-              x: { duration: 0.7, ease: "easeOut" },
-              scale: { duration: 18, repeat: Infinity, ease: "easeInOut" },
-            }}
-          />
-          
           <div className="overflow-hidden mb-8 md:mb-12 relative">
-            <motion.h1 
-              className="text-[18vw] lg:text-[15vw] font-display font-bold leading-[0.85] tracking-[-0.06em] uppercase relative"
-              style={{ 
-                willChange: "transform, opacity",
-                skewX: textSkew,
-                y: textY
-              }}
-              initial={{ y: "110%", rotate: 5 }}
-              animate={{ y: 0, rotate: 0 }}
-              transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
-            >
-              Editable.
-              <motion.span 
-                className="absolute -top-4 -right-4 w-8 h-8 bg-accent rounded-full hidden md:block"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                transition={{ delay: 1.5, type: "spring", stiffness: 200, damping: 10 }}
-              />
-            </motion.h1>
+            <CharacterReveal
+              text="Editable."
+              className="text-[18vw] lg:text-[15vw] font-display font-bold leading-[0.85] tracking-[-0.06em] uppercase"
+              delay={0.2}
+              stagger={0.08}
+            />
+            <motion.span 
+              className="absolute top-0 right-0 w-8 h-8 bg-accent rounded-full hidden md:block"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ delay: 1.5, type: "spring", stiffness: 200, damping: 10 }}
+            />
           </div>
           
           <motion.div 
@@ -311,10 +258,12 @@ export default function Home() {
 
         {/* Simplified Packages List - Moved to Top */}
         <section id="packages-section" className="py-20 md:py-32 max-w-[1440px] mx-auto px-6 lg:px-20 relative">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-4xl h-64 bg-accent/5 rounded-full blur-[120px] -z-10" />
-          
           <div className="mb-12 md:mb-16 flex items-center gap-6">
-            <h2 className="text-4xl md:text-6xl font-display font-bold uppercase tracking-tight mb-0">Our Packages</h2>
+            <CharacterReveal 
+              text="Our Packages"
+              className="text-4xl md:text-6xl font-display font-bold uppercase tracking-tight mb-0"
+              stagger={0.04}
+            />
             <div className="h-[1px] flex-1 bg-gradient-to-r from-ink/10 to-transparent" />
           </div>
 
@@ -366,7 +315,7 @@ export default function Home() {
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-purple/20 to-transparent" />
           <TextReveal 
             text="We create digital artifacts that resonate. No templates. No noise. Just pure intent."
-            className="text-4xl md:text-7xl lg:text-8xl font-display font-medium leading-[1.05] text-center max-w-6xl tracking-tight text-gradient-alt"
+            className="text-4xl md:text-7xl lg:text-8xl font-display font-medium leading-[1.05] text-center max-w-6xl tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-800 dark:from-blue-700 dark:via-purple-700 dark:to-indigo-600"
           />
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-blue/20 to-transparent" />
         </section>
@@ -374,7 +323,13 @@ export default function Home() {
         {/* Why Us Section */}
         <section className="py-20 md:py-32 px-6 md:px-12 lg:px-20 max-w-[1440px] mx-auto">
           <div className="mb-12 md:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-10">
-            <h2 className="text-4xl md:text-6xl lg:text-7xl font-display font-bold uppercase tracking-tighter leading-[0.9] mb-0">Why Us<span className="text-accent">?</span></h2>
+            <div className="flex flex-col">
+              <CharacterReveal 
+                text="Why Us?"
+                className="text-4xl md:text-6xl lg:text-7xl font-display font-bold uppercase tracking-tighter leading-[0.9] mb-0"
+                stagger={0.1}
+              />
+            </div>
             <div className="text-[10px] md:text-xs uppercase tracking-[0.3em] opacity-40 max-w-[280px] leading-relaxed">
               Design is a competitive advantage. We ensure yours is unparalleled through precision and vision.
             </div>
@@ -451,25 +406,12 @@ export default function Home() {
 
         {/* 6. Final Moment */}
         <section className="h-screen flex flex-col items-center justify-center text-center px-4 overflow-hidden relative">
-          <motion.div 
-            className="absolute top-1/4 right-1/4 w-[40vw] h-[40vw] bg-accent-purple/10 rounded-full blur-[120px] -z-10"
-            style={{ y: useTransform(smoothProgress, [0.8, 1], [0, -100]) }}
-          />
-          <motion.div 
-            className="absolute bottom-1/4 left-1/4 w-[30vw] h-[30vw] bg-accent-blue/10 rounded-full blur-[100px] -z-10"
-            style={{ y: useTransform(smoothProgress, [0.8, 1], [0, 100]) }}
-          />
-          
           <div className="space-y-16 z-10 max-w-6xl">
-            <motion.h2
-              initial={{ opacity: 0, y: 100, filter: "blur(10px)" }}
-              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              viewport={{ once: true, margin: "-20%" }}
-              transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-              className="text-6xl md:text-[8vw] font-display font-bold leading-[0.9] tracking-[-0.04em] uppercase text-gradient"
-            >
-              Let’s craft your <span className="text-accent italic font-serif lowercase opacity-100!">distinctive</span> edge.
-            </motion.h2>
+            <CharacterReveal
+              text="Let’s craft your distinctive edge."
+              className="text-6xl md:text-[8vw] font-display font-bold leading-[0.9] tracking-[-0.04em] uppercase"
+              stagger={0.03}
+            />
             <motion.div
               initial={{ opacity: 0, scale: 0.8, y: 40 }}
               whileInView={{ opacity: 1, scale: 1, y: 0 }}

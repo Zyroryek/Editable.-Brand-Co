@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "motion/react";
 import Layout from "./components/Layout";
+import { BackgroundWaves } from "./components/BackgroundWaves";
 import Home from "./pages/Home";
 import Packages from "./pages/Packages";
 import Profile from "./pages/Profile";
@@ -28,6 +29,7 @@ function AnimatedRoutes() {
 export default function App() {
   return (
     <Router>
+      <BackgroundWaves />
       <Layout>
         <div className="grain" id="grain-effect" />
         <AnimatedRoutes />

@@ -128,8 +128,6 @@ export default function Packages() {
               transition={{ duration: 0.5 }}
               className="glass-card p-12 space-y-12 relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-64 h-64 bg-accent/20 rounded-full blur-[100px] -z-10" />
-              <div className="absolute bottom-0 left-0 w-48 h-48 bg-accent-muted/10 rounded-full blur-[80px] -z-10" />
               <div className="space-y-4">
                 <p className="text-[10px] uppercase tracking-[0.1em] opacity-40 font-mono">Investment Range</p>
                 <h2 className="text-4xl md:text-6xl font-display font-bold text-accent">{selected.price}</h2>
