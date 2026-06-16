@@ -54,6 +54,37 @@
         "createdAt": { "type": "string", "format": "date-time" }
       },
       "required": ["projectId", "clientId", "amount", "status", "createdAt"]
+    },
+    "InternshipApplication": {
+      "title": "Internship Application",
+      "description": "Details of someone applying for the Design Intern position.",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string", "description": "Full name of the applicant" },
+        "email": { "type": "string", "format": "email", "description": "Email address" },
+        "portfolioUrl": { "type": "string", "description": "Portfolio or social profile link" },
+        "degree": { "type": "string", "description": "Pursuing or completed education/degree info" },
+        "interest": { "type": "string", "description": "Why they want to join and graphic design background" },
+        "canvaExperience": { "type": "string", "description": "Canva or other design software experience" },
+        "role": { "type": "string", "description": "Selected internship role, e.g. Graphic Designer or Social Media Manager" },
+        "type": { "type": "string", "description": "Commitment selection, e.g. Full-time or Part-time" },
+        "status": { "type": "string", "enum": ["submitted", "reviewing", "interviewing", "accepted", "rejected"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fullName", "email", "portfolioUrl", "degree", "interest", "canvaExperience", "role", "type", "status", "createdAt"]
+    },
+    "SecureInternshipRegistry": {
+      "title": "Secure Internship Registry",
+      "description": "Private registry storing names of internship applicants which is not publicly accessible.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique record id" },
+        "fullName": { "type": "string", "description": "Full name of the applicant" },
+        "email": { "type": "string", "format": "email", "description": "Email address" },
+        "role": { "type": "string", "description": "Selected internship role" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["fullName", "email", "role", "createdAt"]
     }
   },
   "firestore": {
@@ -72,6 +103,14 @@
     "/projects/{projectId}/invoices/{invoiceId}": {
       "schema": "Invoice",
       "description": "Invoices tied to specific projects."
+    },
+    "/internship_applications/{applicationId}": {
+      "schema": "InternshipApplication",
+      "description": "Internship applications submitted by candidates."
+    },
+    "/secure_internship_registry/{id}": {
+      "schema": "SecureInternshipRegistry",
+      "description": "Highly secure private collection caching applicant identity details."
     }
   }
 }

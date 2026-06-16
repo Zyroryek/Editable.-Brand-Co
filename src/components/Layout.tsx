@@ -125,37 +125,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Persistent Logo */}
       <div className="fixed top-0 left-0 z-[999] p-6 md:p-8 lg:p-12 pointer-events-none">
         <Magnetic>
-          <Link to="/" className="pointer-events-auto block">
-            <motion.div 
-              className="w-10 h-10 md:w-16 md:h-16 rounded-xl overflow-hidden shadow-2xl border border-white/20"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              whileHover={{ scale: 1.05 }}
+          <Link to="/" className="pointer-events-auto">
+            <motion.span 
+              className="text-xl md:text-2xl font-display font-black tracking-tighter block mix-blend-difference"
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
             >
-              <img 
-                src="/logo.jpg" 
-                alt="Editable Logo" 
-                className="w-full h-full object-cover"
-                referrerPolicy="no-referrer"
-                onError={(e) => {
-                  // Fallback to text if image fails to load
-                  e.currentTarget.style.display = 'none';
-                  const parent = e.currentTarget.parentElement;
-                  if (parent) {
-                    const span = document.createElement('span');
-                    span.className = "text-xl md:text-2xl font-display font-black tracking-tighter block mix-blend-difference";
-                    span.innerText = "Editable.";
-                    parent.appendChild(span);
-                    parent.style.width = 'auto';
-                    parent.style.height = 'auto';
-                    parent.style.borderRadius = '0';
-                    parent.style.overflow = 'visible';
-                    parent.style.border = 'none';
-                    parent.style.boxShadow = 'none';
-                  }
-                }}
-              />
-            </motion.div>
+              Editable.
+            </motion.span>
           </Link>
         </Magnetic>
       </div>
@@ -175,7 +152,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <NavLink to="/about" label="About" onClick={() => setIsMenuOpen(false)} />
               <NavLink to="/packages" label="Packages" onClick={() => setIsMenuOpen(false)} />
               <NavLink to="/profile" label="Profile" onClick={() => setIsMenuOpen(false)} />
+              <NavLink to="/internship" label="Internship" onClick={() => setIsMenuOpen(false)} />
               <NavLink to="/contact" label="Contact" onClick={() => setIsMenuOpen(false)} />
+              <NavLink to="/admin" label="Admin Login" onClick={() => setIsMenuOpen(false)} />
             </div>
             
               <div className="flex flex-col items-center gap-4 border-t border-ink/5 pt-12 w-full max-w-xs">

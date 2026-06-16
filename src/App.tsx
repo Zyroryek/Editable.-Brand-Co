@@ -8,6 +8,8 @@ import Profile from "./pages/Profile";
 import Booking from "./pages/Booking";
 import Contact from "./pages/Contact";
 import About from "./pages/About";
+import Internship from "./pages/Internship";
+import Admin from "./pages/Admin";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -19,8 +21,10 @@ function AnimatedRoutes() {
         <Route path="/about" element={<About />} />
         <Route path="/packages" element={<Packages />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/internship" element={<Internship />} />
         <Route path="/book" element={<Booking />} />
         <Route path="/contact" element={<Contact />} />
+        <Route path="/admin" element={<Admin />} />
       </Routes>
     </AnimatePresence>
   );

@@ -15,9 +15,15 @@ service cloud.firestore {
     function existing() { return resource.data; }
     function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
     
-    // Admin check - simple collection lookup
+    // Admin check - simple collection lookup or matching verified admin email
     function isAdmin() { 
-      return isSignedIn() && exists(/databases/$(database)/documents/admins/$(request.auth.uid)); 
+      return isSignedIn() && (
+        exists(/databases/$(database)/documents/admins/$(request.auth.uid)) ||
+        request.auth.token.email == "bharanidharan@editablecompany.co.in" ||
+        request.auth.token.email == "dharani@editablecompany.co.in" ||
+        request.auth.token.email == "chitharth@editablecompany.co.in" ||
+        request.auth.token.email == "roshinisephora@editablecompany.co.in"
+      ); 
     }
 
     // --- Entity Validations ---
@@ -61,6 +67,29 @@ service cloud.firestore {
              data.createdAt == request.time;
     }
 
+    function isValidInternshipApplication(data) {
+      return data.keys().hasAll(['fullName', 'email', 'portfolioUrl', 'degree', 'interest', 'canvaExperience', 'role', 'type', 'status', 'createdAt']) &&
+             data.fullName is string && data.fullName.size() > 0 &&
+             data.email is string &&
+             data.portfolioUrl is string &&
+             data.degree is string &&
+             data.interest is string &&
+             data.canvaExperience is string &&
+             data.role is string &&
+             data.type is string &&
+             data.status == 'submitted' &&
+             data.createdAt == request.time;
+    }
+
+    function isValidSecureInternshipRegistry(data) {
+      return data.keys().hasAll(['fullName', 'email', 'role', 'createdAt']) &&
+             data.keys().size() == 4 &&
+             data.fullName is string && data.fullName.size() > 0 &&
+             data.email is string &&
+             data.role is string &&
+             data.createdAt == request.time;
+    }
+
     // --- Collection Routes ---
 
     match /users/{userId} {
@@ -74,7 +103,17 @@ service cloud.firestore {
 
     match /inquiries/{inquiryId} {
       allow create: if isValidId(inquiryId) && isValidInquiry(incoming());
-      allow read, list: if isAdmin();
+      allow read, list, update: if true;
+    }
+
+    match /internship_applications/{applicationId} {
+      allow create: if isValidId(applicationId) && isValidInternshipApplication(incoming());
+      allow read, list, update: if true;
+    }
+
+    match /secure_internship_registry/{id} {
+      allow create: if isValidId(id) && isValidSecureInternshipRegistry(incoming());
+      allow read, list, update: if true;
     }
 
     match /projects/{projectId} {

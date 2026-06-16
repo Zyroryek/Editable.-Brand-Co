@@ -7,6 +7,7 @@ import Magnetic from "../components/Magnetic";
 import TextReveal from "../components/TextReveal";
 import Marquee from "../components/Marquee";
 import { CharacterReveal } from "../components/CharacterReveal";
+import { EditableHeroText } from "../components/EditableHeroText";
 
 interface TiltCardProps {
   children: React.ReactNode;
@@ -171,19 +172,8 @@ export default function Home() {
       <div ref={containerRef} className="relative">
         {/* 1. Opening Frame */}
         <section className="h-screen flex flex-col items-center justify-center text-center relative overflow-hidden">
-          <div className="overflow-hidden mb-8 md:mb-12 relative">
-            <CharacterReveal
-              text="Editable."
-              className="text-[18vw] lg:text-[15vw] font-display font-bold leading-[0.85] tracking-[-0.06em] uppercase"
-              delay={0.2}
-              stagger={0.08}
-            />
-            <motion.span 
-              className="absolute top-0 right-0 w-8 h-8 bg-accent rounded-full hidden md:block"
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 1.5, type: "spring", stiffness: 200, damping: 10 }}
-            />
+          <div className="w-full max-w-7xl mx-auto px-4 mb-4 md:mb-8 relative z-10 overflow-visible">
+            <EditableHeroText className="text-[8.5vw] sm:text-[8vw] md:text-[7.5vw] lg:text-[7vw] xl:text-[6.5vw] font-display font-extrabold tracking-[-0.05em] uppercase" />
           </div>
           
           <motion.div 
@@ -235,6 +225,18 @@ export default function Home() {
                     className="px-8 py-4 bg-transparent text-ink rounded-full text-[10px] uppercase tracking-[0.3em] font-bold border border-ink/20 transition-all w-48 sm:w-auto"
                   >
                     Contact Us
+                  </motion.button>
+                </Magnetic>
+              </Link>
+
+              <Link to="/internship">
+                <Magnetic>
+                  <motion.button 
+                    whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 77, 0, 0.08)", borderColor: "#ff4d00", color: "#ff4d00" }}
+                    whileTap={{ scale: 0.95 }}
+                    className="px-8 py-4 bg-transparent text-accent border border-accent/30 rounded-full text-[10px] uppercase tracking-[0.3em] font-bold transition-all w-48 sm:w-auto"
+                  >
+                    Internships
                   </motion.button>
                 </Magnetic>
               </Link>
@@ -318,6 +320,39 @@ export default function Home() {
             className="text-4xl md:text-7xl lg:text-8xl font-display font-medium leading-[1.05] text-center max-w-6xl tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-800 dark:from-blue-700 dark:via-purple-700 dark:to-indigo-600"
           />
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-blue/20 to-transparent" />
+        </section>
+
+        {/* Featured Content / Immersive Image */}
+        <section className="py-20 md:py-32 px-6 md:px-12 lg:px-20 max-w-[1440px] mx-auto">
+          <motion.div 
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+            className="relative max-w-4xl mx-auto aspect-square md:aspect-[4/3] rounded-[40px] md:rounded-[60px] overflow-hidden bg-neutral-900 group shadow-[0_0_100px_rgba(0,0,0,0.1)] forced-color-adjust-none border border-zinc-200/10"
+          >
+            <motion.img 
+              src="https://drive.google.com/uc?export=view&id=13NuzvIn7mc-GPpoQi7tES9euEcGCHe3g" 
+              alt="Editable Creative Direction" 
+              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
+              referrerPolicy="no-referrer"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+            
+            <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12 z-20 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-700">
+              <motion.div>
+                <span className="text-[10px] md:text-xs uppercase tracking-[0.4em] text-accent-blue font-bold mb-3 block">Perspective</span>
+                <h2 className="text-3xl md:text-5xl font-display font-bold text-white uppercase tracking-tighter leading-none mb-4">
+                  Pure Aesthetic.
+                </h2>
+                <div className="flex items-center gap-4 text-white/50 text-[10px] uppercase tracking-widest font-medium">
+                  <span>Visual Identity</span>
+                  <div className="w-1 h-1 rounded-full bg-white/20" />
+                  <span>2024 Showcase</span>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
         </section>
 
         {/* Why Us Section */}
