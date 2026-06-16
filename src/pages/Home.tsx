@@ -8,6 +8,7 @@ import TextReveal from "../components/TextReveal";
 import Marquee from "../components/Marquee";
 import { CharacterReveal } from "../components/CharacterReveal";
 import { EditableHeroText } from "../components/EditableHeroText";
+import Portfolio from "../components/Portfolio";
 
 interface TiltCardProps {
   children: React.ReactNode;
@@ -258,6 +259,9 @@ export default function Home() {
           </motion.div>
         </section>
 
+        {/* Interactive Portfolio Section */}
+        <Portfolio />
+
         {/* Simplified Packages List - Moved to Top */}
         <section id="packages-section" className="py-20 md:py-32 max-w-[1440px] mx-auto px-6 lg:px-20 relative">
           <div className="mb-12 md:mb-16 flex items-center gap-6">
@@ -332,7 +336,7 @@ export default function Home() {
             className="relative max-w-4xl mx-auto aspect-square md:aspect-[4/3] rounded-[40px] md:rounded-[60px] overflow-hidden bg-neutral-900 group shadow-[0_0_100px_rgba(0,0,0,0.1)] forced-color-adjust-none border border-zinc-200/10"
           >
             <motion.img 
-              src="https://drive.google.com/uc?export=view&id=13NuzvIn7mc-GPpoQi7tES9euEcGCHe3g" 
+              src="/logo.jpg" 
               alt="Editable Creative Direction" 
               className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
               referrerPolicy="no-referrer"
