@@ -206,25 +206,29 @@ async function startServer() {
 
       // Retrieve all internship applicants
       const internshipSnapshot = await db.collection("secure_internship_registry").get();
-      const internships = internshipSnapshot.docs.map((doc: any) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          createdAt: formatTimestamp(data.createdAt)
-        };
-      });
+      const internships = internshipSnapshot.docs
+        .map((doc: any) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            createdAt: formatTimestamp(data.createdAt)
+          };
+        })
+        .filter((item: any) => !item.isDeleted);
 
       // Retrieve all general / package bookings
       const inquirySnapshot = await db.collection("inquiries").get();
-      const inquiries = inquirySnapshot.docs.map((doc: any) => {
-        const data = doc.data();
-        return {
-          id: doc.id,
-          ...data,
-          createdAt: formatTimestamp(data.createdAt)
-        };
-      });
+      const inquiries = inquirySnapshot.docs
+        .map((doc: any) => {
+          const data = doc.data();
+          return {
+            id: doc.id,
+            ...data,
+            createdAt: formatTimestamp(data.createdAt)
+          };
+        })
+        .filter((item: any) => !item.isDeleted);
 
       res.json({
         success: true,
@@ -261,7 +265,8 @@ async function startServer() {
 
   // Serve static files / Vite middleware
   if (process.env.NODE_ENV !== "production") {
-    const { createServer: createViteServer } = await import("vite");
+    const viteModuleName = "vite";
+    const { createServer: createViteServer } = await import(viteModuleName);
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -270,7 +275,7 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get("*", (req, res) => {
+    app.get("*all", (req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }

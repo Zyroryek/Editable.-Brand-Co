@@ -2,5 +2,7 @@
   "name": "Editable creative studio",
   "description": "A premium, minimal creative studio website for Editable., a Design Studio International, featuring an immersive typography-driven experience.",
   "requestFramePermissions": [],
-  "majorCapabilities": []
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
 }

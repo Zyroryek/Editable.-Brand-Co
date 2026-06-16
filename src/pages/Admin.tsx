@@ -156,22 +156,24 @@ export default function Admin() {
       let fetchedInternships: any[] = [];
       try {
         const internshipSnap = await getDocs(query(collection(db, "secure_internship_registry"), orderBy("createdAt", "desc")));
-        fetchedInternships = internshipSnap.docs.map(doc => {
-          const d = doc.data();
-          let seconds = null;
-          if (d.createdAt) {
-            if (typeof d.createdAt.toDate === "function") {
-              seconds = Math.floor(d.createdAt.toDate().getTime() / 1000);
-            } else if (d.createdAt.seconds) {
-              seconds = d.createdAt.seconds;
+        fetchedInternships = internshipSnap.docs
+          .filter(doc => !doc.data().isDeleted)
+          .map(doc => {
+            const d = doc.data();
+            let seconds = null;
+            if (d.createdAt) {
+              if (typeof d.createdAt.toDate === "function") {
+                seconds = Math.floor(d.createdAt.toDate().getTime() / 1000);
+              } else if (d.createdAt.seconds) {
+                seconds = d.createdAt.seconds;
+              }
             }
-          }
-          return {
-            id: doc.id,
-            ...d,
-            createdAt: seconds ? { seconds } : null
-          };
-        });
+            return {
+              id: doc.id,
+              ...d,
+              createdAt: seconds ? { seconds } : null
+            };
+          });
       } catch (err: any) {
         handleFirestoreError(err, OperationType.LIST, "secure_internship_registry");
       }
@@ -180,22 +182,24 @@ export default function Admin() {
       let fetchedBookings: any[] = [];
       try {
         const bookingSnap = await getDocs(query(collection(db, "inquiries"), orderBy("createdAt", "desc")));
-        fetchedBookings = bookingSnap.docs.map(doc => {
-          const d = doc.data();
-          let seconds = null;
-          if (d.createdAt) {
-            if (typeof d.createdAt.toDate === "function") {
-              seconds = Math.floor(d.createdAt.toDate().getTime() / 1000);
-            } else if (d.createdAt.seconds) {
-              seconds = d.createdAt.seconds;
+        fetchedBookings = bookingSnap.docs
+          .filter(doc => !doc.data().isDeleted)
+          .map(doc => {
+            const d = doc.data();
+            let seconds = null;
+            if (d.createdAt) {
+              if (typeof d.createdAt.toDate === "function") {
+                seconds = Math.floor(d.createdAt.toDate().getTime() / 1000);
+              } else if (d.createdAt.seconds) {
+                seconds = d.createdAt.seconds;
+              }
             }
-          }
-          return {
-            id: doc.id,
-            ...d,
-            createdAt: seconds ? { seconds } : null
-          };
-        });
+            return {
+              id: doc.id,
+              ...d,
+              createdAt: seconds ? { seconds } : null
+            };
+          });
       } catch (err: any) {
         handleFirestoreError(err, OperationType.LIST, "inquiries");
       }
