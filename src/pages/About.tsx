@@ -86,22 +86,22 @@ export default function About() {
               Our unique approach leverages the intuitive power of Canva to deliver comprehensive 'Design Kits' tailored to your specific needs. This isn't just about handing over a JPG; it's about giving you a living brand.
             </p>
             <ul className="grid grid-cols-1 sm:grid-cols-2 gap-6 list-none p-0">
-              <li className="flex flex-col gap-2 p-6 rounded-2xl bg-ink/5">
+              <li className="flex flex-col gap-2 p-6 rounded-2xl bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl border-2 border-ink/20 dark:border-white/15 shadow-md">
                 <Palette size={20} className="text-accent" />
                 <span className="font-bold text-ink">Custom Brand Identity</span>
                 <span className="text-sm opacity-70">A unique logo, refined color palettes, and curated typography that authentically represent your brand.</span>
               </li>
-              <li className="flex flex-col gap-2 p-6 rounded-2xl bg-ink/5">
+              <li className="flex flex-col gap-2 p-6 rounded-2xl bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl border-2 border-ink/20 dark:border-white/15 shadow-md">
                 <Users size={20} className="text-accent" />
                 <span className="font-bold text-ink">Social Media Templates</span>
                 <span className="text-sm opacity-70">Branded templates for Instagram, Facebook, Pinterest, and more, empowering you to create content effortlessly.</span>
               </li>
-              <li className="flex flex-col gap-2 p-6 rounded-2xl bg-ink/5">
+              <li className="flex flex-col gap-2 p-6 rounded-2xl bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl border-2 border-ink/20 dark:border-white/15 shadow-md">
                 <Rocket size={20} className="text-accent" />
                 <span className="font-bold text-ink">Launch-Ready Websites</span>
                 <span className="text-sm opacity-70">Simple, professional landing pages or multi-page websites designed and hosted directly on Canva.</span>
               </li>
-              <li className="flex flex-col gap-2 p-6 rounded-2xl bg-ink/5">
+              <li className="flex flex-col gap-2 p-6 rounded-2xl bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl border-2 border-ink/20 dark:border-white/15 shadow-md">
                 <Target size={20} className="text-accent" />
                 <span className="font-bold text-ink">User Empowerment</span>
                 <span className="text-sm opacity-70">We don't just deliver files; we deliver tools. Gain the confidence to manage and evolve your own visuals.</span>
@@ -160,7 +160,7 @@ export default function About() {
                   positioning: "Your dedicated creative team, on demand."
                 }
               ].map((pkg, idx) => (
-                <div key={idx} className="p-8 rounded-3xl bg-ink/5 flex flex-col h-full hover:bg-ink/[0.07] transition-colors duration-500">
+                <div key={idx} className="p-8 rounded-2xl bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl border-2 border-ink/20 dark:border-white/15 flex flex-col h-full hover:border-accent transition-all duration-500 shadow-xl shadow-black/10">
                   <div className="mb-6">
                     <span className="text-xs font-bold uppercase tracking-widest text-accent mb-2 block">{pkg.target}</span>
                     <h3 className="text-2xl font-display font-bold leading-tight">{pkg.title}</h3>
@@ -185,7 +185,7 @@ export default function About() {
             <p>
               As the founder, my commitment is to translate your vision into strategic, beautiful, and most importantly, editable designs. We focus on clarity, consistency, and client empowerment, ensuring your brand not only looks good but works smarter for you.
             </p>
-            <div className="mt-12 p-8 rounded-3xl bg-accent text-white">
+            <div className="mt-12 p-8 rounded-2xl bg-accent text-white border-2 border-accent shadow-xl shadow-black/10">
               <h3 className="text-2xl font-display font-medium mb-4">Let's build a brand that's truly yours, and truly manageable.</h3>
               <Link to="/contact" className="inline-flex items-center gap-2 group underline underline-offset-8">
                 Explore our possibilities <ChevronRight className="group-hover:translate-x-1 transition-transform" />

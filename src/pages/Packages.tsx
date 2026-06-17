@@ -79,10 +79,20 @@ export default function Packages() {
   return (
     <PageTransition>
       <div className="min-h-screen pt-40 pb-24 max-w-7xl mx-auto flex flex-col">
-        <TextReveal 
-          text="Design Ecosystem."
-          className="text-6xl md:text-8xl font-display font-medium tracking-tighter mb-20 uppercase"
-        />
+        <div className="mb-16">
+          <TextReveal 
+            text="Design Ecosystem."
+            className="text-6xl md:text-8xl font-display font-medium tracking-tighter mb-4 uppercase"
+          />
+          <motion.p 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+            className="text-sm md:text-base font-light opacity-50 max-w-xl uppercase tracking-widest font-mono"
+          >
+            Explore our tailored creative solutions, purpose-built from identity foundations through digital user experiences to immersive video motion frameworks.
+          </motion.p>
+        </div>
 
         <div className="flex flex-col md:flex-row gap-20">
         {/* Left Side - Package List */}
@@ -126,7 +136,7 @@ export default function Packages() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 1.05 }}
               transition={{ duration: 0.5 }}
-              className="glass-card p-12 space-y-12 relative overflow-hidden"
+              className="bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl border-2 border-ink/20 dark:border-white/15 p-8 md:p-12 space-y-12 rounded-2xl relative overflow-hidden shadow-xl shadow-black/10"
             >
               <div className="space-y-4">
                 <p className="text-[10px] uppercase tracking-[0.1em] opacity-40 font-mono">Investment Range</p>

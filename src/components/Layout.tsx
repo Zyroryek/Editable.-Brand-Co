@@ -1,35 +1,57 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { Menu, X, Moon, Sun } from "lucide-react";
+import { Menu, X, Moon, Sun, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Lenis from "lenis";
 import { BackgroundWaves } from "./BackgroundWaves";
 import { CustomCursor } from "./CustomCursor";
 import Magnetic from "./Magnetic";
+import { playNavigationSound, getSoundEnabled, setSoundEnabled } from "../lib/audio";
+import ColorwaySwitch from "./ColorwaySwitch";
 
-const NavLink = ({ to, label, onClick }: { to: string; label: string; onClick?: () => void }) => (
-  <Link to={to} onClick={onClick}>
-    <motion.span
-      className="text-4xl md:text-6xl font-display font-medium hover:text-accent transition-colors duration-300"
-      whileHover={{ x: 20 }}
-    >
-      {label}
-    </motion.span>
-  </Link>
-);
+const NavLink = ({ to, label, onClick }: { to: string; label: string; onClick?: () => void }) => {
+  const handleClick = () => {
+    playNavigationSound();
+    if (onClick) onClick();
+  };
+  return (
+    <Link to={to} onClick={handleClick}>
+      <motion.span
+        className="text-4xl md:text-6xl font-display font-medium hover:text-accent transition-colors duration-300 pointer-events-auto"
+        whileHover={{ x: 20 }}
+      >
+        {label}
+      </motion.span>
+    </Link>
+  );
+};
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem("theme") || "light");
+  const [soundEnabled, setSoundEnabledState] = useState(getSoundEnabled());
   const [scrollProgress, setScrollProgress] = useState(0);
   const location = useLocation();
   const lenisRef = useRef<Lenis | null>(null);
 
   const toggleTheme = () => {
+    playNavigationSound();
     const newTheme = theme === "light" ? "dark" : "light";
     setTheme(newTheme);
     localStorage.setItem("theme", newTheme);
+  };
+
+  const toggleSound = () => {
+    const nextVal = !soundEnabled;
+    setSoundEnabledState(nextVal);
+    setSoundEnabled(nextVal);
+    if (nextVal) {
+      // Small deferred timeout so current thread context handles storage sync
+      setTimeout(() => {
+        playNavigationSound();
+      }, 30);
+    }
   };
 
   useEffect(() => {
@@ -89,8 +111,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <CustomCursor />
       {/* Scroll Progress Bar */}
       <motion.div 
-        className="fixed top-0 left-0 h-1 bg-accent z-[100] origin-left"
-        style={{ scaleX: scrollProgress }}
+        className="fixed top-0 left-0 h-1 z-[1000] origin-left shadow-[0_0_8px_rgba(255,255,255,0.4)]"
+        style={{ 
+          scaleX: scrollProgress,
+          background: `linear-gradient(90deg, 
+            hsl(${(scrollProgress * 360) % 360}, 90%, 55%) 0%, 
+            hsl(${(scrollProgress * 360 + 120) % 360}, 90%, 55%) 50%, 
+            hsl(${(scrollProgress * 360 + 240) % 360}, 90%, 55%) 100%
+          )`
+        }}
       />
 
       {/* Top Fixed Actions */}
@@ -105,10 +134,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               {theme === "light" ? <Moon size={16} className="md:size-[18px]" /> : <Sun size={16} className="md:size-[18px] text-accent" />}
             </button>
           </Magnetic>
+
+          <ColorwaySwitch />
           
           <Magnetic>
             <button 
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              onClick={() => {
+                playNavigationSound();
+                setIsMenuOpen(!isMenuOpen);
+              }}
               className="flex items-center gap-3 group focus:outline-none pl-5 pr-2 py-2 rounded-full glass border border-white/20 hover:border-accent transition-all shadow-2xl backdrop-blur-xl"
             >
               <span className="text-[9px] md:text-[10px] uppercase tracking-[0.3em] font-black opacity-70 group-hover:opacity-100 group-hover:text-accent transition-all">

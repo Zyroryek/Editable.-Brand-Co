@@ -83,7 +83,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ project }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-10%" }}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="group relative flex flex-col rounded-3xl overflow-hidden glass border border-ink/5 p-4 md:p-5 h-full cursor-pointer select-none"
+      className="group relative flex flex-col rounded-2xl overflow-hidden bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl border-2 border-ink/20 dark:border-white/15 p-4 md:p-5 h-full cursor-pointer select-none transition-all duration-500 hover:border-accent shadow-xl shadow-black/10"
     >
       {/* Interactive Canvas/Image Stage */}
       <div className="relative w-full aspect-[4/5] sm:aspect-square md:aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-950">
@@ -178,7 +178,13 @@ export default function Portfolio() {
   return (
     <section id="portfolio-section" className="py-20 md:py-32 max-w-[1440px] mx-auto px-6 lg:px-20 relative overflow-hidden">
       {/* Top Section Header */}
-      <div className="mb-12 md:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8">
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true, margin: "-100px" }}
+        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+        className="mb-12 md:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8"
+      >
         <div>
           <div className="flex items-center gap-2 mb-3">
             <Sparkles className="w-4 h-4 text-accent animate-pulse" />
@@ -209,7 +215,7 @@ export default function Portfolio() {
             </button>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Grid of Projects */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

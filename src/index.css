@@ -1,9 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playball&family=Pinyon+Script&family=Alex+Brush&family=Cormorant+Garamond:ital,wght@1,400;1,600;1,700&family=Inter:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700;800;900&family=Syne:wght@700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-display: "Syne", "Outfit", "Space Grotesk", sans-serif;
+  --font-elegant: "Playball", "Pinyon Script", "Cormorant Garamond", cursive, serif;
   --color-accent: #ff4d00;
   --color-accent-muted: #ffbfa3;
   --color-accent-blue: #00f2ff;
@@ -16,6 +17,86 @@
   --color-border: rgba(0, 0, 0, 0.1);
   --color-grid: rgba(0, 0, 0, 0.03);
   --color-grid-sub: rgba(0, 0, 0, 0.01);
+}
+
+/* Swiss Vermilion Palette */
+html.palette-vermilion {
+  --color-accent: #ff4d00;
+  --color-accent-muted: #ffbfa3;
+  --color-accent-blue: #00e1ff;
+  --color-accent-purple: #7a12ff;
+  --color-bg: #FAF7F2;
+  --color-surface: #ECE9DF;
+  --color-ink: #111111;
+}
+html.palette-vermilion.dark {
+  --color-bg: #090706;
+  --color-surface: #161210;
+  --color-ink: #f2f2f2;
+}
+
+/* Midnight Aurora Palette */
+html.palette-aurora {
+  --color-accent: #00f2ff;
+  --color-accent-muted: #aef8ff;
+  --color-accent-blue: #1c64ff;
+  --color-accent-purple: #d100ff;
+  --color-bg: #EFF6F8;
+  --color-surface: #DCE7EA;
+  --color-ink: #070e17;
+}
+html.palette-aurora.dark {
+  --color-bg: #03050C;
+  --color-surface: #090E1C;
+  --color-ink: #e3effd;
+}
+
+/* Royal Gold Palette */
+html.palette-gold {
+  --color-accent: #d4af37;
+  --color-accent-muted: #f2e1bd;
+  --color-accent-blue: #1b4d3e;
+  --color-accent-purple: #6a1a4c;
+  --color-bg: #FCFAF2;
+  --color-surface: #E8E5D8;
+  --color-ink: #1c1b18;
+}
+html.palette-gold.dark {
+  --color-bg: #080806;
+  --color-surface: #141410;
+  --color-ink: #f5f4eb;
+}
+
+/* Nordic Sage Palette */
+html.palette-forest {
+  --color-accent: #10b981;
+  --color-accent-muted: #a7f3d0;
+  --color-accent-blue: #0d9488;
+  --color-accent-purple: #6366f1;
+  --color-bg: #F1F6F3;
+  --color-surface: #E0EAE3;
+  --color-ink: #0c1811;
+}
+html.palette-forest.dark {
+  --color-bg: #040705;
+  --color-surface: #0B120E;
+  --color-ink: #ecfdf5;
+}
+
+/* Cyber Orchid Palette */
+html.palette-cyber {
+  --color-accent: #e11d48;
+  --color-accent-muted: #fecdd3;
+  --color-accent-blue: #0284c7;
+  --color-accent-purple: #c084fc;
+  --color-bg: #FAF2FB;
+  --color-surface: #EAD8E7;
+  --color-ink: #200527;
+}
+html.palette-cyber.dark {
+  --color-bg: #07010E;
+  --color-surface: #150325;
+  --color-ink: #fbf0fe;
 }
 
 .dark {
@@ -127,8 +208,4 @@
 ::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.1);
   border-radius: 10px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent);
 }

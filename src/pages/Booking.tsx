@@ -61,7 +61,7 @@ export default function Booking() {
   return (
     <PageTransition>
       <div className="min-h-screen pt-32 pb-32 md:pt-48 md:pb-48 flex items-center justify-center px-4 md:px-8">
-        <div className="w-full max-w-3xl glass p-8 md:p-20 lg:p-24">
+        <div className="w-full max-w-3xl bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl border-2 border-ink/20 dark:border-white/15 rounded-2xl shadow-xl shadow-black/10 p-8 md:p-20 lg:p-24 relative overflow-hidden">
           <AnimatePresence mode="wait">
             {step === 1 && (
               <motion.div
@@ -232,7 +232,7 @@ export default function Booking() {
                   initial={{ scale: 0.95, y: 10 }}
                   animate={{ scale: 1, y: 0 }}
                   exit={{ scale: 0.95, y: 10 }}
-                  className="glass p-8 md:p-12 max-w-[calc(100vw-2rem)] md:max-w-md w-full relative space-y-8 text-center"
+                  className="bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl border-2 border-ink/20 dark:border-white/15 rounded-2xl shadow-2xl shadow-black/20 p-8 md:p-12 max-w-[calc(100vw-2rem)] md:max-w-md w-full relative space-y-8 text-center"
                 >
                   <button 
                     onClick={handlePaymentConfirmation}

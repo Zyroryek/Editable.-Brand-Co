@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
-import { motion, useSpring, useMotionValue, useTransform } from "motion/react";
-import { cn } from "../lib/utils";
+import { motion, useMotionValue, useSpring } from "motion/react";
+import { cn } from "@/lib/utils";
 
 interface EditableHeroTextProps {
   className?: string;
@@ -8,163 +8,148 @@ interface EditableHeroTextProps {
 
 export const EditableHeroText: React.FC<EditableHeroTextProps> = ({ className }) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  const text = "Editable.";
+  const [inputText, setInputText] = useState("EDITABLE.");
+  const [isEditing, setIsEditing] = useState(false);
 
-  // Mouse positions for the subtle background glow effect
+  // Mouse positions for subtle background glow effect
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  const springConfig = { stiffness: 80, damping: 25 };
+  const springConfig = { damping: 25, stiffness: 250 };
   const glowX = useSpring(mouseX, springConfig);
   const glowY = useSpring(mouseY, springConfig);
 
-  const handleMouseMove = (e: React.MouseEvent) => {
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    // Calculate mouse position relative to the container as percentage (-50% to 50%)
-    const x = (e.clientX - rect.left - rect.width / 2) * 0.4;
-    const y = (e.clientY - rect.top - rect.height / 2) * 0.4;
-    mouseX.set(x);
-    mouseY.set(y);
+    const { left, top } = containerRef.current.getBoundingClientRect();
+    mouseX.set(e.clientX - left);
+    mouseY.set(e.clientY - top);
   };
 
-  const handleMouseLeave = () => {
-    mouseX.set(0);
-    mouseY.set(0);
-  };
-
-  // Split text into characters
-  const characters = text.split("");
-
-  // Animation variants for container
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.06,
-        delayChildren: 0.1,
-      },
-    },
-  };
-
-  // Animation variants for individual letters (initial loading)
-  const letterVariants = {
-    hidden: { 
-      opacity: 0, 
-      y: 120, 
-      rotateX: 45, 
-      skewX: 10 
-    },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
-      rotateX: 0, 
-      skewX: 0,
-      transition: {
-        duration: 1.2,
-        ease: [0.16, 1, 0.3, 1] // Custom easeout Expo
-      }
-    },
+  const handleTextChange = (e: React.FormEvent<HTMLSpanElement>) => {
+    const rawText = e.currentTarget.textContent || "";
+    setInputText(rawText);
   };
 
   return (
     <div 
       ref={containerRef}
       onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      className="relative select-none py-6 overflow-visible flex items-center justify-center w-full"
+      className="relative select-none py-10 w-full flex flex-col items-center justify-center overflow-visible group/container"
     >
-      {/* Dynamic Ambient Background Glows that follow the mouse */}
-      <div className="absolute inset-0 pointer-events-none overflow-visible flex items-center justify-center z-0">
-        <motion.div 
-          style={{ x: glowX, y: glowY }}
-          className="absolute w-[40vw] h-[40vw] max-w-[400px] max-h-[400px] rounded-full bg-accent/10 blur-[80px] dark:bg-accent/15"
-        />
-        <motion.div 
-          style={{ x: useTransform(glowX, (v) => -v), y: useTransform(glowY, (v) => -v) }}
-          className="absolute w-[35vw] h-[35vw] max-w-[350px] max-h-[350px] rounded-full bg-accent-purple/10 blur-[80px] dark:bg-accent-purple/15"
-        />
-      </div>
+      {/* Background Interactive Radial Glow */}
+      <motion.div
+        className="absolute -inset-40 pointer-events-none opacity-0 group-hover/container:opacity-100 transition-opacity duration-700 bg-[radial-gradient(ellipse_at_center,rgba(255,77,0,0.08)_0%,rgba(0,242,255,0.03)_50%,transparent_100%)] rounded-full"
+        style={{
+          left: glowX,
+          top: glowY,
+          transform: "translate(-50%, -50%)",
+        }}
+      />
 
-      {/* Main Heading element */}
-      <motion.h1
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className={cn(
-          "relative z-10 flex flex-nowrap whitespace-nowrap justify-center origin-center leading-none text-ink pb-4 overflow-visible",
-          className
-        )}
-      >
-        {characters.map((char, index) => {
-          // Special styling & rendering for the period "."
-          const isPeriod = char === ".";
-          
-          return (
-            <motion.span
-              key={index}
-              variants={letterVariants}
-              className="relative inline-block cursor-pointer group/letter"
-              style={{ 
-                transformStyle: "preserve-3d",
-                perspective: "1000px" 
+      {/* Editable input area or styled characters */}
+      <div className="relative z-10 flex flex-nowrap md:flex-wrap lg:justify-start justify-center items-center max-w-full">
+        {!isEditing ? (
+          <div 
+            onClick={() => setIsEditing(true)}
+            className={cn(
+              "cursor-pointer outline-none relative flex flex-nowrap md:flex-wrap lg:justify-start justify-center items-center gap-x-[0.01em] whitespace-nowrap",
+              className
+            )}
+            title="Click to edit text"
+          >
+            {inputText.split("").map((char, index) => {
+              const isPeriod = char === ".";
+              // Unique translation offset for each character to create chromatic split
+              const shiftLeft = -3 - (index % 3);
+              const shiftRight = 3 + (index % 3);
+
+              return (
+                <span 
+                  key={index} 
+                  className="relative group/letter inline-block px-[0.03em] transition-transform duration-300 ease-out hover:scale-110"
+                  style={{ transformStyle: "preserve-3d" }}
+                >
+                  {/* Chromatic Splitting Copy 1: Vermilion Accent (Leans Left) */}
+                  <span 
+                    className={cn(
+                      "absolute inset-0 select-none pointer-events-none opacity-0 group-hover/letter:opacity-75 transition-all duration-300 ease-out",
+                      isPeriod ? "text-accent-blue" : "text-accent"
+                    )}
+                    style={{
+                      transform: `translateX(${shiftLeft}px) translateZ(-5px)`
+                    }}
+                  >
+                    {char}
+                  </span>
+
+                  {/* Chromatic Splitting Copy 2: Tech Blue/Purple Accent (Leans Right) */}
+                  <span 
+                    className={cn(
+                      "absolute inset-0 select-none pointer-events-none opacity-0 group-hover/letter:opacity-75 transition-all duration-300 ease-out",
+                      isPeriod ? "text-accent" : "text-accent-blue"
+                    )}
+                    style={{
+                      transform: `translateX(${shiftRight}px) translateZ(-5px)`
+                    }}
+                  >
+                    {char}
+                  </span>
+
+                  {/* Foreground Main Copy */}
+                  <span 
+                    className={cn(
+                      "relative block transition-all duration-300",
+                      isPeriod 
+                        ? "text-accent drop-shadow-[0_0_20px_rgba(255,77,0,0.6)] animate-pulse" 
+                        : "text-ink group-hover/letter:text-accent"
+                    )}
+                    style={{ transform: "translateZ(10px)" }}
+                  >
+                    {char}
+                  </span>
+                </span>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="flex flex-col lg:items-start items-center gap-4">
+            <span
+              contentEditable
+              suppressContentEditableWarning
+              onBlur={() => setIsEditing(false)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault();
+                  setIsEditing(false);
+                }
               }}
-              whileHover={{
-                scale: 1.15,
-                y: -15,
-                rotateZ: isPeriod ? [0, -10, 10, 0] : -3,
-                transition: { 
-                  scale: { type: "spring", stiffness: 400, damping: 15 },
-                  y: { type: "spring", stiffness: 400, damping: 15 },
-                  rotateZ: isPeriod 
-                    ? { type: "tween", duration: 0.45, ease: "easeInOut" }
-                    : { type: "spring", stiffness: 400, damping: 15 }
+              onInput={handleTextChange}
+              className={cn(
+                "inline-block min-w-[200px] lg:text-left text-center border-b border-dashed border-accent outline-none caret-accent text-ink whitespace-nowrap",
+                className
+              )}
+              ref={(el) => {
+                if (el && isEditing) {
+                  el.focus();
+                  // Put caret at end
+                  const range = document.createRange();
+                  const sel = window.getSelection();
+                  range.selectNodeContents(el);
+                  range.collapse(false);
+                  sel?.removeAllRanges();
+                  sel?.addRange(range);
                 }
               }}
             >
-              {/* Chromatical Splitting Copy 1: Vermilion Accent (Leans Left) */}
-              <span 
-                className={cn(
-                  "absolute inset-0 select-none pointer-events-none opacity-0 group-hover/letter:opacity-75 transition-all duration-300 ease-out font-display",
-                  isPeriod ? "text-accent-blue" : "text-accent"
-                )}
-                style={{
-                  transform: "translate3d(-8px, -2px, -10px) scale(0.98)",
-                  mixBlendMode: "screen"
-                }}
-              >
-                {char}
-              </span>
-
-              {/* Chromatical Splitting Copy 2: Tech Blue/Purple Accent (Leans Right) */}
-              <span 
-                className={cn(
-                  "absolute inset-0 select-none pointer-events-none opacity-0 group-hover/letter:opacity-75 transition-all duration-300 ease-out font-display",
-                  isPeriod ? "text-accent" : "text-accent-blue"
-                )}
-                style={{
-                  transform: "translate3d(8px, 2px, -10px) scale(0.98)",
-                  mixBlendMode: "screen"
-                }}
-              >
-                {char}
-              </span>
-
-              {/* Foreground main copy */}
-              <span 
-                className={cn(
-                  "relative block font-display tracking-tight transition-colors duration-300",
-                  isPeriod ? "text-accent drop-shadow-[0_0_15px_rgba(255,77,0,0.5)]" : "text-ink group-hover/letter:text-ink/90"
-                )}
-                style={{ transform: "translateZ(10px)" }}
-              >
-                {char}
-              </span>
-            </motion.span>
-          );
-        })}
-      </motion.h1>
+              {inputText}
+            </span>
+            <span className="text-[10px] font-mono tracking-widest opacity-40 uppercase animate-pulse">
+              Press Enter or click away to save
+            </span>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

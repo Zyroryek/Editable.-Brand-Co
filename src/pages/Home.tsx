@@ -8,6 +8,7 @@ import TextReveal from "../components/TextReveal";
 import Marquee from "../components/Marquee";
 import { CharacterReveal } from "../components/CharacterReveal";
 import { EditableHeroText } from "../components/EditableHeroText";
+import { LogosSlideshow } from "../components/LogosSlideshow";
 import Portfolio from "../components/Portfolio";
 
 interface TiltCardProps {
@@ -172,80 +173,120 @@ export default function Home() {
     <PageTransition>
       <div ref={containerRef} className="relative">
         {/* 1. Opening Frame */}
-        <section className="h-screen flex flex-col items-center justify-center text-center relative overflow-hidden">
-          <div className="w-full max-w-7xl mx-auto px-4 mb-4 md:mb-8 relative z-10 overflow-visible">
-            <EditableHeroText className="text-[8.5vw] sm:text-[8vw] md:text-[7.5vw] lg:text-[7vw] xl:text-[6.5vw] font-display font-extrabold tracking-[-0.05em] uppercase" />
+        <section className="min-h-screen py-24 md:py-32 flex items-center justify-center relative overflow-hidden">
+          <div className="w-full max-w-7xl mx-auto px-6 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center text-center lg:text-left">
+            
+            {/* Left Side: Hero content */}
+            <motion.div 
+              initial="hidden"
+              animate="visible"
+              variants={{
+                hidden: { opacity: 0 },
+                visible: {
+                  opacity: 1,
+                  transition: {
+                    staggerChildren: 0.12,
+                    delayChildren: 0.1
+                  }
+                }
+              }}
+              className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6 md:space-y-8 overflow-visible"
+            >
+              <motion.div 
+                className="w-full overflow-visible"
+                variants={{
+                  hidden: { opacity: 0, y: 30, scale: 0.98 },
+                  visible: { opacity: 1, y: 0, scale: 1 }
+                }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+              >
+                <EditableHeroText className="text-[10vw] sm:text-[8vw] md:text-[6vw] lg:text-[5vw] xl:text-[4.5vw] font-display font-extrabold tracking-[-0.05em] uppercase leading-tight" />
+              </motion.div>
+
+              <motion.div 
+                className="space-y-6 w-full"
+                variants={{
+                  hidden: { opacity: 0, y: 25 },
+                  visible: { opacity: 1, y: 0 }
+                }}
+                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+                style={{ translateZ: 0 }}
+              >
+                <p className="text-[10px] tracking-[0.6em] font-bold opacity-30 uppercase">
+                  Design Studio International / Global Presence
+                </p>
+                <div className="flex items-center gap-6 justify-center lg:justify-start">
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: 32 }}
+                    transition={{ delay: 1.2, duration: 1 }}
+                    className="h-[1px] bg-ink/20 hidden md:block" 
+                  />
+                  <p className="text-base md:text-xl italic font-serif opacity-60">
+                    Creative Studio focused on visceral design
+                  </p>
+                  <motion.div 
+                    initial={{ width: 0 }}
+                    animate={{ width: 32 }}
+                    transition={{ delay: 1.2, duration: 1 }}
+                    className="h-[1px] bg-ink/20 hidden md:block lg:hidden" 
+                  />
+                </div>
+
+                <div className="pt-6 md:pt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+                  <Link to="/packages">
+                    <Magnetic>
+                      <motion.button 
+                        whileHover={{ scale: 1.05, backgroundColor: "#ff4d00", color: "#121212" }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-8 py-4 bg-ink text-bg rounded-full text-[10px] uppercase tracking-[0.3em] font-bold border border-transparent transition-all shadow-2xl shadow-accent-purple/20 w-48 sm:w-auto"
+                      >
+                        Explore Packages
+                      </motion.button>
+                    </Magnetic>
+                  </Link>
+
+                  <Link to="/contact">
+                    <Magnetic>
+                      <motion.button 
+                        whileHover={{ scale: 1.05, backgroundColor: "rgba(18, 18, 18, 0.05)" }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-8 py-4 bg-transparent text-ink rounded-full text-[10px] uppercase tracking-[0.3em] font-bold border border-ink/20 transition-all w-48 sm:w-auto"
+                      >
+                        Contact Us
+                      </motion.button>
+                    </Magnetic>
+                  </Link>
+
+                  <Link to="/internship">
+                    <Magnetic>
+                      <motion.button 
+                        whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 77, 0, 0.08)", borderColor: "#ff4d00", color: "#ff4d00" }}
+                        whileTap={{ scale: 0.95 }}
+                        className="px-8 py-4 bg-transparent text-accent border border-accent/30 rounded-full text-[10px] uppercase tracking-[0.3em] font-bold transition-all w-48 sm:w-auto"
+                      >
+                        Internships
+                      </motion.button>
+                    </Magnetic>
+                  </Link>
+                </div>
+              </motion.div>
+            </motion.div>
+
+            {/* Right Side: Slideshow */}
+            <motion.div 
+              className="lg:col-span-5 w-full flex justify-center items-center overflow-visible"
+              initial={{ opacity: 0, x: 50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+            >
+              <LogosSlideshow />
+            </motion.div>
+
           </div>
-          
-          <motion.div 
-            className="mt-12 space-y-6"
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            style={{ translateZ: 0 }}
-          >
-            <p className="text-[10px] tracking-[0.6em] font-bold opacity-30 uppercase">
-              Design Studio International / Global Presence
-            </p>
-            <div className="flex items-center gap-6 justify-center">
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: 48 }}
-                transition={{ delay: 1.2, duration: 1 }}
-                className="h-[1px] bg-ink/20 hidden md:block" 
-              />
-              <p className="text-lg md:text-2xl italic font-serif opacity-60">
-                Creative Studio focused on visceral design
-              </p>
-              <motion.div 
-                initial={{ width: 0 }}
-                animate={{ width: 48 }}
-                transition={{ delay: 1.2, duration: 1 }}
-                className="h-[1px] bg-ink/20 hidden md:block" 
-              />
-            </div>
-
-            <div className="pt-10 md:pt-16 flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link to="/packages">
-                <Magnetic>
-                  <motion.button 
-                    whileHover={{ scale: 1.05, backgroundColor: "#ff4d00", color: "#121212" }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-8 py-4 bg-ink text-bg rounded-full text-[10px] uppercase tracking-[0.3em] font-bold border border-transparent transition-all shadow-2xl shadow-accent-purple/20 w-48 sm:w-auto"
-                  >
-                    Explore Packages
-                  </motion.button>
-                </Magnetic>
-              </Link>
-
-              <Link to="/contact">
-                <Magnetic>
-                  <motion.button 
-                    whileHover={{ scale: 1.05, backgroundColor: "rgba(18, 18, 18, 0.05)" }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-8 py-4 bg-transparent text-ink rounded-full text-[10px] uppercase tracking-[0.3em] font-bold border border-ink/20 transition-all w-48 sm:w-auto"
-                  >
-                    Contact Us
-                  </motion.button>
-                </Magnetic>
-              </Link>
-
-              <Link to="/internship">
-                <Magnetic>
-                  <motion.button 
-                    whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 77, 0, 0.08)", borderColor: "#ff4d00", color: "#ff4d00" }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-8 py-4 bg-transparent text-accent border border-accent/30 rounded-full text-[10px] uppercase tracking-[0.3em] font-bold transition-all w-48 sm:w-auto"
-                  >
-                    Internships
-                  </motion.button>
-                </Magnetic>
-              </Link>
-            </div>
-          </motion.div>
 
           <motion.div 
-            className="absolute bottom-12 flex flex-col items-center gap-4"
+            className="absolute bottom-6 md:bottom-12 flex flex-col items-center gap-4 left-1/2 -translate-x-1/2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.5 }}
@@ -273,7 +314,7 @@ export default function Home() {
             <div className="h-[1px] flex-1 bg-gradient-to-r from-ink/10 to-transparent" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {PACKAGES.map((pkg, index) => (
               <motion.div
                 key={pkg.id}
@@ -282,35 +323,56 @@ export default function Home() {
                 viewport={{ once: true, margin: "-10%" }}
                 transition={{ 
                   duration: 0.8, 
-                  delay: index * 0.15,
-                  ease: [0.22, 1, 0.36, 1]
+                  delay: index * 0.1,
+                  ease: [0.16, 1, 0.3, 1]
                 }}
                 whileHover={{ 
                   y: -8,
                   transition: { duration: 0.3, ease: "easeOut" }
                 }}
-                className="glass group p-6 md:p-8 flex flex-col justify-center gap-4 hover:border-accent transition-all duration-500 overflow-hidden relative"
+                className="group p-6 md:p-8 flex flex-col justify-start rounded-2xl bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl border-2 border-ink/20 dark:border-white/15 hover:border-accent transition-all duration-500 overflow-hidden relative min-h-[200px] shadow-xl shadow-black/10"
                 style={{ willChange: "transform, opacity" }}
               >
+                {/* Visual Glass highlights & Hover Accent flow */}
                 <motion.div 
-                  className="absolute inset-0 bg-accent/5 translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-[0.22, 1, 0.36, 1]"
+                  className="absolute inset-0 bg-accent/[0.02] dark:bg-accent/[0.04] translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-[0.16, 1, 0.3, 1]"
                 />
-                <div className="flex items-center justify-between relative z-10">
-                  <h3 className="text-xl md:text-2xl font-display font-bold uppercase group-hover:text-accent transition-colors">
+
+                {/* Technical Blueprint Elements */}
+                <div className="absolute inset-2 border border-dashed border-ink/5 dark:border-white/5 rounded-[24px] pointer-events-none" />
+                <span className="absolute top-4 left-4 w-3.5 h-3.5 border-t border-l border-ink/20 dark:border-white/20 group-hover:border-accent/40 transition-colors pointer-events-none" />
+                <span className="absolute top-4 right-4 w-3.5 h-3.5 border-t border-r border-ink/20 dark:border-white/20 group-hover:border-accent/40 transition-colors pointer-events-none" />
+                <span className="absolute bottom-4 left-4 w-3.5 h-3.5 border-b border-l border-ink/20 dark:border-white/20 group-hover:border-accent/40 transition-colors pointer-events-none" />
+                <span className="absolute bottom-4 right-4 w-3.5 h-3.5 border-b border-r border-ink/20 dark:border-white/20 group-hover:border-accent/40 transition-colors pointer-events-none" />
+
+                {/* Top Metabar */}
+                <div className="flex items-center justify-between select-none relative z-10 mb-4">
+                  <span className="font-mono text-[9px] uppercase tracking-[0.25em] opacity-40 font-black">
+                    [ 0{index + 1} / PKG ]
+                  </span>
+                  <span className="font-mono text-[10px] font-black uppercase tracking-wider text-accent bg-accent/5 dark:bg-accent/10 px-2.5 py-1 rounded-lg">
+                    {pkg.price}
+                  </span>
+                </div>
+
+                {/* Title */}
+                <div className="space-y-2 relative z-10 mb-4">
+                  <h3 className="text-xl md:text-2xl font-display font-black uppercase tracking-tight group-hover:text-accent transition-colors leading-none">
                     {pkg.name}
                   </h3>
+                </div>
+
+                {/* Bottom Details Arrow Action */}
+                <div className="mt-auto pt-4 flex justify-end relative z-10">
                   <Link to="/packages">
                     <motion.span 
                       whileHover={{ x: 5 }}
-                      className="text-[11px] uppercase tracking-[0.2em] font-black opacity-100 text-accent transition-all flex items-center gap-2"
+                      className="text-[10px] uppercase tracking-[0.25em] font-black text-accent transition-all flex items-center gap-1.5"
                     >
-                      Details <span className="text-[14px]">→</span>
+                      View Details <span className="text-xs">→</span>
                     </motion.span>
                   </Link>
                 </div>
-                <p className="text-xs opacity-50 font-light leading-relaxed line-clamp-1 relative z-10">
-                  {pkg.desc}
-                </p>
               </motion.div>
             ))}
           </div>
@@ -361,7 +423,13 @@ export default function Home() {
 
         {/* Why Us Section */}
         <section className="py-20 md:py-32 px-6 md:px-12 lg:px-20 max-w-[1440px] mx-auto">
-          <div className="mb-12 md:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-10">
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-10%" }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+            className="mb-12 md:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-10"
+          >
             <div className="flex flex-col">
               <CharacterReveal 
                 text="Why Us?"
@@ -372,7 +440,7 @@ export default function Home() {
             <div className="text-[10px] md:text-xs uppercase tracking-[0.3em] opacity-40 max-w-[280px] leading-relaxed">
               Design is a competitive advantage. We ensure yours is unparalleled through precision and vision.
             </div>
-          </div>
+          </motion.div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             {reasons.map((reason, i) => (
@@ -380,7 +448,7 @@ export default function Home() {
                 key={i}
                 i={i}
                 color={reason.color}
-                className="group relative p-8 md:p-10 glass rounded-[32px] overflow-hidden min-h-[300px] border border-ink/5"
+                className="group relative p-8 md:p-10 bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl rounded-2xl overflow-hidden min-h-[300px] border-2 border-ink/20 dark:border-white/15 hover:border-accent transition-all duration-500 shadow-xl shadow-black/10"
               >
                 <div className="flex items-center justify-between mb-8">
                   <div className="w-10 h-10 rounded-full border border-ink/10 flex items-center justify-center text-[10px] font-bold group-hover:border-accent transition-colors group-hover:bg-accent group-hover:text-bg">
@@ -412,7 +480,13 @@ export default function Home() {
         </section>
 
         {/* Client Logos Marquee */}
-        <section className="py-20 border-y border-ink/5 overflow-hidden">
+        <motion.section 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-10%" }}
+          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+          className="py-20 border-y border-ink/5 overflow-hidden"
+        >
           <div className="px-6 mb-12 text-center">
             <span className="text-[10px] uppercase tracking-[0.5em] opacity-30 font-bold">In Trusted Partnership With</span>
           </div>
@@ -432,7 +506,7 @@ export default function Home() {
               ))}
             </motion.div>
           </div>
-        </section>
+        </motion.section>
 
         {/* Marquee Section */}
         <Marquee 

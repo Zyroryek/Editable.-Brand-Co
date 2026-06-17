@@ -50,7 +50,7 @@ export default function Contact() {
                 y: -10,
                 transition: { duration: 0.4, ease: "easeOut" }
               }}
-              className="glass p-10 md:p-16 flex flex-col gap-10 group hover:border-accent transition-all duration-500 overflow-hidden relative"
+              className="bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl border-2 border-ink/20 dark:border-white/15 rounded-2xl p-10 md:p-16 flex flex-col gap-10 group hover:border-accent transition-all duration-500 overflow-hidden relative shadow-xl shadow-black/10"
             >
               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-30 group-hover:scale-125 group-hover:rotate-6 transition-all duration-700">
                 <method.icon size={120} strokeWidth={1} />

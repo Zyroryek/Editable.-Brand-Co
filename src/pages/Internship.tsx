@@ -236,10 +236,10 @@ export default function Internship() {
                     setSelectedRole("Graphic Designer");
                     setStep(2);
                   }}
-                  className={`p-8 rounded-[32px] border cursor-pointer transition-all flex flex-col justify-between group min-h-[350px] relative overflow-hidden ${
+                  className={`p-8 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between group min-h-[350px] relative overflow-hidden bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl shadow-xl shadow-black/10 ${
                     selectedRole === "Graphic Designer" 
-                      ? "border-accent bg-accent/[0.02]" 
-                      : "border-ink/10 hover:border-accent/40 bg-zinc-400/[0.01]"
+                      ? "border-accent" 
+                      : "border-ink/20 dark:border-white/15 hover:border-accent"
                   }`}
                 >
                   <div className="absolute top-0 right-0 w-48 h-48 bg-accent/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -272,10 +272,10 @@ export default function Internship() {
                     setSelectedRole("Social Media Manager");
                     setStep(2);
                   }}
-                  className={`p-8 rounded-[32px] border cursor-pointer transition-all flex flex-col justify-between group min-h-[350px] relative overflow-hidden ${
+                  className={`p-8 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between group min-h-[350px] relative overflow-hidden bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl shadow-xl shadow-black/10 ${
                     selectedRole === "Social Media Manager" 
-                      ? "border-accent bg-accent/[0.02]" 
-                      : "border-ink/10 hover:border-accent/40 bg-zinc-400/[0.01]"
+                      ? "border-accent" 
+                      : "border-ink/20 dark:border-white/15 hover:border-accent"
                   }`}
                 >
                   <div className="absolute top-0 right-0 w-48 h-48 bg-accent/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -332,10 +332,10 @@ export default function Internship() {
                     setSelectedType("Part-time");
                     setStep(3);
                   }}
-                  className={`p-8 rounded-[32px] border cursor-pointer transition-all flex flex-col justify-between group min-h-[250px] relative overflow-hidden ${
+                  className={`p-8 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between group min-h-[250px] relative overflow-hidden bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl shadow-xl shadow-black/10 ${
                     selectedType === "Part-time" 
-                      ? "border-accent bg-accent/[0.02]" 
-                      : "border-ink/10 hover:border-accent/40 bg-zinc-400/[0.01]"
+                      ? "border-accent" 
+                      : "border-ink/20 dark:border-white/15 hover:border-accent"
                   }`}
                 >
                   <div className="space-y-4">
@@ -364,10 +364,10 @@ export default function Internship() {
                     setSelectedType("Full-time");
                     setStep(3);
                   }}
-                  className={`p-8 rounded-[32px] border cursor-pointer transition-all flex flex-col justify-between group min-h-[250px] relative overflow-hidden ${
+                  className={`p-8 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between group min-h-[250px] relative overflow-hidden bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl shadow-xl shadow-black/10 ${
                     selectedType === "Full-time" 
-                      ? "border-accent bg-accent/[0.02]" 
-                      : "border-ink/10 hover:border-accent/40 bg-zinc-400/[0.01]"
+                      ? "border-accent" 
+                      : "border-ink/20 dark:border-white/15 hover:border-accent"
                   }`}
                 >
                   <div className="space-y-4">
@@ -467,7 +467,7 @@ export default function Internship() {
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true }}
                           transition={{ delay: index * 0.05 }}
-                          className="flex gap-3 items-start p-4 bg-zinc-400/[0.03] hover:bg-zinc-400/[0.06] border border-ink/5 rounded-2xl transition-all"
+                          className="flex gap-3 items-start p-4 bg-[var(--color-surface)] border-2 border-ink/20 dark:border-white/20 rounded-2xl shadow-md transition-all hover:border-accent/40"
                         >
                           <CheckCircle2 size={16} className="text-accent shrink-0 mt-0.5" />
                           <span className="text-sm text-ink/80 font-light">{qual}</span>
@@ -484,7 +484,7 @@ export default function Internship() {
                       </div>
                       <h2 className="text-xs uppercase tracking-[0.3em] font-black opacity-40">Program Perks</h2>
                     </div>
-                    <div className="p-6 bg-accent/5 hover:bg-accent/8 border border-accent/10 rounded-2xl flex items-center gap-4 transition-all">
+                    <div className="p-6 bg-[var(--color-surface)] border-2 border-accent/20 hover:border-accent rounded-2xl flex items-center gap-4 transition-all shadow-md">
                       <span className="text-3xl">🎓</span>
                       <div>
                         <h4 className="font-semibold text-base text-ink">Certificate of Completion</h4>
@@ -499,7 +499,7 @@ export default function Internship() {
                 {/* Form Column */}
                 <div className="lg:col-span-5 relative">
                   <div className="sticky top-28">
-                    <div className="glass p-8 md:p-12 rounded-[32px] border border-ink/10 relative overflow-hidden">
+                    <div className="bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl p-8 md:p-12 rounded-2xl border-2 border-ink/20 dark:border-white/15 relative overflow-hidden shadow-xl shadow-black/10">
                       <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
                       
                       <AnimatePresence mode="wait">
