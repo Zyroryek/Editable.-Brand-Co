@@ -237,9 +237,9 @@ export default function Home() {
                   <Link to="/packages">
                     <Magnetic>
                       <motion.button 
-                        whileHover={{ scale: 1.05, backgroundColor: "#ff4d00", color: "#121212" }}
+                        whileHover={{ scale: 1.05, backgroundColor: "var(--color-accent)", color: "var(--color-bg)" }}
                         whileTap={{ scale: 0.95 }}
-                        className="px-8 py-4 bg-ink text-bg rounded-full text-[10px] uppercase tracking-[0.3em] font-bold border border-transparent transition-all shadow-2xl shadow-accent-purple/20 w-48 sm:w-auto"
+                        className="px-8 py-4 bg-ink text-bg rounded-full text-[10px] uppercase tracking-[0.3em] font-bold border border-transparent transition-all shadow-2xl shadow-accent/15 w-48 sm:w-auto"
                       >
                         Explore Packages
                       </motion.button>
@@ -249,7 +249,7 @@ export default function Home() {
                   <Link to="/contact">
                     <Magnetic>
                       <motion.button 
-                        whileHover={{ scale: 1.05, backgroundColor: "rgba(18, 18, 18, 0.05)" }}
+                        whileHover={{ scale: 1.05, backgroundColor: "var(--color-overlay)" }}
                         whileTap={{ scale: 0.95 }}
                         className="px-8 py-4 bg-transparent text-ink rounded-full text-[10px] uppercase tracking-[0.3em] font-bold border border-ink/20 transition-all w-48 sm:w-auto"
                       >
@@ -261,9 +261,9 @@ export default function Home() {
                   <Link to="/internship">
                     <Magnetic>
                       <motion.button 
-                        whileHover={{ scale: 1.05, backgroundColor: "rgba(255, 77, 0, 0.08)", borderColor: "#ff4d00", color: "#ff4d00" }}
+                        whileHover={{ scale: 1.05, backgroundColor: "var(--color-ink)", color: "var(--color-bg)" }}
                         whileTap={{ scale: 0.95 }}
-                        className="px-8 py-4 bg-transparent text-accent border border-accent/30 rounded-full text-[10px] uppercase tracking-[0.3em] font-bold transition-all w-48 sm:w-auto"
+                        className="px-8 py-4 bg-accent text-bg border border-transparent rounded-full text-[10px] uppercase tracking-[0.3em] font-bold transition-all w-48 sm:w-auto shadow-2xl shadow-accent/25"
                       >
                         Internships
                       </motion.button>
@@ -522,7 +522,7 @@ export default function Home() {
           <div className="space-y-16 z-10 max-w-6xl">
             <CharacterReveal
               text="Let’s craft your distinctive edge."
-              className="text-6xl md:text-[8vw] font-display font-bold leading-[0.9] tracking-[-0.04em] uppercase"
+              className="text-4xl sm:text-5xl md:text-[6vw] font-display font-bold leading-[0.95] tracking-[-0.04em] uppercase"
               stagger={0.03}
             />
             <motion.div

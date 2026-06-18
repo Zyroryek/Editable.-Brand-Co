@@ -32,7 +32,7 @@ const ADMIN_CREDENTIALS: Record<string, { passkey: string; name: string; age: nu
   "bharanidharan@editablecompany.co.in": {
     passkey: "ceo@bharani",
     name: "Bharani dharan T",
-    age: 21,
+    age: 20,
     phone: "+91 76049 69891",
     address: "Editable Co. Headquarters, Chennai",
     joiningYear: 2026,
@@ -373,14 +373,24 @@ export default function Admin() {
           <div className="w-full space-y-12">
             {/* 1. Header Bar with log-out and context information */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-b border-ink/5 pb-8" id="admin-top-panel">
-              <div className="space-y-1">
-                <div className="flex items-center gap-3">
-                  <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
-                  <span className="text-[9px] uppercase font-black tracking-[0.3em] opacity-40">Editable Executive Core</span>
+              <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-3">
+                    <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-[9px] uppercase font-black tracking-[0.3em] opacity-40">Editable Executive Core</span>
+                  </div>
+                  <h1 className="text-2xl md:text-3xl font-display font-black tracking-tight uppercase leading-none">
+                    Admin Cabinet
+                  </h1>
                 </div>
-                <h1 className="text-2xl md:text-3xl font-display font-black tracking-tight uppercase leading-none">
-                  Admin Cabinet
-                </h1>
+                {activeTab !== "overview" && (
+                  <button
+                    onClick={() => { setActiveTab("overview"); setSelectedItem(null); }}
+                    className="self-start sm:self-center px-4 py-2 bg-accent/10 border border-accent/20 hover:bg-accent text-accent hover:text-white rounded-full text-[9px] uppercase tracking-widest font-black flex items-center gap-1.5 transition-all shadow-sm cursor-pointer"
+                  >
+                    <span>← Back to Overview Options</span>
+                  </button>
+                )}
               </div>
 
               {/* Logged in admin meta summary */}
@@ -458,7 +468,7 @@ export default function Admin() {
                   activeTab === "analytics" ? "border-b-2 border-accent text-accent bg-accent/5" : "opacity-40 hover:opacity-80"
                 }`}
               >
-                5. Studio Analytics
+                Studio Analytics
               </button>
               <button
                 onClick={() => { setActiveTab("internships"); setSelectedItem(null); }}
@@ -466,7 +476,7 @@ export default function Admin() {
                   activeTab === "internships" ? "border-b-2 border-accent text-accent bg-accent/5" : "opacity-40 hover:opacity-80"
                 }`}
               >
-                1. Internship Applicants ({internships.length})
+                Internship Applicants ({internships.length})
               </button>
               <button
                 onClick={() => { setActiveTab("bookings"); setSelectedItem(null); }}
@@ -474,7 +484,7 @@ export default function Admin() {
                   activeTab === "bookings" ? "border-b-2 border-accent text-accent bg-accent/5" : "opacity-40 hover:opacity-80"
                 }`}
               >
-                2. Package Bookings ({bookings.filter(b => b.package).length})
+                Package Bookings ({bookings.filter(b => b.package).length})
               </button>
               <button
                 onClick={() => { setActiveTab("contacts"); setSelectedItem(null); }}
@@ -482,7 +492,7 @@ export default function Admin() {
                   activeTab === "contacts" ? "border-b-2 border-accent text-accent bg-accent/5" : "opacity-40 hover:opacity-80"
                 }`}
               >
-                3. General Inquiries ({bookings.filter(b => !b.package).length})
+                General Inquiries ({bookings.filter(b => !b.package).length})
               </button>
               <button
                 onClick={() => { setActiveTab("employees"); setSelectedItem(null); }}
@@ -490,7 +500,7 @@ export default function Admin() {
                   activeTab === "employees" ? "border-b-2 border-accent text-accent bg-accent/5" : "opacity-40 hover:opacity-80"
                 }`}
               >
-                4. Employee Directory ({EMPLOYEES.length})
+                Employee Directory ({EMPLOYEES.length})
               </button>
             </div>
 
@@ -501,31 +511,108 @@ export default function Admin() {
                 <p className="text-[10px] uppercase tracking-widest opacity-40 font-bold">Querying Datastores...</p>
               </div>
             ) : (
-              <div className="grid lg:grid-cols-3 gap-8 items-start">
+              <div className={["internships", "bookings", "contacts"].includes(activeTab) ? "grid lg:grid-cols-3 gap-8 items-start" : "w-full"}>
                 {/* Left Side: Elaborated details or database listings */}
-                <div className="lg:col-span-2 space-y-6">
+                <div className={["internships", "bookings", "contacts"].includes(activeTab) ? "lg:col-span-2 space-y-6" : "w-full space-y-8"}>
 
                   {/* SUBPAGE OVERVIEW TAB */}
                   {activeTab === "overview" && (
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-8">
-                      {/* Systems Pulse Cards */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="glass p-6 rounded-2xl relative overflow-hidden group hover:border-accent/40 transition-all">
-                          <Activity size={24} className="text-accent mb-4" />
-                          <h3 className="text-4xl font-display font-black text-ink">{internships.length}</h3>
-                          <p className="text-[10px] uppercase tracking-wider font-bold opacity-40 mt-1">Internship Applications</p>
+                      {/* Systems Pulse Cards - Properly Arranged with Action Navigators */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                        {/* CARD 1: Internship Applications */}
+                        <div className="glass p-6 rounded-2xl relative overflow-hidden group hover:border-accent/40 transition-all flex flex-col justify-between min-h-[190px]">
+                          <div>
+                            <div className="flex items-start justify-between">
+                              <Activity size={20} className="text-accent mb-3" />
+                              <span className="text-[8px] uppercase font-mono tracking-widest text-accent font-black px-1.5 py-0.5 rounded bg-accent/5">Core</span>
+                            </div>
+                            <h3 className="text-4xl font-display font-black text-ink leading-none mt-2">{internships.length}</h3>
+                            <p className="text-[10px] uppercase tracking-wider font-bold opacity-45 mt-2">Internship Applications</p>
+                          </div>
+                          <button
+                            onClick={() => { setActiveTab("internships"); setSelectedItem(null); }}
+                            className="mt-6 w-full py-2 border border-ink/10 group-hover:border-accent/30 group-hover:bg-accent/5 text-[9px] uppercase tracking-widest font-black rounded-lg transition-all text-center flex items-center justify-center gap-1 text-ink/70 group-hover:text-accent cursor-pointer"
+                          >
+                            <span>Inspect Option</span>
+                            <ChevronRight size={10} />
+                          </button>
                         </div>
-                        <div className="glass p-6 rounded-2xl relative overflow-hidden group hover:border-accent/40 transition-all">
-                          <Layers size={24} className="text-emerald-500 mb-4" />
-                          <h3 className="text-4xl font-display font-black text-ink">
-                            {bookings.filter(b => b.package).length}
-                          </h3>
-                          <p className="text-[10px] uppercase tracking-wider font-bold opacity-40 mt-1">Active Package Bookings</p>
+
+                        {/* CARD 2: Active Package Bookings */}
+                        <div className="glass p-6 rounded-2xl relative overflow-hidden group hover:border-accent/40 transition-all flex flex-col justify-between min-h-[190px]">
+                          <div>
+                            <div className="flex items-start justify-between">
+                              <Layers size={20} className="text-emerald-500 mb-3" />
+                              <span className="text-[8px] uppercase font-mono tracking-widest text-emerald-500 font-black px-1.5 py-0.5 rounded bg-emerald-500/5">Active</span>
+                            </div>
+                            <h3 className="text-4xl font-display font-black text-ink leading-none mt-2">{bookings.filter(b => b.package).length}</h3>
+                            <p className="text-[10px] uppercase tracking-wider font-bold opacity-45 mt-2">Active Packages</p>
+                          </div>
+                          <button
+                            onClick={() => { setActiveTab("bookings"); setSelectedItem(null); }}
+                            className="mt-6 w-full py-2 border border-ink/10 group-hover:border-emerald-500/30 group-hover:bg-emerald-500/5 text-[9px] uppercase tracking-widest font-black rounded-lg transition-all text-center flex items-center justify-center gap-1 text-ink/70 group-hover:text-emerald-500 cursor-pointer"
+                          >
+                            <span>Inspect Option</span>
+                            <ChevronRight size={10} />
+                          </button>
                         </div>
-                        <div className="glass p-6 rounded-2xl relative overflow-hidden group hover:border-accent/40 transition-all">
-                          <Users size={24} className="text-cyan-500 mb-4" />
-                          <h3 className="text-4xl font-display font-black text-ink">{EMPLOYEES.length}</h3>
-                          <p className="text-[10px] uppercase tracking-wider font-bold opacity-40 mt-1">Active Team Officers</p>
+
+                        {/* CARD 3: General Inquiries */}
+                        <div className="glass p-6 rounded-2xl relative overflow-hidden group hover:border-accent/40 transition-all flex flex-col justify-between min-h-[190px]">
+                          <div>
+                            <div className="flex items-start justify-between">
+                              <Mail size={20} className="text-amber-500 mb-3" />
+                              <span className="text-[8px] uppercase font-mono tracking-widest text-amber-500 font-black px-1.5 py-0.5 rounded bg-amber-500/5">Inbound</span>
+                            </div>
+                            <h3 className="text-4xl font-display font-black text-ink leading-none mt-2">{bookings.filter(b => !b.package).length}</h3>
+                            <p className="text-[10px] uppercase tracking-wider font-bold opacity-45 mt-2">General Inquiries</p>
+                          </div>
+                          <button
+                            onClick={() => { setActiveTab("contacts"); setSelectedItem(null); }}
+                            className="mt-6 w-full py-2 border border-ink/10 group-hover:border-amber-500/30 group-hover:bg-amber-500/5 text-[9px] uppercase tracking-widest font-black rounded-lg transition-all text-center flex items-center justify-center gap-1 text-ink/70 group-hover:text-amber-600 dark:group-hover:text-amber-400 cursor-pointer"
+                          >
+                            <span>Inspect Option</span>
+                            <ChevronRight size={10} />
+                          </button>
+                        </div>
+
+                        {/* CARD 4: Active Team Officers */}
+                        <div className="glass p-6 rounded-2xl relative overflow-hidden group hover:border-accent/40 transition-all flex flex-col justify-between min-h-[190px]">
+                          <div>
+                            <div className="flex items-start justify-between">
+                              <Users size={20} className="text-cyan-500 mb-3" />
+                              <span className="text-[8px] uppercase font-mono tracking-widest text-cyan-500 font-black px-1.5 py-0.5 rounded bg-cyan-500/5">Onboard</span>
+                            </div>
+                            <h3 className="text-4xl font-display font-black text-ink leading-none mt-2">{EMPLOYEES.length}</h3>
+                            <p className="text-[10px] uppercase tracking-wider font-bold opacity-45 mt-2">Active Team Directory</p>
+                          </div>
+                          <button
+                            onClick={() => { setActiveTab("employees"); setSelectedItem(null); }}
+                            className="mt-6 w-full py-2 border border-ink/10 group-hover:border-cyan-500/30 group-hover:bg-cyan-500/5 text-[9px] uppercase tracking-widest font-black rounded-lg transition-all text-center flex items-center justify-center gap-1 text-ink/70 group-hover:text-cyan-500 cursor-pointer"
+                          >
+                            <span>Inspect Option</span>
+                            <ChevronRight size={10} />
+                          </button>
+                        </div>
+
+                        {/* CARD 5: Studio Analytics */}
+                        <div className="glass p-6 rounded-2xl relative overflow-hidden group hover:border-accent/40 transition-all flex flex-col justify-between min-h-[190px]">
+                          <div>
+                            <div className="flex items-start justify-between">
+                              <ArrowUpRight size={20} className="text-fuchsia-500 mb-3" />
+                              <span className="text-[8px] uppercase font-mono tracking-widest text-fuchsia-500 font-black px-1.5 py-0.5 rounded bg-fuchsia-500/5 font-black">Growth</span>
+                            </div>
+                            <h3 className="text-xl md:text-2xl font-display font-black text-ink leading-none mt-3">VALUATION</h3>
+                            <p className="text-[10px] uppercase tracking-wider font-bold opacity-45 mt-2">Financial Intelligence</p>
+                          </div>
+                          <button
+                            onClick={() => { setActiveTab("analytics"); setSelectedItem(null); }}
+                            className="mt-6 w-full py-2 border border-ink/10 group-hover:border-fuchsia-500/30 group-hover:bg-fuchsia-500/5 text-[9px] uppercase tracking-widest font-black rounded-lg transition-all text-center flex items-center justify-center gap-1 text-ink/70 group-hover:text-fuchsia-500 cursor-pointer"
+                          >
+                            <span>Inspect Option</span>
+                            <ChevronRight size={10} />
+                          </button>
                         </div>
                       </div>
 
@@ -1110,7 +1197,8 @@ export default function Admin() {
                 </div>
 
                 {/* Right Side: Elated details drawer displaying full entries */}
-                <div className="lg:col-span-1" id="admin-details-sidebar">
+                {["internships", "bookings", "contacts"].includes(activeTab) && (
+                  <div className="lg:col-span-1" id="admin-details-sidebar">
                   {selectedItem ? (
                     <motion.div 
                       initial={{ opacity: 0, x: 20 }}
@@ -1245,7 +1333,8 @@ export default function Admin() {
                       <p className="text-[10px] uppercase tracking-widest font-bold">Select any entry card to inspect submission parameters.</p>
                     </div>
                   )}
-                </div>
+                  </div>
+                )}
               </div>
             )}
           </div>

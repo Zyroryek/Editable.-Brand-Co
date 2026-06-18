@@ -40,12 +40,12 @@ export const LogosSlideshow: React.FC = () => {
     }
   ];
 
-  // Automate slide cycle every 2200ms, paused on manual hover/interaction
+  // Automate slide cycle every 4500ms (4.5s), paused on manual hover/interaction
   useEffect(() => {
     if (isHovered) return;
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % agencySlides.length);
-    }, 2200);
+    }, 4500);
     return () => clearInterval(timer);
   }, [isHovered, agencySlides.length]);
 

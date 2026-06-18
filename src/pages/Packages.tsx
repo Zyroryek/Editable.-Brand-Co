@@ -82,7 +82,7 @@ export default function Packages() {
         <div className="mb-16">
           <TextReveal 
             text="Design Ecosystem."
-            className="text-6xl md:text-8xl font-display font-medium tracking-tighter mb-4 uppercase"
+            className="text-4xl md:text-6xl font-display font-medium tracking-tighter mb-4 uppercase"
           />
           <motion.p 
             initial={{ opacity: 0, y: 15 }}

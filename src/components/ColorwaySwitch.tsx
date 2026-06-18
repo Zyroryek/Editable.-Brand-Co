@@ -17,36 +17,36 @@ export const COLORWAYS: Colorway[] = [
   {
     id: "vermilion",
     name: "Swiss Vermilion",
-    description: "High-contrast modernist layout",
-    colors: ["#ff4d00", "#ffbfa3", "#8200ff"],
+    description: "Vivid vermilion & sandstone cream",
+    colors: ["#ff4d00", "#ffa880", "#7d1aff"],
     className: "palette-vermilion"
   },
   {
     id: "aurora",
-    name: "Midnight Aurora",
-    description: "Luminous sky cyan & cosmos",
-    colors: ["#00f2ff", "#1c64ff", "#d100ff"],
+    name: "Midnight Electric",
+    description: "Electric cyan & deep space cobalt",
+    colors: ["#00f2ff", "#2563eb", "#d946ef"],
     className: "palette-aurora"
   },
   {
     id: "gold",
-    name: "Royal Gold",
-    description: "Imperial champagne & gold accents",
-    colors: ["#d4af37", "#1a3c40", "#4e0d3a"],
+    name: "Obsidian Saffron",
+    description: "Royal saffron & smoked charcoal",
+    colors: ["#f59e0b", "#10b981", "#ec4899"],
     className: "palette-gold"
   },
   {
     id: "forest",
-    name: "Nordic Sage",
-    description: "Organic emerald pine & moss",
-    colors: ["#10b981", "#0d9488", "#6366f1"],
+    name: "Nordic Emerald",
+    description: "Sleek organic emerald pine & sage",
+    colors: ["#10b981", "#3b82f6", "#6366f1"],
     className: "palette-forest"
   },
   {
     id: "cyber",
-    name: "Cyber Orchid",
-    description: "High-tech vibrant hyper-magenta",
-    colors: ["#e11d48", "#0284c7", "#c084fc"],
+    name: "Crimson Poison",
+    description: "Vicious ruby red & toxic teal",
+    colors: ["#e11d48", "#06b6d4", "#6366f1"],
     className: "palette-cyber"
   }
 ];
