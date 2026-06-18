@@ -1,6 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 
+// Import images so Vite can correctly process and bundle them with hashed URLs for production
+import pkgBrandFoundation from "../assets/images/pkg_brand_foundation_1781709357784.jpg";
+import pkgUiuxWebsite from "../assets/images/pkg_uiux_website_1781709375177.jpg";
+import pkgContentVideo from "../assets/images/pkg_content_video_1781709391007.jpg";
+import pkgGrowthCombo from "../assets/images/pkg_growth_combo_1781709410976.jpg";
+import pkgMonthlyRetainer from "../assets/images/pkg_monthly_retainer_1781709430112.jpg";
+
 interface AgencySlide {
   id: string;
   imgUrl: string;
@@ -13,23 +20,23 @@ export const LogosSlideshow: React.FC = () => {
   const agencySlides: AgencySlide[] = [
     {
       id: "brand-foundation",
-      imgUrl: "/src/assets/images/pkg_brand_foundation_1781709357784.jpg"
+      imgUrl: pkgBrandFoundation
     },
     {
       id: "uiux-website",
-      imgUrl: "/src/assets/images/pkg_uiux_website_1781709375177.jpg"
+      imgUrl: pkgUiuxWebsite
     },
     {
       id: "content-video",
-      imgUrl: "/src/assets/images/pkg_content_video_1781709391007.jpg"
+      imgUrl: pkgContentVideo
     },
     {
       id: "growth-combo",
-      imgUrl: "/src/assets/images/pkg_growth_combo_1781709410976.jpg"
+      imgUrl: pkgGrowthCombo
     },
     {
       id: "monthly-retainer",
-      imgUrl: "/src/assets/images/pkg_monthly_retainer_1781709430112.jpg"
+      imgUrl: pkgMonthlyRetainer
     }
   ];
 

@@ -123,7 +123,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       />
 
       {/* Top Fixed Actions */}
-      <div className="fixed top-0 right-0 z-[999] p-4 md:p-8 lg:p-12 flex items-center gap-3 pointer-events-none">
+      <div className="fixed top-0 right-0 z-[999] p-6 md:p-8 lg:p-12 flex items-center gap-3 pointer-events-none">
         <div className="flex items-center gap-3 pointer-events-auto">
           <Magnetic>
             <button 
@@ -159,14 +159,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {/* Persistent Logo */}
       <div className="fixed top-0 left-0 z-[999] p-6 md:p-8 lg:p-12 pointer-events-none">
         <Magnetic>
-          <Link to="/" className="pointer-events-auto">
-            <motion.span 
-              className="text-xl md:text-2xl font-display font-black tracking-tighter block mix-blend-difference"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
+          <Link to="/" className="pointer-events-auto block">
+            <motion.div 
+              className="flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl bg-ink text-bg font-display font-black text-base md:text-lg shadow-md border border-white/10 dark:border-white/5 relative group overflow-hidden mix-blend-difference"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              whileHover={{ rotate: -5, scale: 1.05 }}
+              transition={{ type: "spring", stiffness: 400, damping: 12 }}
             >
-              Editable.
-            </motion.span>
+              <div className="absolute inset-0 bg-accent translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out" />
+              <span className="relative z-10 transition-colors group-hover:text-white leading-none">e</span>
+            </motion.div>
           </Link>
         </Magnetic>
       </div>

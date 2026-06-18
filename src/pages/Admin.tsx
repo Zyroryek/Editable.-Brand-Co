@@ -378,7 +378,7 @@ export default function Admin() {
                   <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
                   <span className="text-[9px] uppercase font-black tracking-[0.3em] opacity-40">Editable Executive Core</span>
                 </div>
-                <h1 className="text-4xl md:text-5xl font-display font-black tracking-tight uppercase leading-none">
+                <h1 className="text-2xl md:text-3xl font-display font-black tracking-tight uppercase leading-none">
                   Admin Cabinet
                 </h1>
               </div>
@@ -413,7 +413,7 @@ export default function Admin() {
               <div className="grid md:grid-cols-4 gap-6 items-center">
                 <div className="md:col-span-1 border-r border-ink/5 pr-6 hidden md:block">
                   <span className="text-[10px] uppercase tracking-widest font-bold opacity-30 block mb-2">Corporate ID card</span>
-                  <div className="text-4xl font-display font-black tracking-tighter text-accent">EDITABLE</div>
+                  <div className="text-2xl font-display font-black tracking-tighter text-accent">EDITABLE</div>
                   <div className="text-[9px] font-mono opacity-40 mt-1 uppercase">EST. 2026 / CHENNAI</div>
                 </div>
 

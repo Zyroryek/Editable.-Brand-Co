@@ -562,25 +562,26 @@ export default function Home() {
           </motion.div>
         </section>
 
-        <footer className="py-12 border-t border-ink/5 flex flex-col md:flex-row justify-between items-center gap-8 px-12 opacity-40 text-[10px] uppercase tracking-widest font-bold bg-ink/[0.02]">
+        <footer className="py-12 border-t border-ink/5 flex flex-col md:flex-row justify-between items-center gap-8 px-12 opacity-40 text-[10px] uppercase tracking-widest font-bold bg-ink/[0.02] relative z-10 w-full overflow-hidden">
           <p>© {new Date().getFullYear()} Editable. / Design Studio International</p>
-          <div className="flex gap-4 md:gap-10">
+          <div className="flex flex-wrap gap-4 md:gap-8 items-center justify-center">
             {[
-              { label: "Privacy", href: "#" },
-              { label: "Terms", href: "#" },
+              { label: "WhatsApp: +91 76049 69891", href: "https://wa.me/917604969891", target: "_blank" },
               { label: "Instagram", href: "https://www.instagram.com/official_editable?igsh=MWt6OWtvYm41bTEyZQ==", target: "_blank" },
               { label: "LinkedIn", href: "https://linkedin.com", target: "_blank" },
-              { label: "Gmail", href: "mailto:editable.freelancing@gmail.com" },
-              { label: "WhatsApp", href: "https://wa.me/917604969891", target: "_blank" }
+              { label: "Gmail", href: "mailto:editable.freelancing@gmail.com" }
             ].map((link) => (
               <Magnetic key={link.label}>
                 <motion.a 
                   href={link.href} 
                   target={link.target}
                   rel={link.target === "_blank" ? "noreferrer" : undefined}
-                  className="group relative hover:text-accent transition-colors duration-300 py-2 px-4 inline-block"
+                  className={cn(
+                    "group relative hover:text-accent transition-colors duration-300 py-2 px-4 inline-block",
+                    link.label.startsWith("WhatsApp") && "text-accent font-black"
+                  )}
                   whileHover={{ 
-                    scale: 1.1,
+                    scale: 1.05,
                     y: -2,
                     transition: { type: "spring", stiffness: 400, damping: 10 }
                   }}
