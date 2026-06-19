@@ -173,11 +173,6 @@ html.palette-cyber.dark {
     border-color: var(--color-accent);
   }
 
-  .hover-target {
-    @apply cursor-none;
-  }
-
-
   .text-reveal {
     @apply overflow-hidden;
   }

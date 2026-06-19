@@ -4,7 +4,6 @@ import { motion, AnimatePresence } from "motion/react";
 import { Menu, X, Moon, Sun, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Lenis from "lenis";
-import { CustomCursor } from "./CustomCursor";
 import Magnetic from "./Magnetic";
 import { playNavigationSound, getSoundEnabled, setSoundEnabled } from "../lib/audio";
 import ColorwaySwitch from "./ColorwaySwitch";
@@ -113,7 +112,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="relative min-h-screen bg-transparent">
-      <CustomCursor />
       {/* Scroll Progress Bar */}
       <motion.div 
         className="fixed top-0 left-0 h-1 z-[1000] origin-left shadow-[0_0_8px_rgba(255,255,255,0.4)]"

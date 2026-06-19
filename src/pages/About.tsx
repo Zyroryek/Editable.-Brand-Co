@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import Magnetic from "../components/Magnetic";
 import TextReveal from "../components/TextReveal";
 import { ChevronRight, Target, Users, Zap, Palette, Rocket } from "lucide-react";
+import { FAQ } from "../components/FAQ";
 
 const Section = ({ title, children, icon: Icon }: { title: string; children: React.ReactNode; icon: any }) => (
   <motion.div 
@@ -192,6 +193,9 @@ export default function About() {
               </Link>
             </div>
           </Section>
+
+          {/* FAQ Accordion Section */}
+          <FAQ />
         </div>
       </div>
     </PageTransition>
