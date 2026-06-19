@@ -51,7 +51,7 @@ export const COLORWAYS: Colorway[] = [
   }
 ];
 
-export default function ColorwaySwitch() {
+export default function ColorwaySwitch({ theme }: { theme?: string }) {
   const [activePalette, setActivePalette] = useState(() => {
     return localStorage.getItem("color-palette") || "vermilion";
   });
@@ -78,6 +78,8 @@ export default function ColorwaySwitch() {
     setActivePalette(id);
   };
 
+  const isLightTheme = theme === "light";
+
   return (
     <div className="relative pointer-events-auto flex items-center">
       {/* Control Button */}
@@ -88,13 +90,24 @@ export default function ColorwaySwitch() {
             setIsOpen(!isOpen);
           }}
           className={cn(
-            "w-10 h-10 md:w-12 md:h-12 flex items-center justify-center rounded-full glass border border-white/20 transition-all group shadow-2xl relative",
-            isOpen ? "border-accent text-accent ring-2 ring-accent/20" : "hover:border-accent"
+            "w-9 h-9 md:w-11 md:h-11 flex items-center justify-center rounded-full bg-transparent transition-all relative group",
+            isLightTheme 
+              ? "text-white hover:text-accent hover:bg-white/10" 
+              : "text-neutral-900 dark:text-neutral-900 hover:text-accent hover:bg-black/5",
+            isOpen ? "text-accent" : ""
           )}
           title="Customize studio colorway"
         >
-          <Paintbrush size={16} className="md:size-[18px] group-hover:rotate-12 transition-transform" />
-          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-accent ring-2 ring-background animate-pulse" />
+          <Paintbrush size={15} className="md:size-[17px] group-hover:rotate-12 transition-transform relative z-10" />
+          
+          {/* Ambient rotation border */}
+          <span className={cn(
+            "absolute inset-0.5 rounded-full border border-dashed border-accent/0 group-hover:border-accent/40 group-hover:animate-[spin_8s_linear_infinite] transition-all",
+            isLightTheme ? "group-hover:border-accent/40" : "group-hover:border-accent/40"
+          )} />
+
+          {/* Micro state indicator dot */}
+          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-accent scale-100 group-hover:scale-125 transition-all" />
         </button>
       </Magnetic>
 
@@ -113,12 +126,20 @@ export default function ColorwaySwitch() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 15, scale: 0.95 }}
               transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
-              className="absolute top-14 md:top-16 right-0 z-50 w-72 md:w-80 bg-glass/50 backdrop-blur-3xl border border-white/20 rounded-3xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.2)]"
+              className={cn(
+                "absolute top-14 md:top-16 right-0 z-50 w-72 md:w-80 rounded-3xl p-6 shadow-2xl backdrop-blur-3xl border",
+                isLightTheme 
+                  ? "bg-stone-950 border-stone-850 text-white shadow-[0_24px_64px_rgba(0,0,0,0.5)]" 
+                  : "bg-white border-neutral-200 text-neutral-950 shadow-[0_24px_64px_rgba(0,0,0,0.15)]"
+              )}
             >
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-ink/5 dark:border-white/5">
+              <div className={cn(
+                "flex items-center justify-between mb-4 pb-3 border-b",
+                isLightTheme ? "border-white/10" : "border-neutral-100"
+              )}>
                 <div className="flex items-center gap-1.5">
                   <Sparkles size={13} className="text-accent" />
-                  <span className="text-[10px] font-mono uppercase tracking-[0.2em] font-black text-ink/80 dark:text-white/80">
+                  <span className="text-[10px] font-mono uppercase tracking-[0.2em] font-black">
                     Studio Colorways
                   </span>
                 </div>
@@ -135,8 +156,12 @@ export default function ColorwaySwitch() {
                       className={cn(
                         "w-full text-left p-3 rounded-2xl border transition-all flex items-center justify-between group",
                         isSelected 
-                          ? "bg-ink text-bg border-transparent shadow-lg shadow-ink/10 dark:bg-white dark:text-bg dark:shadow-white/5" 
-                          : "bg-transparent border-ink/5 dark:border-white/5 hover:border-accent hover:bg-ink/5 dark:hover:bg-white/5"
+                          ? (isLightTheme 
+                              ? "bg-white text-black border-transparent shadow-lg" 
+                              : "bg-neutral-950 text-white border-transparent shadow-lg")
+                          : (isLightTheme
+                              ? "bg-transparent border-white/10 hover:border-accent hover:bg-white/5 text-white/90"
+                              : "bg-transparent border-neutral-200 hover:border-accent hover:bg-neutral-50 text-neutral-800")
                       )}
                     >
                       <div className="flex flex-col gap-0.5">
@@ -145,7 +170,7 @@ export default function ColorwaySwitch() {
                         </span>
                         <span className={cn(
                           "text-[9px] font-serif italic mt-0.5 opacity-60 leading-tight",
-                          isSelected ? "text-bg/85" : ""
+                          isSelected ? "" : (isLightTheme ? "text-white/70" : "text-neutral-600")
                         )}>
                           {c.description}
                         </span>
@@ -158,7 +183,10 @@ export default function ColorwaySwitch() {
                             <span 
                               key={idx}
                               style={{ backgroundColor: color }}
-                              className="w-3.5 h-3.5 rounded-full border border-black/10 dark:border-white/10 shrink-0"
+                              className={cn(
+                                "w-3.5 h-3.5 rounded-full shrink-0 border",
+                                isLightTheme ? "border-black/25" : "border-white/20"
+                              )}
                             />
                           ))}
                         </div>
@@ -171,7 +199,10 @@ export default function ColorwaySwitch() {
                 })}
               </div>
 
-              <div className="mt-4 pt-3 border-t border-ink/5 dark:border-white/5 flex items-center justify-between text-[8px] font-mono opacity-50 tracking-wider">
+              <div className={cn(
+                "mt-4 pt-3 border-t flex items-center justify-between text-[8px] font-mono opacity-50 tracking-wider",
+                isLightTheme ? "border-white/10" : "border-neutral-100"
+              )}>
                 <span>[ DRAPED IN ART DIRECTION ]</span>
                 <span className="text-right">PREMIUM SYSTEM v2.5</span>
               </div>
