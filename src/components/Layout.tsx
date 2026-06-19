@@ -10,15 +10,20 @@ import { playNavigationSound, getSoundEnabled, setSoundEnabled } from "../lib/au
 import ColorwaySwitch from "./ColorwaySwitch";
 
 const NavLink = ({ to, label, onClick }: { to: string; label: string; onClick?: () => void }) => {
+  const location = useLocation();
+  const isActive = location.pathname === to;
   const handleClick = () => {
     playNavigationSound();
     if (onClick) onClick();
   };
   return (
-    <Link to={to} onClick={handleClick} className="block py-3 md:py-4 pointer-events-auto">
+    <Link to={to} onClick={handleClick} className="block py-1 md:py-1.5 pointer-events-auto">
       <motion.span
-        className="block text-4xl md:text-6xl font-display font-medium text-black dark:text-white hover:text-accent transition-colors duration-300 pointer-events-auto uppercase tracking-tighter"
-        whileHover={{ x: 15 }}
+        className={cn(
+          "block text-lg md:text-2xl font-display font-medium hover:text-accent transition-all duration-300 pointer-events-auto uppercase tracking-tight",
+          isActive ? "text-accent" : "text-black dark:text-white"
+        )}
+        whileHover={{ x: 8 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
         {label}
@@ -262,10 +267,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-bg/95 backdrop-blur-3xl flex flex-col justify-start p-6 md:p-12 lg:p-20 overflow-y-auto"
+            className="fixed inset-0 z-40 bg-bg/95 backdrop-blur-3xl flex flex-col justify-start pt-16 px-6 pb-12 md:pt-20 md:px-12 md:pb-16 lg:pt-24 lg:px-20 lg:pb-20 overflow-y-auto"
           >
-            <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-start space-y-8 md:space-y-12 pt-28 pb-16 md:pt-36 md:pb-24 lg:pt-48 lg:pb-32 min-h-full text-center">
-              <div className="flex flex-col gap-5 text-center">
+            <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-start space-y-4 md:space-y-6 pt-4 pb-12 text-center">
+              <div className="flex flex-col gap-3 md:gap-4 text-center">
                 <NavLink to="/" label="Home" onClick={() => setIsMenuOpen(false)} />
                 <NavLink to="/about" label="About" onClick={() => setIsMenuOpen(false)} />
                 <NavLink to="/packages" label="Packages" onClick={() => setIsMenuOpen(false)} />
