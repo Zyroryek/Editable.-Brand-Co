@@ -679,10 +679,8 @@ export default function Admin() {
 
                     // Compute role metrics for applicants
                     const roleCounts = {
-                      "UI/UX Designer": internships.filter(i => i.role === "UI/UX Designer").length,
-                      "Video Editor": internships.filter(i => i.role === "Video Editor").length,
-                      "Graphic Designer": internships.filter(i => i.role === "Graphic Designer").length,
-                      "Web Developer": internships.filter(i => i.role === "Web Developer").length,
+                      "Graphic/UI UX Designer": internships.filter(i => i.role === "Graphic/UI UX Designer" || i.role === "Graphic Designer").length,
+                      "Social Media Manager": internships.filter(i => i.role === "Social Media Manager").length,
                     };
 
                     const totalInterns = internships.length;
@@ -1034,10 +1032,8 @@ export default function Admin() {
                             className="bg-transparent border border-ink/10 rounded-full px-4 py-2 text-[10px] uppercase tracking-wider font-bold focus:outline-none text-ink cursor-pointer"
                           >
                             <option value="all">ALL ROLES</option>
-                            <option value="UI/UX Designer">UI/UX DESIGNER</option>
-                            <option value="Video Editor">VIDEO EDITOR</option>
-                            <option value="Graphic Designer">GRAPHIC DESIGNER</option>
-                            <option value="Web Developer">WEB DEVELOPER</option>
+                            <option value="Graphic/UI UX Designer">GRAPHIC/UI UX DESIGNER</option>
+                            <option value="Social Media Manager">SOCIAL MEDIA MANAGER</option>
                           </select>
                         </div>
                       </div>

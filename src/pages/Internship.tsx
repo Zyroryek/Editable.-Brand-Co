@@ -20,7 +20,7 @@ import {
 } from "lucide-react";
 import Magnetic from "../components/Magnetic";
 
-type RoleType = "Graphic Designer" | "Social Media Manager";
+type RoleType = "Graphic/UI UX Designer" | "Social Media Manager";
 type CommitmentType = "Full-time" | "Part-time";
 
 export default function Internship() {
@@ -134,19 +134,19 @@ export default function Internship() {
         ]
       };
     } else {
-      // Graphic Designer default
+      // Graphic/UI UX Designer default
       return {
-        title: "Design Intern",
-        desc: `This is a ${selectedType ? selectedType.toLowerCase() : "part-time"} remote role for a Design Intern at Editable Creative Studio. As a Design Intern, you will assist in creating high-quality graphic designs, contribute to brand strategy projects, and develop assets, including social media templates and web design components. Key responsibilities include collaborating with team members, conducting research to inform design choices, and utilizing tools like Canva and other design software to create cohesive, visually impactful deliverables.`,
+        title: "Graphic / UIUX Design Intern",
+        desc: `This is a ${selectedType ? selectedType.toLowerCase() : "part-time"} remote role for a Graphic & UI/UX Design Intern at Editable Creative Studio. As a Graphic/UI UX Design Intern, you will assist in creating high-quality graphic assets, designing beautiful web interfaces (UI), prototyping seamless experiences (UX), contributing to brand strategy projects, and developing reusable template libraries. Key responsibilities include designing custom landing pages, collaborating with team members, conducting user and style research, and utilizing design tools like Figma and Canva to produce cohesive, visually stunning, and highly intuitive layouts.`,
         qualifications: [
-          "Proficiency in Graphic Design and creating high-quality visuals.",
-          "Ability to conduct Research to inform design decisions.",
-          "Experience with Graphics and Computer-Aided Design (Canva) tools.",
-          "General understanding of Architecture in design and layout.",
-          "Strong communication and collaboration skills.",
-          "Ability to work efficiently in a remote environment.",
-          "Familiarity with Canva is highly advantageous.",
-          "Currently pursuing or recently completed a degree in Graphic Design, Visual Arts, or a related field (or similar)."
+          "Proficiency in Graphic Design, user interface styling, and user experience principles.",
+          "Solid experience with design tools, specifically Figma and Canva.",
+          "Ability to conduct user research, brand audits, and wireframing.",
+          "Strong understanding of responsive layouts, typography, and web architectural grids.",
+          "Eye for consistent typography, modern clean colors, and micro-interactions.",
+          "Excellent collaboration and written communication skills.",
+          "Disciplined and organized when executing tasks in a remote-first setup.",
+          "Currently pursuing or recently completed a degree in Graphic Design, UI/UX Design, Human-Computer Interaction, or a relevant visual field."
         ]
       };
     }
@@ -229,15 +229,15 @@ export default function Internship() {
               </div>
 
               <div className="grid md:grid-cols-2 gap-8 pt-4">
-                {/* Option A: Graphic Designer */}
+                {/* Option A: Graphic/UI UX Designer */}
                 <motion.div 
                   whileHover={{ y: -6, borderColor: "#ff4d00" }}
                   onClick={() => {
-                    setSelectedRole("Graphic Designer");
+                    setSelectedRole("Graphic/UI UX Designer");
                     setStep(2);
                   }}
                   className={`p-8 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between group min-h-[350px] relative overflow-hidden bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl shadow-xl shadow-black/10 ${
-                    selectedRole === "Graphic Designer" 
+                    selectedRole === "Graphic/UI UX Designer" 
                       ? "border-accent" 
                       : "border-ink/20 dark:border-white/15 hover:border-accent"
                   }`}
@@ -250,12 +250,12 @@ export default function Internship() {
                     </div>
                     <div>
                       <h3 className="text-2xl font-display font-bold uppercase tracking-tight text-ink group-hover:text-accent transition-colors">
-                        Graphic Designer
+                        Graphic/UI UX Design
                       </h3>
-                      <p className="text-xs text-accent uppercase tracking-widest font-black mt-1">Design Kit Specialist</p>
+                      <p className="text-xs text-accent uppercase tracking-widest font-black mt-1">Design & Interface Specialist</p>
                     </div>
                     <p className="text-sm md:text-base text-ink/60 font-light leading-relaxed">
-                      Assist in drafting customizable social layouts, launching scalable Canva templates, building responsive brand assets, and empowering clients to evolve their dynamic screen presences.
+                      Assist in drafting customizable social layouts and brand campaigns, sculpting premium digital interfaces (UI/UX) for websites, launching scalable Canva/Figma templates, and crafting beautifully cohesive user-centric assets.
                     </p>
                   </div>
 
