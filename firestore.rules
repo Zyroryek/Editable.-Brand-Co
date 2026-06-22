@@ -22,7 +22,8 @@ service cloud.firestore {
         request.auth.token.email == "bharanidharan@editablecompany.co.in" ||
         request.auth.token.email == "dharani@editablecompany.co.in" ||
         request.auth.token.email == "chitharth@editablecompany.co.in" ||
-        request.auth.token.email == "roshinisephora@editablecompany.co.in"
+        request.auth.token.email == "roshinisephora@editablecompany.co.in" ||
+        request.auth.token.email == "editablecreativestudio@gmail.com"
       ); 
     }
 

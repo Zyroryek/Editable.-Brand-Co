@@ -24,17 +24,20 @@ function getAdminDb() {
   return adminDbInstance;
 }
 
-const ADMIN_CREDENTIALS: Record<string, string> = {
-  "bharanidharan@editablecompany.co.in": "ceo@bharani",
-  "dharani@editablecompany.co.in": "admin@dharani",
-  "chitharth@editablecompany.co.in": "admin@chitharth",
-  "roshinisephora@editablecompany.co.in": "admin@roshini"
+const ADMIN_CREDENTIALS: Record<string, string[]> = {
+  "bharanidharan@editablecompany.co.in": ["ceo@bharani"],
+  "dharani@editablecompany.co.in": ["admin@dharani"],
+  "chitharth@editablecompany.co.in": ["admin@chitharth"],
+  "roshinisephora@editablecompany.co.in": ["admin@roshini"],
+  "editablecreativestudio@gmail.com": ["admin@editable", "ceo@bharani", "admin@dharani", "admin@chitharth", "admin@roshini"]
 };
 
 function isValidAdmin(email?: string, passkey?: string): boolean {
   if (!email || !passkey) return false;
   const formatted = email.trim().toLowerCase();
-  return ADMIN_CREDENTIALS[formatted] === passkey;
+  const allowed = ADMIN_CREDENTIALS[formatted];
+  if (!allowed) return false;
+  return allowed.includes(passkey);
 }
 
 function formatTimestamp(field: any) {
@@ -58,6 +61,44 @@ function formatTimestamp(field: any) {
   return null;
 }
 
+interface SMTPOptions {
+  host: string;
+  port: number;
+  user: string;
+  pass: string | undefined;
+  recipient: string;
+}
+
+function getSMTPOptions(): SMTPOptions {
+  let host = (process.env.EMAIL_HOST || "smtp.gmail.com").trim();
+  let portStr = (process.env.EMAIL_PORT || "587").trim();
+  let user = (process.env.EMAIL_USER || "editablecreativestudio@gmail.com").trim();
+  let pass = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.trim() : undefined;
+  let recipient = (process.env.COMPANY_EMAIL || "editablecreativestudio@gmail.com").trim();
+
+  // Auto-Detect swapped Host and Pass
+  if (host.includes("@") && (!pass || pass === "smtp.gmail.com" || !pass.includes("@"))) {
+    console.log(`[SMTP Config] Swapped EMAIL_HOST ("${host}") and EMAIL_PASS detected. Correcting...`);
+    const temp = host;
+    host = pass || "smtp.gmail.com";
+    pass = temp;
+  }
+
+  // Sanitise host
+  if (host.includes("@") || !host.includes(".")) {
+    console.warn(`[SMTP Config] Invalid host detected: "${host}". Falling back to default "smtp.gmail.com".`);
+    host = "smtp.gmail.com";
+  }
+
+  // Ensure port is number
+  let port = parseInt(portStr);
+  if (isNaN(port)) {
+    port = 587;
+  }
+
+  return { host, port, user, pass, recipient };
+}
+
 async function startServer() {
   const app = express();
   const PORT = 3000;
@@ -74,11 +115,9 @@ async function startServer() {
       return;
     }
 
-    const host = process.env.EMAIL_HOST || "smtp.gmail.com";
-    const port = parseInt(process.env.EMAIL_PORT || "587");
-    const user = process.env.EMAIL_USER || "editablecreativestudio@gmail.com";
-    const pass = process.env.EMAIL_PASS;
-    const recipient = process.env.COMPANY_EMAIL || "editablecreativestudio@gmail.com";
+    const { host, port, user, pass, recipient } = getSMTPOptions();
+
+    console.log(`[SMTP APPLY] Adjusted configuration: host="${host}", port=${port}, user="${user}", passPrefix="${pass ? pass.slice(0, 3) : "none"}", passSuffix="${pass ? pass.slice(-3) : "none"}", passLength=${pass ? pass.length : 0}`);
 
     console.log(`Received application from ${fullName} for ${role} (${type}). Recipient: ${recipient}`);
 
@@ -277,10 +316,9 @@ async function startServer() {
       return;
     }
 
-    const host = process.env.EMAIL_HOST || "smtp.gmail.com";
-    const port = parseInt(process.env.EMAIL_PORT || "587");
-    const user = process.env.EMAIL_USER || "editablecreativestudio@gmail.com";
-    const pass = process.env.EMAIL_PASS;
+    const { host, port, user, pass } = getSMTPOptions();
+
+    console.log(`[SMTP ADMIN] Adjusted configuration: host="${host}", port=${port}, user="${user}", passPrefix="${pass ? pass.slice(0, 3) : "none"}", passSuffix="${pass ? pass.slice(-3) : "none"}", passLength=${pass ? pass.length : 0}`);
 
     if (!user || !pass) {
       console.warn("EMAIL_USER and EMAIL_PASS are not configured in environment variables.");
@@ -332,8 +370,41 @@ async function startServer() {
       res.json({ success: true });
     } catch (err: any) {
       console.error("Nodemailer SMTP failed to send admin triggered mail:", err);
-      res.status(500).json({ error: "Failed to dispatch email via SMTP server", details: err?.message || err });
+      const errMsg = err?.message || String(err);
+      let details = errMsg;
+      let errorTitle = "Failed to dispatch email via SMTP server";
+
+      if (errMsg.includes("535") || errMsg.toLowerCase().includes("accepted") || errMsg.toLowerCase().includes("invalid login")) {
+        errorTitle = "SMTP Authentication Failed (Gmail Error 535)";
+        details = "Your SMTP credentials were not accepted by Gmail.\n\n" +
+          "💡 TO FIX THIS:\n" +
+          "Standard Google account passwords do not support automated email dispatch. You must use a Google App Password instead:\n\n" +
+          "1. Go to Google Account Settings (myaccount.google.com)\n" +
+          "2. Navigate to 'Security' and ensure '2-Step Verification' is turned ON.\n" +
+          "3. Search for 'App passwords' in the search bar or go to: Security -> App passwords.\n" +
+          "4. Under App name, type a nickname like 'Editable Studio', and click Create.\n" +
+          "5. Copy the newly generated 16-character code (it looks like 'xxxx xxxx xxxx xxxx').\n" +
+          "6. Paste this code directly into the 'EMAIL_PASS' environment variable in your AI Studio settings (sidebar Settings -> Environment Variables) instead of your normal password.\n" +
+          "7. Click save, restart your dev server, and retry dispatch!";
+      } else if (errMsg.includes("ENOTFOUND")) {
+        errorTitle = "SMTP Server Host Not Resolved (ENOTFOUND)";
+        details = "The mail server address could not be resolved. Please verify that your EMAIL_HOST (e.g., smtp.gmail.com) environment variable in the sidebar Settings menu is spelled correctly.";
+      } else if (errMsg.includes("ETIMEDOUT") || errMsg.includes("ECONNRESET") || errMsg.includes("ECONNREFUSED")) {
+        errorTitle = "SMTP Connection Terminated";
+        details = "The connection to the SMTP server timed out or was refused. Please check that your EMAIL_PORT (typically 587 or 465) matches the encryption protocol used by your provider.";
+      }
+
+      res.status(500).json({ error: errorTitle, details: details });
     }
+  });
+
+  // Global uncaught server exception handler to prevent HTML fallbacks on API routes
+  app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+    console.error("Unhandled API exception caught:", err);
+    res.status(500).json({
+      error: "An unexpected server-side exception occurred.",
+      details: err?.message || String(err)
+    });
   });
 
   // Serve static files / Vite middleware

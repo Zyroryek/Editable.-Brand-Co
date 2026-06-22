@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import PageTransition from "../components/PageTransition";
-import { db, handleFirestoreError, OperationType } from "../lib/firebase";
-import { collection, getDocs, doc, updateDoc, query, orderBy } from "firebase/firestore";
+import { db, handleFirestoreError, OperationType, auth } from "../lib/firebase";
+import { collection, getDocs, doc, updateDoc, query, orderBy, addDoc, serverTimestamp } from "firebase/firestore";
+import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { 
   User, 
   Users, 
@@ -25,11 +26,13 @@ import {
   ChevronRight, 
   ShieldAlert,
   Menu,
-  X
+  X,
+  Chrome,
+  RefreshCw
 } from "lucide-react";
 
 // Admin credentials matching specified requirements
-const ADMIN_CREDENTIALS: Record<string, { passkey: string; name: string; age: number; phone: string; address: string; joiningYear: number; role: string }> = {
+const ADMIN_CREDENTIALS: Record<string, { passkey: string; passkeys?: string[]; name: string; age: number; phone: string; address: string; joiningYear: number; role: string }> = {
   "bharanidharan@editablecompany.co.in": {
     passkey: "ceo@bharani",
     name: "Bharani dharan T",
@@ -65,6 +68,16 @@ const ADMIN_CREDENTIALS: Record<string, { passkey: string; name: string; age: nu
     address: "2/217, vairam nagar, pudukkottai road, Aranthangi",
     joiningYear: 2026,
     role: "Video Editor / Motion Designer"
+  },
+  "editablecreativestudio@gmail.com": {
+    passkey: "admin@editable",
+    passkeys: ["admin@editable", "ceo@bharani", "admin@dharani", "admin@chitharth", "admin@roshini"],
+    name: "Bharani dharan T",
+    age: 20,
+    phone: "+91 76049 69891",
+    address: "Editable Co. Headquarters, Chennai",
+    joiningYear: 2026,
+    role: "Founder, CEO & Creative Director, UI/UX & Visual Designer"
   }
 };
 
@@ -200,13 +213,21 @@ export default function Admin() {
   const [emailSending, setEmailSending] = useState(false);
   const [emailSuccess, setEmailSuccess] = useState(false);
   const [emailError, setEmailError] = useState("");
+  const [emailMethod, setEmailMethod] = useState<"gmailWeb" | "mailto" | "gmail" | "smtp">("gmailWeb");
+  const [gmailToken, setGmailToken] = useState<string | null>(null);
+  const [gmailUserEmail, setGmailUserEmail] = useState<string | null>(null);
+  const [isGoogleConnecting, setIsGoogleConnecting] = useState(false);
 
   useEffect(() => {
     const savedEmail = sessionStorage.getItem("admin_email");
     const savedPasskey = sessionStorage.getItem("admin_passkey");
     if (savedEmail && savedPasskey) {
       const adminAccount = ADMIN_CREDENTIALS[savedEmail];
-      if (adminAccount && adminAccount.passkey === savedPasskey) {
+      const isSavedPasskeyValid = adminAccount && (adminAccount.passkeys 
+        ? adminAccount.passkeys.includes(savedPasskey) 
+        : adminAccount.passkey === savedPasskey);
+
+      if (isSavedPasskeyValid) {
         setCurrentUser({
           email: savedEmail,
           passkey: savedPasskey,
@@ -250,6 +271,12 @@ export default function Admin() {
               createdAt: seconds ? { seconds } : null
             };
           });
+
+        const allowedLowerNames = ["naren", "iraianbu e", "sathish alagar"];
+        fetchedInternships = fetchedInternships.filter(intern => {
+          const name = (intern.fullName || "").trim().toLowerCase();
+          return allowedLowerNames.some(allowed => name === allowed || name.includes(allowed));
+        });
       } catch (err: any) {
         handleFirestoreError(err, OperationType.LIST, "internship_applications");
       }
@@ -305,7 +332,11 @@ export default function Admin() {
       return;
     }
 
-    if (adminAccount.passkey !== passkey) {
+    const isPasskeyValid = adminAccount.passkeys 
+      ? adminAccount.passkeys.includes(passkey) 
+      : adminAccount.passkey === passkey;
+
+    if (!isPasskeyValid) {
       setAuthError("Incorrect access passkey. Please verify your credentials and try again.");
       setIsLoading(false);
       return;
@@ -387,8 +418,146 @@ export default function Admin() {
     setIsEmailModalOpen(true);
   };
 
+  const handleConnectGmail = async () => {
+    setIsGoogleConnecting(true);
+    setEmailError("");
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.addScope("https://www.googleapis.com/auth/gmail.send");
+      const result = await signInWithPopup(auth, provider);
+      const credential = GoogleAuthProvider.credentialFromResult(result);
+      if (credential?.accessToken) {
+        setGmailToken(credential.accessToken);
+        setGmailUserEmail(result.user.email || "Gmail User");
+      } else {
+        throw new Error("Unable to obtain Google OAuth access token from authentication popup.");
+      }
+    } catch (err: any) {
+      console.error("Gmail Connection Error:", err);
+      let errMsg = err?.message || String(err);
+      if (err?.code === "auth/popup-blocked") {
+        errMsg = "Sign-in popup blocked by the browser. Please allow popups for this site and try again.";
+      }
+      setEmailError(`Failed to connect your Gmail account: ${errMsg}`);
+    } finally {
+      setIsGoogleConnecting(false);
+    }
+  };
+
+  const sendEmailViaGmailDirect = async () => {
+    if (!emailTargetCandidate || !gmailToken) return;
+    setEmailSending(true);
+    setEmailError("");
+    setEmailSuccess(false);
+
+    try {
+      const htmlBody = emailBody.replace(/\n/g, "<br>");
+      
+      const utf8B64 = (str: string) => {
+        return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (_, p1) => 
+          String.fromCharCode(parseInt(p1, 16))
+        ));
+      };
+
+      const emailParts = [
+        `To: ${emailTargetCandidate.email}`,
+        `Subject: =?utf-8?B?${utf8B64(emailSubject)}?=`,
+        `MIME-Version: 1.0`,
+        `Content-Type: text/html; charset=utf-8`,
+        `Content-Transfer-Encoding: base64`,
+        ``,
+        utf8B64(htmlBody)
+      ];
+
+      const rawMIME = utf8B64(emailParts.join("\r\n"))
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
+
+      const response = await fetch("https://gmail.googleapis.com/gmail/v1/users/me/messages/send", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${gmailToken}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ raw: rawMIME })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error?.message || `Gmail API returned HTTP ${response.status}`);
+      }
+
+      setEmailSuccess(true);
+      if (emailType === "accept") {
+        await updateItemStatus(emailTargetCandidate.id, "internship_applications", "shortlisted");
+      } else if (emailType === "reject") {
+        await updateItemStatus(emailTargetCandidate.id, "internship_applications", "rejected");
+      }
+    } catch (err: any) {
+      console.error("Gmail Dispatch Error:", err);
+      setEmailError(`Gmail API outbound dispatch failed:\n${err?.message || err}`);
+    } finally {
+      setEmailSending(false);
+    }
+  };
+
   const sendEmailOutreach = async () => {
     if (!currentUser || !emailTargetCandidate) return;
+
+    if (emailMethod === "gmailWeb") {
+      setEmailSending(true);
+      setEmailError("");
+      try {
+        const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(emailTargetCandidate.email)}&su=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+        window.open(gmailUrl, "_blank", "noopener,noreferrer");
+        
+        setEmailSuccess(true);
+        if (emailType === "accept") {
+          await updateItemStatus(emailTargetCandidate.id, "internship_applications", "shortlisted");
+        } else if (emailType === "reject") {
+          await updateItemStatus(emailTargetCandidate.id, "internship_applications", "rejected");
+        }
+      } catch (err: any) {
+        console.error("Gmail Web App Link Error:", err);
+        setEmailError(`Failed to open Gmail compose draft: ${err?.message || err}`);
+      } finally {
+        setEmailSending(false);
+      }
+      return;
+    }
+
+    if (emailMethod === "mailto") {
+      setEmailSending(true);
+      setEmailError("");
+      try {
+        const mailtoUrl = `mailto:${encodeURIComponent(emailTargetCandidate.email)}?subject=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
+        window.location.href = mailtoUrl;
+
+        setEmailSuccess(true);
+        if (emailType === "accept") {
+          await updateItemStatus(emailTargetCandidate.id, "internship_applications", "shortlisted");
+        } else if (emailType === "reject") {
+          await updateItemStatus(emailTargetCandidate.id, "internship_applications", "rejected");
+        }
+      } catch (err: any) {
+        console.error("Mailto Link Error:", err);
+        setEmailError(`Failed to open native default mail app: ${err?.message || err}`);
+      } finally {
+        setEmailSending(false);
+      }
+      return;
+    }
+
+    if (emailMethod === "gmail") {
+      if (!gmailToken) {
+        setEmailError("Please connect your Gmail account before initiating dispatch.");
+        return;
+      }
+      await sendEmailViaGmailDirect();
+      return;
+    }
+
     setEmailSending(true);
     setEmailError("");
     setEmailSuccess(false);
@@ -408,9 +577,21 @@ export default function Admin() {
         })
       });
 
-      const result = await response.json();
+      let result: any = {};
+      const contentType = response.headers.get("content-type");
+      if (contentType && contentType.includes("application/json")) {
+        result = await response.json();
+      } else {
+        const text = await response.text();
+        console.warn("Server responded with non-JSON data:", text);
+        throw new Error("Mail dispatch received an HTML response from the server representing a gateway error. Please verify the EMAIL_USER and EMAIL_PASS variables are configured in the sidebar settings.");
+      }
+
       if (!response.ok) {
-        throw new Error(result.error || "Failed to deliver email through SMTP gateway. Check server log output.");
+        const fullMessage = result.details 
+          ? `${result.error}\n\n${result.details}`
+          : (result.error || "Failed to deliver email through SMTP gateway. Check server log output.");
+        throw new Error(fullMessage);
       }
 
       setEmailSuccess(true);
@@ -1569,13 +1750,30 @@ export default function Admin() {
                 <div className="flex items-start justify-between border-b border-white/10 pb-4 mb-5 relative z-10">
                   <div>
                     <span className="text-[9px] font-black uppercase tracking-widest text-accent mb-1 inline-block">
-                      SMTP Email Transmitter
+                      {emailMethod === "gmailWeb" 
+                        ? "Gmail Web App Redirection" 
+                        : emailMethod === "mailto" 
+                        ? "Native Mail Client Launcher" 
+                        : emailMethod === "gmail" 
+                        ? "Gmail Workspace API" 
+                        : "SMTP Server Gateway"}
                     </span>
                     <h3 className="text-xl font-bold font-display text-white flex items-center gap-2">
                       Email Outreach: {emailTargetCandidate.fullName}
                     </h3>
                     <p className="text-xs text-zinc-400 mt-1">
-                      Delivered securely from <strong className="text-accent">editablecreativestudio@gmail.com</strong> to <strong className="text-accent">{emailTargetCandidate.email}</strong>
+                      {emailMethod === "gmailWeb" && (
+                        <span>Prepare draft and open in <strong className="text-accent">Gmail Web App</strong> to send to <strong className="text-accent">{emailTargetCandidate.email}</strong></span>
+                      )}
+                      {emailMethod === "mailto" && (
+                        <span>Open pre-filled window in your <strong className="text-accent">Local Email Client</strong> for <strong className="text-accent">{emailTargetCandidate.email}</strong></span>
+                      )}
+                      {emailMethod === "gmail" && (
+                        <span>Delivering securely via Gmail API from <strong className="text-accent">{gmailUserEmail || "authorized user"}</strong> to <strong className="text-accent">{emailTargetCandidate.email}</strong></span>
+                      )}
+                      {emailMethod === "smtp" && (
+                        <span>Sending from <strong className="text-accent">editablecreativestudio@gmail.com</strong> to <strong className="text-accent">{emailTargetCandidate.email}</strong></span>
+                      )}
                     </p>
                   </div>
                   <button
@@ -1588,24 +1786,130 @@ export default function Admin() {
                 </div>
 
                 {/* Status Indicator Bar */}
-                <div className="flex items-center gap-2 mb-4 relative z-10">
-                  <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Campaign Type:</span>
-                  {emailType === "accept" && (
-                    <span className="text-[9px] px-2.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold uppercase tracking-widest">
-                      Acceptance Letter
-                    </span>
-                  )}
-                  {emailType === "reject" && (
-                    <span className="text-[9px] px-2.5 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-400 font-bold uppercase tracking-widest">
-                      Rejection Notice
-                    </span>
-                  )}
-                  {emailType === "reminder" && (
-                    <span className="text-[9px] px-2.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 font-bold uppercase tracking-widest">
-                      Outreach Reminder
-                    </span>
-                  )}
+                <div className="flex items-center justify-between gap-2 mb-4 relative z-10">
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Campaign Type:</span>
+                    {emailType === "accept" && (
+                      <span className="text-[9px] px-2.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold uppercase tracking-widest">
+                        Acceptance Letter
+                      </span>
+                    )}
+                    {emailType === "reject" && (
+                      <span className="text-[9px] px-2.5 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-400 font-bold uppercase tracking-widest">
+                        Rejection Notice
+                      </span>
+                    )}
+                    {emailType === "reminder" && (
+                      <span className="text-[9px] px-2.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 font-bold uppercase tracking-widest">
+                        Outreach Reminder
+                      </span>
+                    )}
+                  </div>
                 </div>
+
+                {/* Delivery Channel Selector */}
+                <div className="bg-zinc-950/60 p-1 rounded-2xl border border-white/5 grid grid-cols-2 lg:grid-cols-4 gap-1 mb-5 relative z-10">
+                  <button
+                    type="button"
+                    onClick={() => { if (!emailSending && !emailSuccess) setEmailMethod("gmailWeb"); }}
+                    disabled={emailSending || emailSuccess}
+                    className={`py-2 px-1 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                      emailMethod === "gmailWeb"
+                        ? "bg-accent text-white shadow-md font-black"
+                        : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
+                    }`}
+                  >
+                    <ArrowUpRight size={14} className={emailMethod === "gmailWeb" ? "text-white" : "text-zinc-500"} />
+                    Gmail Web App
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { if (!emailSending && !emailSuccess) setEmailMethod("mailto"); }}
+                    disabled={emailSending || emailSuccess}
+                    className={`py-2 px-1 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                      emailMethod === "mailto"
+                        ? "bg-accent text-white shadow-md font-black"
+                        : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
+                    }`}
+                  >
+                    <Mail size={14} className={emailMethod === "mailto" ? "text-white" : "text-zinc-500"} />
+                    Native Mail App
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { if (!emailSending && !emailSuccess) setEmailMethod("smtp"); }}
+                    disabled={emailSending || emailSuccess}
+                    className={`py-2 px-1 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                      emailMethod === "smtp"
+                        ? "bg-accent text-white shadow-md font-black"
+                        : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
+                    }`}
+                  >
+                    <Layers size={14} className={emailMethod === "smtp" ? "text-white" : "text-zinc-500"} />
+                    SMTP Relay
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { if (!emailSending && !emailSuccess) setEmailMethod("gmail"); }}
+                    disabled={emailSending || emailSuccess}
+                    className={`py-2 px-1 rounded-xl text-[10px] font-bold uppercase tracking-wider transition-all flex flex-col items-center justify-center gap-1 cursor-pointer ${
+                      emailMethod === "gmail"
+                        ? "bg-accent text-white shadow-md font-black"
+                        : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"
+                    }`}
+                  >
+                    <Chrome size={14} className={emailMethod === "gmail" ? "text-white" : "text-zinc-500"} />
+                    Gmail API
+                  </button>
+                </div>
+
+                {/* Gmail Connection Status Section */}
+                {emailMethod === "gmail" && !emailSuccess && (
+                  <div className="mb-5 p-4 rounded-xl bg-zinc-900/60 border border-white/5 relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                    <div className="flex items-center gap-2.5">
+                      <div className={`w-2.5 h-2.5 rounded-full ${gmailToken ? "bg-emerald-500 animate-pulse" : "bg-amber-500"}`} />
+                      <div>
+                        {gmailToken ? (
+                          <>
+                            <span className="text-xs font-bold text-zinc-100 block">Connected to Gmail</span>
+                            <span className="text-[10px] text-zinc-400 block mt-0.5">{gmailUserEmail}</span>
+                          </>
+                        ) : (
+                          <>
+                            <span className="text-xs font-bold text-zinc-200 block">Gmail Account Required</span>
+                            <span className="text-[10px] text-zinc-400 block mt-0.5">Authorization is required to send emails directly via your Google address.</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div>
+                      {gmailToken ? (
+                        <button
+                          type="button"
+                          onClick={handleConnectGmail}
+                          disabled={isGoogleConnecting}
+                          className="px-3 py-1.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] uppercase tracking-wider font-extrabold transition-colors text-zinc-300 hover:text-white"
+                        >
+                          Switch Account
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleConnectGmail}
+                          disabled={isGoogleConnecting}
+                          className="px-4 py-2 bg-white text-black hover:bg-zinc-200 rounded-xl text-[10px] uppercase tracking-wider font-black transition-all flex items-center gap-2 shadow-md cursor-pointer disabled:opacity-50"
+                        >
+                          {isGoogleConnecting ? (
+                            <div className="w-3 h-3 rounded-full border-t border-black border-2 animate-spin" />
+                          ) : (
+                            <Chrome size={12} />
+                          )}
+                          Connect Gmail
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {/* Form Area */}
                 <div className="space-y-4 relative z-10">
@@ -1643,14 +1947,19 @@ export default function Admin() {
                 {emailSuccess ? (
                   <div className="mt-5 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2 relative z-10">
                     <CheckCircle size={14} className="flex-shrink-0" />
-                    <span>Success: The pre-formatted email was securely routed and delivered via SMTP server to {emailTargetCandidate.email}.</span>
+                    <span>
+                      {emailMethod === "gmailWeb" && "Draft launched successfully! Please complete any final edits and click 'Send' in the opened Gmail Web tab."}
+                      {emailMethod === "mailto" && "Mail client opened successfully with pre-filled contents! You can now send it."}
+                      {emailMethod === "gmail" && `Success: The pre-formatted email was securely delivered via Gmail Workspace API to ${emailTargetCandidate.email}.`}
+                      {emailMethod === "smtp" && `Success: The pre-formatted email was securely routed and delivered via SMTP Server to ${emailTargetCandidate.email}.`}
+                    </span>
                   </div>
                 ) : emailError ? (
-                  <div className="mt-5 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2 relative z-10">
-                    <ShieldAlert size={14} className="flex-shrink-0" />
-                    <div>
-                      <span className="font-bold block">Transmission Interrupted</span>
-                      <span className="opacity-85 block text-[11px] mt-0.5">{emailError}</span>
+                  <div className="mt-5 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-500 text-xs flex items-start gap-2.5 relative z-10 max-h-60 overflow-y-auto">
+                    <ShieldAlert size={15} className="flex-shrink-0 mt-0.5 text-red-400" />
+                    <div className="flex-1 min-w-0">
+                      <span className="font-bold text-red-400 block mb-1">Transmission Interrupted</span>
+                      <span className="opacity-90 block text-[11.5px] leading-relaxed whitespace-pre-wrap font-sans text-zinc-200">{emailError}</span>
                     </div>
                   </div>
                 ) : null}
@@ -1668,14 +1977,20 @@ export default function Admin() {
                   {!emailSuccess && (
                     <button
                       onClick={sendEmailOutreach}
-                      disabled={emailSending}
-                      className="px-5 py-2 bg-accent hover:bg-accent/85 text-white rounded-xl text-xs uppercase tracking-widest font-black transition-opacity flex items-center gap-2 focus:outline-none disabled:opacity-50 cursor-pointer"
+                      disabled={emailSending || (emailMethod === "gmail" && !gmailToken)}
+                      className="px-5 py-2 bg-accent hover:bg-accent/85 text-white rounded-xl text-xs uppercase tracking-widest font-black transition-opacity flex items-center gap-2 focus:outline-none disabled:opacity-80 cursor-pointer"
                     >
                       {emailSending ? (
                         <>
                           <div className="w-3.5 h-3.5 rounded-full border-t border-white border-2 animate-spin" />
-                          Sending...
+                          Processing...
                         </>
+                      ) : emailMethod === "gmailWeb" ? (
+                        "Open Gmail Web App"
+                      ) : emailMethod === "mailto" ? (
+                        "Open Native Mail App"
+                      ) : emailMethod === "gmail" ? (
+                        "Send via Gmail API"
                       ) : (
                         "Send via SMTP"
                       )}
