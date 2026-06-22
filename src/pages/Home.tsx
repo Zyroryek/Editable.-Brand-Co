@@ -569,7 +569,7 @@ export default function Home() {
               { label: "WhatsApp: +91 76049 69891", href: "https://wa.me/917604969891", target: "_blank" },
               { label: "Instagram", href: "https://www.instagram.com/official_editable?igsh=MWt6OWtvYm41bTEyZQ==", target: "_blank" },
               { label: "LinkedIn", href: "https://linkedin.com", target: "_blank" },
-              { label: "Gmail", href: "mailto:editable.freelancing@gmail.com" }
+              { label: "Gmail", href: "mailto:editablecreativestudio@gmail.com" }
             ].map((link) => (
               <Magnetic key={link.label}>
                 <motion.a 

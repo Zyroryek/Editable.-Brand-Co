@@ -285,7 +285,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <div className="flex flex-wrap gap-8 text-[11px] uppercase tracking-[0.2em] font-extrabold text-black dark:text-white mt-2">
                   <a href="https://www.instagram.com/official_editable?igsh=MWt6OWtvYm41bTEyZQ==" target="_blank" rel="noreferrer" className="hover:text-accent transition-colors duration-250">Instagram</a>
                   <a href="https://wa.me/917604969891" target="_blank" rel="noreferrer" className="hover:text-accent transition-colors duration-250">WhatsApp</a>
-                  <a href="mailto:editable.freelancing@gmail.com" className="hover:text-accent transition-colors duration-250">Gmail</a>
+                  <a href="mailto:editablecreativestudio@gmail.com" className="hover:text-accent transition-colors duration-250">Gmail</a>
                 </div>
               </div>
             </div>

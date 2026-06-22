@@ -76,9 +76,9 @@ async function startServer() {
 
     const host = process.env.EMAIL_HOST || "smtp.gmail.com";
     const port = parseInt(process.env.EMAIL_PORT || "587");
-    const user = process.env.EMAIL_USER;
+    const user = process.env.EMAIL_USER || "editablecreativestudio@gmail.com";
     const pass = process.env.EMAIL_PASS;
-    const recipient = process.env.COMPANY_EMAIL || "editable.freelancing@gmail.com";
+    const recipient = process.env.COMPANY_EMAIL || "editablecreativestudio@gmail.com";
 
     console.log(`Received application from ${fullName} for ${role} (${type}). Recipient: ${recipient}`);
 
@@ -260,6 +260,79 @@ async function startServer() {
     } catch (err: any) {
       console.error("Firebase Admin update failure:", err);
       res.status(500).json({ error: "Server failed applying updates to the specified record", details: err?.message });
+    }
+  });
+
+  // Admin SMTP Dispatch API
+  app.post("/api/admin/send-email", async (req, res) => {
+    const { email, passkey, candidateEmail, subject, body } = req.body;
+
+    if (!isValidAdmin(email, passkey)) {
+      res.status(401).json({ error: "Unauthorised access to SMTP dispatch servers." });
+      return;
+    }
+
+    if (!candidateEmail || !subject || !body) {
+      res.status(400).json({ error: "Email dispatch requires candidateEmail, subject, and body parameters." });
+      return;
+    }
+
+    const host = process.env.EMAIL_HOST || "smtp.gmail.com";
+    const port = parseInt(process.env.EMAIL_PORT || "587");
+    const user = process.env.EMAIL_USER || "editablecreativestudio@gmail.com";
+    const pass = process.env.EMAIL_PASS;
+
+    if (!user || !pass) {
+      console.warn("EMAIL_USER and EMAIL_PASS are not configured in environment variables.");
+      res.status(500).json({ 
+        error: "SMTP credentials are not configured on the server. Please check your environment variables." 
+      });
+      return;
+    }
+
+    try {
+      const transporter = nodemailer.createTransport({
+        host,
+        port,
+        secure: port === 465,
+        auth: {
+          user,
+          pass,
+        },
+        tls: {
+          rejectUnauthorized: false
+        }
+      });
+
+      const mailOptions = {
+        from: `"Editable Careers" <${user}>`,
+        to: candidateEmail,
+        subject: subject,
+        text: body,
+        html: `
+          <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 650px; margin: auto; border: 1px solid #e4e4e7; border-radius: 16px; padding: 36px; color: #18181b; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.03); line-height: 1.6;">
+            <div style="margin-bottom: 24px; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px;">
+              <h2 style="font-size: 18px; font-weight: 800; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: -0.01em;">Editable Creative Studio</h2>
+              <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.15em; color: #ff4d00; font-weight: bold;">Careers & Internships Desk</span>
+            </div>
+            
+            <div style="font-size: 14.5px; color: #334155; white-space: pre-wrap;">${body}</div>
+
+            <div style="margin-top: 36px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 24px;">
+              <p style="font-size: 11px; color: #94a3b8; margin: 0;">
+                This email was dispatched securely by an authorized coordinator of Editable Creative Studio.
+              </p>
+            </div>
+          </div>
+        `,
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`Success: SMTP email sent to ${candidateEmail}`);
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("Nodemailer SMTP failed to send admin triggered mail:", err);
+      res.status(500).json({ error: "Failed to dispatch email via SMTP server", details: err?.message || err });
     }
   });
 

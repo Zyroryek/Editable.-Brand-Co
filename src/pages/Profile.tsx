@@ -176,7 +176,7 @@ export default function Profile() {
                 <p className="text-[10px] uppercase tracking-widest font-mono opacity-40">Contact Studio</p>
                 <div className="space-y-2 text-sm">
                     <p className="text-xs opacity-50 mb-4">Dedicated support for active clients.</p>
-                    <a href="mailto:editable.freelancing@gmail.com" className="text-accent text-[10px] uppercase tracking-widest font-bold decoration-accent">
+                    <a href="mailto:editablecreativestudio@gmail.com" className="text-accent text-[10px] uppercase tracking-widest font-bold decoration-accent">
                         Open Support Ticket
                     </a>
                 </div>

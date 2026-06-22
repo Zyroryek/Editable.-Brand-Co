@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "motion/react";
 import PageTransition from "../components/PageTransition";
 import { db, handleFirestoreError, OperationType } from "../lib/firebase";
@@ -103,6 +104,71 @@ const EMPLOYEES = [
   }
 ];
 
+const getAcceptanceEmail = (candidateName: string, adminName: string, adminPosition: string) => {
+  return `Dear ${candidateName},
+
+Thank you for your interest in the Internship Program at Editable. We are pleased to inform you that, after reviewing your application, you have been shortlisted for the UI/UX Design Internship position.
+
+To proceed with the onboarding process, a one-time registration fee of ₹250 is required to confirm your participation. We would like to assure you that this is the only fee associated with the internship, and no additional charges will be requested at any stage. Your official Letter of Joining will be shared within the next week, following which the internship program will commence.
+
+While the internship does not include a fixed stipend, a performance-based stipend will be awarded to the best-performing intern(s). Upon successful completion of the internship, you will also receive a Completion Certificate.
+
+Kindly reply to this email and let us know whether you would like to accept this offer and proceed with the internship. Upon receiving your confirmation, we will share the next steps regarding registration and onboarding.
+
+We look forward to hearing from you and potentially welcoming you to our team.
+
+Best regards,
+${adminName}
+${adminPosition}
+Editable`;
+};
+
+const getRejectionEmail = (candidateName: string, adminName: string) => {
+  return `Dear ${candidateName},
+
+Thank you for your interest in the Internship Program at Editable and for taking the time to apply.
+
+After careful consideration, we regret to inform you that we will not be moving forward with your application at this time. We received a large number of applications, and the selection process was highly competitive.
+
+We appreciate your interest in our organization and encourage you to apply for future opportunities that match your skills and experience.
+
+We wish you all the best in your academic and professional journey.
+
+Best regards,
+${adminName}
+Editable`;
+};
+
+const getReminderEmail = (candidateName: string, adminName: string) => {
+  return `Dear ${candidateName},
+
+We hope you're doing well.
+
+This is a reminder regarding your shortlisting for our Internship Program. Kindly confirm your acceptance by replying to this email within 48 hours so that we can proceed with the onboarding process.
+
+If we do not receive a response within this timeframe, your position may be offered to another candidate.
+
+We look forward to hearing from you.
+
+Best regards,
+${adminName}
+Editable`;
+};
+
+const getAdminDetails = (adminEmail: string) => {
+  const emailLower = (adminEmail || "").trim().toLowerCase();
+  if (emailLower.includes("bharanidharan")) {
+    return { name: "Bharani dharan T", position: "CEO & Founder", company: "Editable Creative Studio" };
+  } else if (emailLower.includes("dharani")) {
+    return { name: "Dharani S", position: "Co-Founder & HR Lead", company: "Editable Creative Studio" };
+  } else if (emailLower.includes("chitharth")) {
+    return { name: "Chitharth S", position: "Managing Director", company: "Editable Creative Studio" };
+  } else if (emailLower.includes("roshini")) {
+    return { name: "Roshini Sephora S", position: "HR Administrator", company: "Editable Creative Studio" };
+  }
+  return { name: "The Editable Team", position: "Careers Desk", company: "Editable Creative Studio" };
+};
+
 export default function Admin() {
   const [currentUser, setCurrentUser] = useState<{ email: string; passkey: string; name: string } | null>(null);
   const [email, setEmail] = useState("");
@@ -124,6 +190,16 @@ export default function Admin() {
   // Search states
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
+
+  // Email Composer Modal States
+  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [emailTargetCandidate, setEmailTargetCandidate] = useState<any | null>(null);
+  const [emailSubject, setEmailSubject] = useState("");
+  const [emailBody, setEmailBody] = useState("");
+  const [emailType, setEmailType] = useState<"accept" | "reject" | "reminder">("accept");
+  const [emailSending, setEmailSending] = useState(false);
+  const [emailSuccess, setEmailSuccess] = useState(false);
+  const [emailError, setEmailError] = useState("");
 
   useEffect(() => {
     const savedEmail = sessionStorage.getItem("admin_email");
@@ -152,10 +228,10 @@ export default function Admin() {
     try {
       const formattedEmail = adminEmail.trim().toLowerCase();
 
-      // Query secure internship registry directly
+      // Get applicant entries from internship_applications to recover all submitted details
       let fetchedInternships: any[] = [];
       try {
-        const internshipSnap = await getDocs(query(collection(db, "secure_internship_registry"), orderBy("createdAt", "desc")));
+        const internshipSnap = await getDocs(query(collection(db, "internship_applications"), orderBy("createdAt", "desc")));
         fetchedInternships = internshipSnap.docs
           .filter(doc => !doc.data().isDeleted)
           .map(doc => {
@@ -175,7 +251,7 @@ export default function Admin() {
             };
           });
       } catch (err: any) {
-        handleFirestoreError(err, OperationType.LIST, "secure_internship_registry");
+        handleFirestoreError(err, OperationType.LIST, "internship_applications");
       }
 
       // Query inquiries directly
@@ -264,14 +340,14 @@ export default function Admin() {
   };
 
   // Status updates in database
-  const updateItemStatus = async (id: string, collectionName: "secure_internship_registry" | "inquiries", newStatus: string) => {
+  const updateItemStatus = async (id: string, collectionName: "secure_internship_registry" | "inquiries" | "internship_applications", newStatus: string) => {
     if (!currentUser) return;
     try {
       const docRef = doc(db, collectionName, id);
       await updateDoc(docRef, { status: newStatus });
       
       // Update local state instantly
-      if (collectionName === "secure_internship_registry") {
+      if (collectionName === "secure_internship_registry" || collectionName === "internship_applications") {
         setInternships(prev => prev.map(item => item.id === id ? { ...item, status: newStatus } : item));
       } else {
         setBookings(prev => prev.map(item => item.id === id ? { ...item, status: newStatus } : item));
@@ -283,6 +359,71 @@ export default function Admin() {
     } catch (err: any) {
       console.error("Failed to update status:", err);
       handleFirestoreError(err, OperationType.UPDATE, `${collectionName}/${id}`);
+    }
+  };
+
+  const openEmailComposer = (candidate: any, type: "accept" | "reject" | "reminder") => {
+    const adminInfo = getAdminDetails(currentUser?.email || "");
+    let subject = "";
+    let body = "";
+
+    if (type === "accept") {
+      subject = "Shortlisted for Internship Program at Editable Creative Studio";
+      body = getAcceptanceEmail(candidate.fullName, adminInfo.name, adminInfo.position);
+    } else if (type === "reject") {
+      subject = "Internship Application Status update - Editable Creative Studio";
+      body = getRejectionEmail(candidate.fullName, adminInfo.name);
+    } else {
+      subject = "Urgent: Response required for Internship Program - Editable Creative Studio";
+      body = getReminderEmail(candidate.fullName, adminInfo.name);
+    }
+
+    setEmailTargetCandidate(candidate);
+    setEmailType(type);
+    setEmailSubject(subject);
+    setEmailBody(body);
+    setEmailSuccess(false);
+    setEmailError("");
+    setIsEmailModalOpen(true);
+  };
+
+  const sendEmailOutreach = async () => {
+    if (!currentUser || !emailTargetCandidate) return;
+    setEmailSending(true);
+    setEmailError("");
+    setEmailSuccess(false);
+
+    try {
+      const response = await fetch("/api/admin/send-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: currentUser.email,
+          passkey: currentUser.passkey,
+          candidateEmail: emailTargetCandidate.email,
+          subject: emailSubject,
+          body: emailBody
+        })
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || "Failed to deliver email through SMTP gateway. Check server log output.");
+      }
+
+      setEmailSuccess(true);
+      // Automatically transition candidate status based on the selected email type (Accept -> Shortlisted, Reject -> Rejected)
+      if (emailType === "accept") {
+        await updateItemStatus(emailTargetCandidate.id, "internship_applications", "shortlisted");
+      } else if (emailType === "reject") {
+        await updateItemStatus(emailTargetCandidate.id, "internship_applications", "rejected");
+      }
+    } catch (err: any) {
+      setEmailError(err.message || "An unexpected error occurred while sending mail.");
+    } finally {
+      setEmailSending(false);
     }
   };
 
@@ -1059,8 +1200,8 @@ export default function Admin() {
                                   selectedItem?.id === candidate.id ? "border-accent/40 bg-accent/5 scale-[0.99]" : ""
                                 }`}
                               >
-                                <div className="space-y-1">
-                                  <div className="flex items-center gap-2">
+                                <div className="space-y-2 flex-grow pr-4">
+                                  <div className="flex items-center gap-2 flex-wrap">
                                     <h4 className="text-base font-bold font-display group-hover:text-accent transition-colors">
                                       {candidate.fullName}
                                     </h4>
@@ -1068,12 +1209,34 @@ export default function Admin() {
                                       {candidate.role || "N/A"}
                                     </span>
                                   </div>
-                                  <div className="flex items-center gap-4 text-xs opacity-40 font-light">
+                                  <div className="flex items-center gap-4 text-xs opacity-40 font-light flex-wrap">
                                     <span className="flex items-center gap-1"><Mail size={12} /> {candidate.email}</span>
                                     <span className="flex items-center gap-1"><Calendar size={12} /> {candidate.createdAt?.seconds ? new Date(candidate.createdAt.seconds * 1000).toLocaleDateString() : "Pending"}</span>
                                   </div>
+
+                                  {/* Quick SMTP Email Buttons next to applicant in list */}
+                                  <div className="flex items-center gap-2 pt-2 border-t border-ink/5" onClick={(e) => e.stopPropagation()}>
+                                    <button
+                                      onClick={() => openEmailComposer(candidate, "accept")}
+                                      className="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/20 rounded text-[9px] uppercase tracking-wider font-extrabold transition-all cursor-pointer"
+                                    >
+                                      Accept
+                                    </button>
+                                    <button
+                                      onClick={() => openEmailComposer(candidate, "reject")}
+                                      className="px-2.5 py-1 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/20 rounded text-[9px] uppercase tracking-wider font-extrabold transition-all cursor-pointer"
+                                    >
+                                      Reject
+                                    </button>
+                                    <button
+                                      onClick={() => openEmailComposer(candidate, "reminder")}
+                                      className="px-2.5 py-1 bg-blue-500/10 hover:bg-blue-500 text-blue-400 hover:text-white border border-blue-500/20 rounded text-[9px] uppercase tracking-wider font-extrabold transition-all cursor-pointer"
+                                    >
+                                      Remind
+                                    </button>
+                                  </div>
                                 </div>
-                                <ChevronRight size={16} className="opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                                <ChevronRight size={16} className="opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all flex-shrink-0" />
                               </motion.div>
                             ))
                         }
@@ -1221,7 +1384,7 @@ export default function Admin() {
                         <div className="space-y-5 text-sm">
                           <div className="space-y-1">
                             <span className="text-[9px] uppercase tracking-widest font-black opacity-30 block">Candidate Email</span>
-                            <a href={`mailto:${selectedItem.email}`} className="text-accent underline font-mono break-all">{selectedItem.email}</a>
+                            <a href={`mailto:${selectedItem.email}`} className="text-accent underline font-mono break-all font-semibold">{selectedItem.email}</a>
                           </div>
 
                           <div className="space-y-1">
@@ -1229,46 +1392,87 @@ export default function Admin() {
                             <span className="text-ink font-bold block">{selectedItem.role || "N/A"}</span>
                           </div>
 
-                          {selectedItem.portfolioUrl && (
+                          {selectedItem.type && (
                             <div className="space-y-1">
-                              <span className="text-[9px] uppercase tracking-widest font-black opacity-30 block">Creative Portfolio</span>
-                              <a href={selectedItem.portfolioUrl} target="_blank" rel="noreferrer" className="text-accent hover:underline flex items-center gap-1 break-all">
-                                Open Website <ArrowUpRight size={12} />
-                              </a>
+                              <span className="text-[9px] uppercase tracking-widest font-black opacity-30 block">Commitment type</span>
+                              <span className="text-xs px-2.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold uppercase inline-block">
+                                {selectedItem.type}
+                              </span>
                             </div>
                           )}
 
-                          {selectedItem.interest && (
+                          {selectedItem.degree && (
                             <div className="space-y-1">
-                              <span className="text-[9px] uppercase tracking-widest font-black opacity-30 block">Why Editable Creative Studio</span>
-                              <div className="bg-ink/5 p-4 rounded-xl text-xs text-ink/80 leading-relaxed font-light font-sans max-h-40 overflow-y-auto whitespace-pre-wrap">
-                                {selectedItem.interest}
-                              </div>
+                              <span className="text-[9px] uppercase tracking-widest font-black opacity-30 block">Education / Degree</span>
+                              <span className="text-ink font-medium block bg-ink/5 px-3 py-2 rounded-xl text-xs">{selectedItem.degree}</span>
+                            </div>
+                          )}
+
+                          {selectedItem.portfolioUrl && (
+                            <div className="space-y-1">
+                              <span className="text-[9px] uppercase tracking-widest font-black opacity-30 block">Creative Portfolio</span>
+                              <a href={selectedItem.portfolioUrl} target="_blank" rel="noreferrer" className="text-accent hover:underline flex items-center gap-1 font-mono text-xs break-all font-bold">
+                                {selectedItem.portfolioUrl} <ArrowUpRight size={12} />
+                              </a>
                             </div>
                           )}
 
                           {selectedItem.canvaExperience && (
                             <div className="space-y-1">
                               <span className="text-[9px] uppercase tracking-widest font-black opacity-30 block font-light">Canva Experience</span>
-                              <span className="text-xs px-2.5 py-0.5 rounded bg-accent/10 border border-accent/20 text-accent font-bold uppercase">{selectedItem.canvaExperience}</span>
+                              <span className="text-xs px-2.5 py-0.5 rounded bg-accent/10 border border-accent/20 text-accent font-bold uppercase inline-block">{selectedItem.canvaExperience}</span>
                             </div>
                           )}
+
+                          {selectedItem.interest && (
+                            <div className="space-y-1">
+                              <span className="text-[9px] uppercase tracking-widest font-black opacity-30 block">Why Editable Creative Studio</span>
+                              <div className="bg-ink/5 p-4 rounded-xl text-xs text-ink/85 leading-relaxed font-light font-sans max-h-48 overflow-y-auto whitespace-pre-wrap border border-ink/5">
+                                {selectedItem.interest}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* SMTP Email Outreach Section */}
+                          <div className="space-y-2 pt-4 border-t border-ink/5">
+                            <span className="text-[9px] uppercase tracking-widest font-black opacity-30 block">SMTP Email Outreach</span>
+                            <div className="grid grid-cols-3 gap-2">
+                              <button
+                                onClick={() => openEmailComposer(selectedItem, "accept")}
+                                className="px-2 py-2 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/20 rounded-xl text-[9px] uppercase tracking-wider font-extrabold transition-all cursor-pointer text-center"
+                              >
+                                Accept Mail
+                              </button>
+                              <button
+                                onClick={() => openEmailComposer(selectedItem, "reject")}
+                                className="px-2 py-2 bg-red-500/10 hover:bg-red-500 text-red-400 hover:text-white border border-red-500/20 rounded-xl text-[9px] uppercase tracking-wider font-extrabold transition-all cursor-pointer text-center"
+                              >
+                                Reject Mail
+                              </button>
+                              <button
+                                onClick={() => openEmailComposer(selectedItem, "reminder")}
+                                className="px-2 py-2 bg-blue-500/10 hover:bg-blue-500 text-blue-400 hover:text-white border border-blue-500/20 rounded-xl text-[9px] uppercase tracking-wider font-extrabold transition-all cursor-pointer text-center"
+                              >
+                                Remind Mail
+                              </button>
+                            </div>
+                          </div>
 
                           <div className="space-y-1 pt-4 border-t border-ink/5">
                             <span className="text-[9px] uppercase tracking-widest font-black opacity-30 block mb-2">Disposition Status</span>
                             <div className="flex gap-2">
                               <button
-                                onClick={() => updateItemStatus(selectedItem.id, "secure_internship_registry", "shortlisted")}
-                                className={`px-4 py-2 rounded-full text-[9px] uppercase tracking-widest font-black border transition-all ${
-                                  selectedItem.status === "shortlisted" ? "bg-green-500/10 text-green-400 border-green-500/20" : "border-ink/10 text-ink opacity-60 hover:opacity-100"
+                                onClick={() => updateItemStatus(selectedItem.id, "internship_applications", "shortlisted")}
+                                className={`px-4 py-2 rounded-full text-[9px] uppercase tracking-widest font-black border transition-all cursor-pointer ${
+                                  selectedItem.status === "shortlisted" ? "bg-green-500/10 text-green-400 border-green-500/20 font-bold" : "border-ink/10 text-ink opacity-60 hover:opacity-100"
                                 }`}
                               >
                                 shortlist
                               </button>
                               <button
-                                onClick={() => updateItemStatus(selectedItem.id, "secure_internship_registry", "rejected")}
-                                className={`px-4 py-2 rounded-full text-[9px] uppercase tracking-widest font-black border transition-all ${
-                                  selectedItem.status === "rejected" ? "bg-red-500/10 text-red-400 border-red-500/20" : "border-ink/10 text-ink opacity-60 hover:opacity-100"
+                                onClick={() => updateItemStatus(selectedItem.id, "internship_applications", "rejected")}
+                                className={`px-4 py-2 rounded-full text-[9px] uppercase tracking-widest font-black border transition-all cursor-pointer ${
+                                  selectedItem.status === "rejected" ? "bg-red-500/10 text-red-400 border-red-500/20 font-bold" : "border-ink/10 text-ink opacity-60 hover:opacity-100"
                                 }`}
                               >
                                 skip
@@ -1336,6 +1540,154 @@ export default function Admin() {
           </div>
         )}
       </div>
+      {/* Dynamic Email Composer and SMTP Dispatcher Modal */}
+      {createPortal(
+        <AnimatePresence>
+          {isEmailModalOpen && emailTargetCandidate && (
+            <div className="fixed inset-0 z-[999] flex items-center justify-center p-4" style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0 }}>
+              {/* Backdrop */}
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => { if (!emailSending) setIsEmailModalOpen(false); }}
+                className="absolute inset-0 bg-black/80 backdrop-blur-md cursor-pointer"
+              />
+
+              {/* Modal Box */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 15 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 15 }}
+                transition={{ type: "spring", duration: 0.4 }}
+                className="relative w-full max-w-2xl bg-[#0d0d10] border border-white/10 rounded-3xl p-6 md:p-8 shadow-[0_25px_60px_rgba(0,0,0,0.8)] z-10 overflow-hidden text-white"
+              >
+                {/* Top ambient aesthetic light gradient */}
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-32 bg-accent/20 rounded-full blur-3xl pointer-events-none" />
+
+                {/* Header */}
+                <div className="flex items-start justify-between border-b border-white/10 pb-4 mb-5 relative z-10">
+                  <div>
+                    <span className="text-[9px] font-black uppercase tracking-widest text-accent mb-1 inline-block">
+                      SMTP Email Transmitter
+                    </span>
+                    <h3 className="text-xl font-bold font-display text-white flex items-center gap-2">
+                      Email Outreach: {emailTargetCandidate.fullName}
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-1">
+                      Delivered securely from <strong className="text-accent">editablecreativestudio@gmail.com</strong> to <strong className="text-accent">{emailTargetCandidate.email}</strong>
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setIsEmailModalOpen(false)}
+                    disabled={emailSending}
+                    className="w-8 h-8 rounded-full border border-white/10 hover:border-accent hover:text-accent flex items-center justify-center transition-colors focus:outline-none text-white cursor-pointer"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+
+                {/* Status Indicator Bar */}
+                <div className="flex items-center gap-2 mb-4 relative z-10">
+                  <span className="text-[10px] font-medium text-zinc-500 uppercase tracking-wider">Campaign Type:</span>
+                  {emailType === "accept" && (
+                    <span className="text-[9px] px-2.5 py-0.5 rounded bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold uppercase tracking-widest">
+                      Acceptance Letter
+                    </span>
+                  )}
+                  {emailType === "reject" && (
+                    <span className="text-[9px] px-2.5 py-0.5 rounded bg-red-500/10 border border-red-500/20 text-red-400 font-bold uppercase tracking-widest">
+                      Rejection Notice
+                    </span>
+                  )}
+                  {emailType === "reminder" && (
+                    <span className="text-[9px] px-2.5 py-0.5 rounded bg-blue-500/10 border border-blue-500/20 text-blue-400 font-bold uppercase tracking-widest">
+                      Outreach Reminder
+                    </span>
+                  )}
+                </div>
+
+                {/* Form Area */}
+                <div className="space-y-4 relative z-10">
+                  <div className="space-y-1">
+                    <label className="text-[9px] uppercase tracking-widest font-black text-zinc-400 block">
+                      Email Subject Line
+                    </label>
+                    <input
+                      type="text"
+                      value={emailSubject}
+                      onChange={(e) => setEmailSubject(e.target.value)}
+                      disabled={emailSending || emailSuccess}
+                      className="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-accent transition-colors text-white placeholder:text-zinc-600"
+                    />
+                  </div>
+
+                  <div className="space-y-1">
+                    <div className="flex justify-between items-center">
+                      <label className="text-[9px] uppercase tracking-widest font-black text-zinc-400 block">
+                        Email Body Content
+                      </label>
+                      <span className="text-[8px] text-zinc-500">Full Plain-Text Editable Format</span>
+                    </div>
+                    <textarea
+                      rows={12}
+                      value={emailBody}
+                      onChange={(e) => setEmailBody(e.target.value)}
+                      disabled={emailSending || emailSuccess}
+                      className="w-full bg-zinc-950 border border-white/10 rounded-xl px-4 py-3 text-xs focus:outline-none focus:border-accent transition-colors text-white font-mono leading-relaxed placeholder:text-zinc-600 resize-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Success / Error Banners */}
+                {emailSuccess ? (
+                  <div className="mt-5 p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs flex items-center gap-2 relative z-10">
+                    <CheckCircle size={14} className="flex-shrink-0" />
+                    <span>Success: The pre-formatted email was securely routed and delivered via SMTP server to {emailTargetCandidate.email}.</span>
+                  </div>
+                ) : emailError ? (
+                  <div className="mt-5 p-4 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs flex items-center gap-2 relative z-10">
+                    <ShieldAlert size={14} className="flex-shrink-0" />
+                    <div>
+                      <span className="font-bold block">Transmission Interrupted</span>
+                      <span className="opacity-85 block text-[11px] mt-0.5">{emailError}</span>
+                    </div>
+                  </div>
+                ) : null}
+
+                {/* Footer Actions */}
+                <div className="flex justify-end gap-3 items-center mt-6 border-t border-white/10 pt-5 relative z-10">
+                  <button
+                    onClick={() => setIsEmailModalOpen(false)}
+                    disabled={emailSending}
+                    className="px-4 py-2 border border-white/10 hover:border-white/20 rounded-xl text-xs uppercase tracking-wider font-extrabold focus:outline-none disabled:opacity-50 text-white cursor-pointer"
+                  >
+                    {emailSuccess ? "Close" : "Cancel"}
+                  </button>
+                  
+                  {!emailSuccess && (
+                    <button
+                      onClick={sendEmailOutreach}
+                      disabled={emailSending}
+                      className="px-5 py-2 bg-accent hover:bg-accent/85 text-white rounded-xl text-xs uppercase tracking-widest font-black transition-opacity flex items-center gap-2 focus:outline-none disabled:opacity-50 cursor-pointer"
+                    >
+                      {emailSending ? (
+                        <>
+                          <div className="w-3.5 h-3.5 rounded-full border-t border-white border-2 animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        "Send via SMTP"
+                      )}
+                    </button>
+                  )}
+                </div>
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </PageTransition>
   );
 }
