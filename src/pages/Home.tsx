@@ -200,7 +200,7 @@ export default function Home() {
                 }}
                 transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
               >
-                <EditableHeroText className="text-[10vw] sm:text-[8vw] md:text-[6vw] lg:text-[5vw] xl:text-[4.5vw] font-display font-extrabold tracking-[-0.05em] uppercase leading-tight" />
+                <EditableHeroText className="text-[10vw] sm:text-[8vw] md:text-[6vw] lg:text-[3.8vw] xl:text-[3.2vw] font-display font-extrabold tracking-[-0.05em] uppercase leading-tight" />
               </motion.div>
 
               <motion.div 

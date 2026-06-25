@@ -48,12 +48,12 @@ export const EditableHeroText: React.FC<EditableHeroTextProps> = ({ className })
       />
 
       {/* Editable input area or styled characters */}
-      <div className="relative z-10 flex flex-nowrap md:flex-wrap lg:justify-start justify-center items-center max-w-full">
+      <div className="relative z-10 flex flex-nowrap lg:justify-start justify-center items-center max-w-full">
         {!isEditing ? (
           <div 
             onClick={() => setIsEditing(true)}
             className={cn(
-              "cursor-pointer outline-none relative flex flex-nowrap md:flex-wrap lg:justify-start justify-center items-center gap-x-[0.01em] whitespace-nowrap",
+              "cursor-pointer outline-none relative flex flex-nowrap lg:justify-start justify-center items-center gap-x-[0.01em] whitespace-nowrap",
               className
             )}
             title="Click to edit text"

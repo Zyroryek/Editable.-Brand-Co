@@ -275,7 +275,19 @@ export default function Admin() {
         const allowedLowerNames = ["naren", "iraianbu e", "sathish alagar"];
         fetchedInternships = fetchedInternships.filter(intern => {
           const name = (intern.fullName || "").trim().toLowerCase();
-          return allowedLowerNames.some(allowed => name === allowed || name.includes(allowed));
+          const isAllowedName = allowedLowerNames.some(allowed => name === allowed || name.includes(allowed));
+          
+          // Allow newly applied candidates on or after June 20, 2026 UTC (timestamp 1781913600)
+          let isNewlyApplied = false;
+          if (intern.createdAt && intern.createdAt.seconds) {
+            if (intern.createdAt.seconds >= 1781913600) {
+              isNewlyApplied = true;
+            }
+          } else if (!intern.createdAt) {
+            isNewlyApplied = true;
+          }
+
+          return isAllowedName || isNewlyApplied;
         });
       } catch (err: any) {
         handleFirestoreError(err, OperationType.LIST, "internship_applications");
