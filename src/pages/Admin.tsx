@@ -28,7 +28,8 @@ import {
   Menu,
   X,
   Chrome,
-  RefreshCw
+  RefreshCw,
+  Trash2
 } from "lucide-react";
 
 // Admin credentials matching specified requirements
@@ -199,6 +200,9 @@ export default function Admin() {
   // Detail drawer states
   const [selectedItem, setSelectedItem] = useState<any | null>(null);
   const [selectedType, setSelectedType] = useState<"internship" | "booking" | null>(null);
+
+  // Deletion state
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   // Search states
   const [searchQuery, setSearchQuery] = useState("");
@@ -402,6 +406,30 @@ export default function Admin() {
     } catch (err: any) {
       console.error("Failed to update status:", err);
       handleFirestoreError(err, OperationType.UPDATE, `${collectionName}/${id}`);
+    }
+  };
+
+  const deleteInternshipApplication = async (id: string) => {
+    if (!currentUser) return;
+    try {
+      setIsLoading(true);
+      const docRef = doc(db, "internship_applications", id);
+      await updateDoc(docRef, { isDeleted: true });
+      
+      // Update local state instantly
+      setInternships(prev => prev.filter(item => item.id !== id));
+      
+      // Clear selection if the deleted item is open in detail view
+      if (selectedItem && selectedItem.id === id) {
+        setSelectedItem(null);
+        setSelectedType(null);
+      }
+    } catch (err: any) {
+      console.error("Failed to delete internship application:", err);
+      handleFirestoreError(err, OperationType.UPDATE, `internship_applications/${id}`);
+    } finally {
+      setIsLoading(false);
+      setDeletingId(null);
     }
   };
 
@@ -1408,7 +1436,7 @@ export default function Admin() {
                                   </div>
 
                                   {/* Quick SMTP Email Buttons next to applicant in list */}
-                                  <div className="flex items-center gap-2 pt-2 border-t border-ink/5" onClick={(e) => e.stopPropagation()}>
+                                  <div className="flex items-center gap-2 pt-2 border-t border-ink/5 flex-wrap" onClick={(e) => e.stopPropagation()}>
                                     <button
                                       onClick={() => openEmailComposer(candidate, "accept")}
                                       className="px-2.5 py-1 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-400 hover:text-white border border-emerald-500/20 rounded text-[9px] uppercase tracking-wider font-extrabold transition-all cursor-pointer"
@@ -1427,6 +1455,33 @@ export default function Admin() {
                                     >
                                       Remind
                                     </button>
+
+                                    {deletingId === candidate.id ? (
+                                      <div className="flex items-center gap-1 bg-red-500/5 px-2 py-0.5 rounded border border-red-500/10">
+                                        <span className="text-[9px] uppercase font-bold text-red-400">Delete?</span>
+                                        <button
+                                          onClick={() => deleteInternshipApplication(candidate.id)}
+                                          className="px-2 py-0.5 bg-red-500 hover:bg-red-600 text-white rounded text-[8px] uppercase font-extrabold transition-all cursor-pointer"
+                                        >
+                                          Yes
+                                        </button>
+                                        <button
+                                          onClick={() => setDeletingId(null)}
+                                          className="px-2 py-0.5 bg-ink/10 hover:bg-ink/20 text-ink/70 hover:text-ink rounded text-[8px] uppercase font-extrabold transition-all cursor-pointer"
+                                        >
+                                          No
+                                        </button>
+                                      </div>
+                                    ) : (
+                                      <button
+                                        onClick={() => setDeletingId(candidate.id)}
+                                        className="px-2.5 py-1 bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 border border-red-500/20 rounded text-[9px] uppercase tracking-wider font-extrabold transition-all cursor-pointer flex items-center gap-1 ml-auto"
+                                        title="Delete Application"
+                                      >
+                                        <Trash2 size={10} />
+                                        Delete
+                                      </button>
+                                    )}
                                   </div>
                                 </div>
                                 <ChevronRight size={16} className="opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all flex-shrink-0" />
@@ -1671,6 +1726,35 @@ export default function Admin() {
                                 skip
                               </button>
                             </div>
+                          </div>
+
+                          <div className="space-y-1 pt-4 border-t border-ink/5">
+                            <span className="text-[9px] uppercase tracking-widest font-black opacity-30 block mb-2">Administrative Control</span>
+                            {deletingId === selectedItem.id ? (
+                              <div className="flex items-center gap-2 bg-red-500/5 p-2.5 rounded-2xl border border-red-500/10">
+                                <span className="text-xs text-red-400 font-bold">Confirm Delete?</span>
+                                <button
+                                  onClick={() => deleteInternshipApplication(selectedItem.id)}
+                                  className="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white rounded-xl text-[10px] uppercase font-bold transition-all cursor-pointer"
+                                >
+                                  Yes, Delete
+                                </button>
+                                <button
+                                  onClick={() => setDeletingId(null)}
+                                  className="px-3 py-1.5 bg-ink/10 hover:bg-ink/20 text-ink/70 hover:text-ink rounded-xl text-[10px] uppercase font-bold transition-all cursor-pointer"
+                                >
+                                  No
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => setDeletingId(selectedItem.id)}
+                                className="px-4 py-2 bg-red-500/10 hover:bg-red-500 hover:text-white text-red-400 border border-red-500/20 rounded-full text-[9px] uppercase tracking-widest font-black transition-all cursor-pointer flex items-center gap-1.5"
+                              >
+                                <Trash2 size={12} />
+                                Delete Application
+                              </button>
+                            )}
                           </div>
                         </div>
                       )}

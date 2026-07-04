@@ -246,9 +246,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 }}
                 transition={{ type: "spring", stiffness: 120, damping: 12 }}
               />
-              {/* Center core holding the letter "e" */}
-              <div className="absolute inset-2 bg-neutral-950 dark:bg-white rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-95 duration-350">
-                <span className="text-white dark:text-neutral-950 font-mono font-black text-sm md:text-base leading-none lowercase select-none">e</span>
+              {/* Center core holding the logo image */}
+              <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-95 duration-350 overflow-hidden">
+                <img 
+                  src="/logo.jpg" 
+                  alt="Editable Studio" 
+                  className="w-full h-full object-cover rounded-full"
+                  referrerPolicy="no-referrer"
+                />
               </div>
               {/* Dynamic Spark pulse dot */}
               <span className="absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-accent ring-[2px] ring-white dark:ring-black animate-ping" />
