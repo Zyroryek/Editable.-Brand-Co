@@ -176,17 +176,17 @@ export default function Home() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                className="space-y-6 max-w-xl"
+                className="space-y-6 max-w-xl lg:max-w-2xl"
               >
                 <p className="text-base sm:text-lg md:text-xl text-ink/70 dark:text-white/70 font-normal leading-relaxed">
                   We turn ambitious ideas into iconic brand identities, bespoke websites, and digital experiences that convert.
                 </p>
 
-                {/* Pill Action Buttons Row */}
-                <div className="flex flex-wrap items-center gap-3 pt-2">
+                {/* Pill Action Buttons Row - Single line on desktop */}
+                <div className="flex flex-wrap lg:flex-nowrap items-center gap-2.5 sm:gap-3 pt-2">
                   <Link
                     to="/packages"
-                    className="px-7 py-3.5 bg-ink text-white dark:bg-accent dark:text-white text-xs font-mono uppercase tracking-[0.16em] font-bold rounded-full hover:bg-accent hover:text-white dark:hover:opacity-90 transition-all shadow-md flex items-center gap-2 cursor-pointer group"
+                    className="px-5 sm:px-6 py-3.5 bg-ink text-white dark:bg-accent dark:text-white text-xs font-mono uppercase tracking-[0.14em] sm:tracking-[0.16em] font-bold rounded-full hover:bg-accent hover:text-white dark:hover:opacity-90 transition-all shadow-md flex items-center gap-2 cursor-pointer group whitespace-nowrap"
                   >
                     <span>EXPLORE PACKAGES</span>
                     <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
@@ -194,7 +194,7 @@ export default function Home() {
 
                   <Link
                     to="/contact"
-                    className="px-7 py-3.5 border border-ink/30 dark:border-white/30 text-ink dark:text-white text-xs font-mono uppercase tracking-[0.16em] font-bold rounded-full hover:bg-ink/5 dark:hover:bg-white/10 transition-all flex items-center gap-2 cursor-pointer group"
+                    className="px-5 sm:px-6 py-3.5 border border-ink/30 dark:border-white/30 text-ink dark:text-white text-xs font-mono uppercase tracking-[0.14em] sm:tracking-[0.16em] font-bold rounded-full hover:bg-ink/5 dark:hover:bg-white/10 transition-all flex items-center gap-2 cursor-pointer group whitespace-nowrap"
                   >
                     <span>GET IN TOUCH</span>
                     <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
@@ -202,7 +202,7 @@ export default function Home() {
 
                   <button
                     onClick={() => setIsOfferModalOpen(true)}
-                    className="px-6 py-3.5 bg-amber-500/10 dark:bg-white/10 border border-amber-500/30 dark:border-white/20 text-accent dark:text-amber-400 text-xs font-mono uppercase tracking-[0.16em] font-bold rounded-full flex items-center gap-2 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
+                    className="px-5 sm:px-6 py-3.5 bg-amber-500/10 dark:bg-white/10 border border-amber-500/30 dark:border-white/20 text-accent dark:text-amber-400 text-xs font-mono uppercase tracking-[0.14em] sm:tracking-[0.16em] font-bold rounded-full flex items-center gap-2 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xs whitespace-nowrap"
                   >
                     <Sparkles size={14} className="text-accent animate-pulse" />
                     <span>FREE OFFER (₹0)</span>
