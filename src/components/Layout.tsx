@@ -232,55 +232,81 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        {/* Mobile Dropdown */}
+        {/* Mobile Dropdown with Glassmorphism & Smooth Top Slide Transition */}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="md:hidden border-t border-ink/10 dark:border-white/10 bg-bg px-6 py-5 space-y-3"
+              initial={{ opacity: 0, y: -16, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: "auto" }}
+              exit={{ opacity: 0, y: -16, height: 0 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="md:hidden overflow-hidden border-t border-ink/10 dark:border-white/10 bg-bg/85 dark:bg-zinc-950/85 backdrop-blur-2xl backdrop-saturate-150 px-6 py-6 shadow-2xl"
             >
-              {navLinks.map((link) => {
-                const isHash = link.to.includes("#");
-                const isActive = !isHash && location.pathname === link.to;
+              <div className="flex flex-col space-y-3">
+                {navLinks.map((link, idx) => {
+                  const isHash = link.to.includes("#");
+                  const isActive = !isHash && location.pathname === link.to;
 
-                if (isHash) {
                   return (
-                    <a
+                    <motion.div
                       key={link.label}
-                      href={link.to}
-                      onClick={() => {
-                        playNavigationSound();
-                        setIsMenuOpen(false);
-                      }}
-                      className="block text-xs font-mono uppercase tracking-widest text-ink/70 dark:text-white/70 py-1"
+                      initial={{ opacity: 0, x: -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ duration: 0.25, delay: idx * 0.03, ease: "easeOut" }}
                     >
-                      {link.label}
-                    </a>
+                      {isHash ? (
+                        <a
+                          href={link.to}
+                          onClick={() => {
+                            playNavigationSound();
+                            setIsMenuOpen(false);
+                          }}
+                          className="block text-xs font-mono uppercase tracking-widest text-ink/80 dark:text-white/80 hover:text-accent transition-colors py-2"
+                        >
+                          {link.label}
+                        </a>
+                      ) : (
+                        <Link
+                          to={link.to}
+                          onClick={() => {
+                            playNavigationSound();
+                            setIsMenuOpen(false);
+                          }}
+                          className={cn(
+                            "flex items-center justify-between text-xs font-mono uppercase tracking-widest py-2 transition-colors",
+                            isActive
+                              ? "text-accent font-bold"
+                              : "text-ink/80 dark:text-white/80 hover:text-ink dark:hover:text-white"
+                          )}
+                        >
+                          <span>{link.label}</span>
+                          {isActive && <span className="w-1.5 h-1.5 rounded-full bg-accent" />}
+                        </Link>
+                      )}
+                    </motion.div>
                   );
-                }
+                })}
 
-                return (
+                {/* Mobile CTA Button */}
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: navLinks.length * 0.03 }}
+                  className="pt-3 border-t border-ink/10 dark:border-white/10"
+                >
                   <Link
-                    key={link.to}
-                    to={link.to}
+                    to="/booking?offer=independence"
                     onClick={() => {
                       playNavigationSound();
                       setIsMenuOpen(false);
                     }}
-                    className={cn(
-                      "block text-xs font-mono uppercase tracking-widest py-1 transition-colors",
-                      isActive
-                        ? "text-accent font-bold"
-                        : "text-ink/70 dark:text-white/70 hover:text-ink dark:hover:text-white"
-                    )}
+                    className="w-full flex items-center justify-center gap-2 px-5 py-3 bg-accent text-white rounded-full text-xs font-mono font-bold uppercase tracking-wider shadow-md shadow-accent/20 cursor-pointer"
                   >
-                    {link.label}
+                    <span>CLAIM FREE SLOT #1 (₹0)</span>
+                    <ArrowUpRight size={14} />
                   </Link>
-                );
-              })}
+                </motion.div>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
