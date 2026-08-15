@@ -1,604 +1,521 @@
-import React, { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence, useScroll, useTransform, useSpring, useMotionValue } from "motion/react";
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { Link } from "react-router-dom";
 import PageTransition from "../components/PageTransition";
-import { cn } from "@/lib/utils";
-import Magnetic from "../components/Magnetic";
-import TextReveal from "../components/TextReveal";
-import Marquee from "../components/Marquee";
-import { CharacterReveal } from "../components/CharacterReveal";
-import { EditableHeroText } from "../components/EditableHeroText";
-import { LogosSlideshow } from "../components/LogosSlideshow";
+import { ArrowUpRight, Sparkles, ArrowRight, Check, Info, ShieldCheck, Clock, Globe } from "lucide-react";
 import Portfolio from "../components/Portfolio";
-
-interface TiltCardProps {
-  children: React.ReactNode;
-  className: string;
-  i: number;
-  color: string;
-}
-
-const TiltCard: React.FC<TiltCardProps> = ({ children, className, i, color }) => {
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-
-  const rotateX = useTransform(y, [-0.5, 0.5], [8, -8]);
-  const rotateY = useTransform(x, [-0.5, 0.5], [-8, 8]);
-
-  const springConfig = { stiffness: 150, damping: 20 };
-  const springRotateX = useSpring(rotateX, springConfig);
-  const springRotateY = useSpring(rotateY, springConfig);
-
-  const handleMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    const rect = event.currentTarget.getBoundingClientRect();
-    const width = rect.width;
-    const height = rect.height;
-    const mouseX = event.clientX - rect.left;
-    const mouseY = event.clientY - rect.top;
-    
-    x.set(mouseX / width - 0.5);
-    y.set(mouseY / height - 0.5);
-  };
-
-  const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
-  };
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 50, rotateX: -15 }}
-      whileInView={{ opacity: 1, y: 0, rotateX: 0 }}
-      viewport={{ once: true, margin: "-5%" }}
-      transition={{ 
-        duration: 1, 
-        ease: [0.22, 1, 0.36, 1], 
-        delay: i * 0.2 
-      }}
-      whileHover={{ 
-        scale: 1.02,
-        zIndex: 20,
-        transition: { duration: 0.4, ease: [0.33, 1, 0.68, 1] }
-      }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      style={{
-        rotateX: springRotateX,
-        rotateY: springRotateY,
-        transformStyle: "preserve-3d",
-        perspective: "1000px"
-      }}
-      className={className}
-    >
-      <div className={cn("absolute inset-0 opacity-10 group-hover:opacity-30 transition-opacity duration-700", color)} />
-      <div style={{ transform: "translateZ(30px)", transformStyle: "preserve-3d" }} className="relative z-10 flex flex-col h-full">
-        {children}
-      </div>
-    </motion.div>
-  );
-};
+import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
+import { collection, addDoc, getDocs, query, where, serverTimestamp } from "firebase/firestore";
+import founderImage from "../assets/images/founder_portrait_1786780454996.jpg";
 
 const PACKAGES = [
   { 
     id: "bf", 
+    num: "01",
     name: "Brand Foundation", 
     price: "₹2,000 – ₹15,000", 
-    desc: "We build your brand from scratch with a strong, modern identity.", 
-    includes: ["Logo design", "Brand colors & typography", "Basic guidelines"] 
+    desc: "We build your brand from scratch with a strong, modern identity that stands the test of time.", 
+    includes: ["Logo design & guidelines", "Brand colors & typography", "Vector asset suite", "Social media kit"] 
   },
   { 
     id: "ui", 
+    num: "02",
     name: "UI/UX & Website", 
     price: "₹5,000 – ₹20,000", 
-    desc: "We design clean, user-focused digital experiences that convert.", 
-    includes: ["UX research", "Wireframes", "UI design (Figma)"] 
+    desc: "We design clean, high-performance digital experiences and bespoke websites that convert visitors.", 
+    includes: ["UX research & wireframes", "Figma design system", "Responsive development", "SEO & Speed optimization"] 
   },
   { 
     id: "cv", 
+    num: "03",
     name: "Content & Video", 
     price: "₹3,000 – ₹12,000", 
-    desc: "We turn your content into scroll-stopping visuals.", 
-    includes: ["Reel editing", "Motion graphics", "Thumbnails"] 
+    desc: "We turn your content into scroll-stopping visuals, reels, and commercial motion graphics.", 
+    includes: ["Reel & Short video editing", "Motion graphics & VFX", "High-CTR Thumbnails", "Audio mastering"] 
   },
   { 
     id: "gc", 
+    num: "04",
     name: "Growth Combo", 
     price: "₹5,000 – ₹25,000", 
-    desc: "A complete creative system to build, launch, and grow your brand.", 
-    includes: ["Full Creative System", "Monthly Support", "Video Content"] 
+    desc: "A complete creative system to build, launch, and scale your brand across all digital touchpoints.", 
+    includes: ["Full Brand Identity", "Custom Website Build", "10x Video Deliverables", "Launch Strategy"] 
   },
   { 
     id: "mr", 
+    num: "05",
     name: "Monthly Retainer", 
     price: "Custom Monthly", 
-    desc: "Your dedicated creative team, on demand.", 
-    includes: ["Fixed Task Slots", "Continuous Editing", "Priority Support"] 
+    desc: "Your dedicated full-stack creative studio team on demand with guaranteed turnaround times.", 
+    includes: ["Unlimited task requests", "Continuous design & dev", "Priority 24/7 Slack comms", "Flexible bandwidth"] 
   }
 ];
 
 export default function Home() {
-  const [activePackage, setActivePackage] = useState(PACKAGES[0]);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
+  const [claimedCount, setClaimedCount] = useState<number>(0);
+  const totalSlots = 15;
+  const remainingSlots = Math.max(0, totalSlots - claimedCount);
+  const nextAvailableSlot = Math.min(totalSlots, claimedCount + 1);
+  const [selectedSlotNumber, setSelectedSlotNumber] = useState<number>(1);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
 
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start start", "end end"]
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    businessName: "",
+    projectType: "New Business / Startup Website",
+    details: ""
   });
 
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
-    restDelta: 0.001
-  });
-
-  const backgroundY = useTransform(smoothProgress, [0, 1], ["0%", "50%"]);
-  const textSkew = useTransform(smoothProgress, [0, 1], [0, 2]);
-  const textY = useTransform(smoothProgress, [0, 0.5], [0, -100]);
-
+  // Sync claimed count from Firestore
   useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
+    const syncClaims = async () => {
+      try {
+        const q = query(
+          collection(db, "inquiries"),
+          where("isIndependenceOffer", "==", true)
+        );
+        const snapshot = await getDocs(q);
+        const validDocs = snapshot.docs.filter(d => !d.data().isDeleted);
+        const count = validDocs.length;
+        setClaimedCount(Math.min(totalSlots, count));
+        setSelectedSlotNumber(Math.min(totalSlots, count + 1));
+      } catch {
+        setClaimedCount(0);
+      }
     };
-    window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    syncClaims();
   }, []);
 
-  const reasons = [
-    { 
-      title: "Strategic Minimalism", 
-      desc: "We strip away the noise to find the core essence of your brand. Purposeful design that speaks louder by saying less.",
-      impact: "Reduced interface clutter for 'Zenit' by 45%, leading to a 30% boost in conversion rates.",
-      color: "bg-accent-purple/10" 
-    },
-    { 
-      title: "Visceral Impact", 
-      desc: "We create digital artifacts that aren't just seen—they are felt. Design that triggers emotion and commands attention.", 
-      impact: "Developed the viral 'Aura' campaign which generated 2.5M impressions within the first 48 hours.",
-      color: "bg-accent-blue/10" 
-    },
-    { 
-      title: "Future-Ready", 
-      desc: "Scalable systems built for the modern frontier. We ensure your brand evolves ahead of the digital curve.", 
-      impact: "Designed a universal design system for 'Nexus Corp' that successfully scaled to 50+ regional sub-brands.",
-      color: "bg-accent/10" 
-    }
-  ];
+  const handleSubmitClaim = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.fullName.trim() || !formData.email.trim() || !formData.phone.trim()) return;
 
-  const clientLogos = [
-    "InfrontOfUs", "Sparknest", "ThurikaSchoolOfArts"
-  ];
+    setIsSubmitting(true);
+    try {
+      const assignedSlot = selectedSlotNumber || nextAvailableSlot;
+      const payload = {
+        name: formData.fullName.trim(),
+        email: formData.email.trim(),
+        phone: formData.phone.trim(),
+        businessName: formData.businessName.trim() || "Independent Business",
+        package: "Independence Day Free Website Offer (Aug 15 - Aug 30)",
+        details: `[Independence Day Free Offer - Slot #${assignedSlot}] Type: ${formData.projectType}. Goal: ${formData.details.trim() || "Free website creation under Independence Day initiative"}`,
+        status: "pending",
+        isIndependenceOffer: true,
+        slotNumber: assignedSlot,
+        projectType: formData.projectType,
+        createdAt: serverTimestamp()
+      };
+
+      await addDoc(collection(db, "inquiries"), payload);
+      setClaimedCount(prev => Math.min(totalSlots, prev + 1));
+      setIsSuccess(true);
+    } catch (err: any) {
+      console.error("Error submitting claim:", err);
+      handleFirestoreError(err, OperationType.WRITE, "inquiries");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <PageTransition>
-      <div ref={containerRef} className="relative">
-        {/* 1. Opening Frame */}
-        <section className="min-h-screen py-24 md:py-32 flex items-center justify-center relative overflow-hidden">
-          <div className="w-full max-w-7xl mx-auto px-6 relative z-10 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center text-center lg:text-left">
+      <div className="relative w-full">
+
+        {/* 1. TOP SPECIAL OFFER NOTICE BAR (Aug 15 - Aug 30 Independence Day Free Website Offer) */}
+        <div className="w-full bg-ink text-bg px-6 py-2.5 flex items-center justify-between text-xs font-mono border-b border-ink/20">
+          <div className="max-w-[1440px] mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent animate-ping" />
+              <span className="font-bold tracking-wider uppercase text-[11px]">
+                Independence Special (Aug 15 – Aug 30): 100% Free Website Build ({remainingSlots} of 15 Slots Left)
+              </span>
+            </div>
+            <button
+              onClick={() => setIsOfferModalOpen(true)}
+              className="text-[11px] uppercase tracking-widest text-accent hover:underline font-bold flex items-center gap-1 cursor-pointer"
+            >
+              <span>Claim Free Slot #{nextAvailableSlot} (₹0)</span>
+              <ArrowRight size={12} />
+            </button>
+          </div>
+        </div>
+
+        {/* 2. HERO SECTION (EXACT REPLICA OF THE TOP PART OF REFERENCE IMAGE) */}
+        <section className="pt-16 sm:pt-24 md:pt-32 pb-20 md:pb-28 max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
             
-            {/* Left Side: Hero content */}
-            <motion.div 
-              initial="hidden"
-              animate="visible"
-              variants={{
-                hidden: { opacity: 0 },
-                visible: {
-                  opacity: 1,
-                  transition: {
-                    staggerChildren: 0.12,
-                    delayChildren: 0.1
-                  }
-                }
-              }}
-              className="lg:col-span-7 flex flex-col items-center lg:items-start text-center lg:text-left space-y-6 md:space-y-8 overflow-visible"
-            >
-              <motion.div 
-                className="w-full overflow-visible"
-                variants={{
-                  hidden: { opacity: 0, y: 30, scale: 0.98 },
-                  visible: { opacity: 1, y: 0, scale: 1 }
-                }}
-                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            {/* Left Hero Column: Massive High-Contrast Typography */}
+            <div className="lg:col-span-8 space-y-8 md:space-y-12">
+              <motion.h1
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                className="text-4xl sm:text-6xl md:text-7xl lg:text-[5.4vw] font-display font-bold tracking-[-0.035em] text-ink leading-[1.04] uppercase"
               >
-                <EditableHeroText className="text-[10vw] sm:text-[8vw] md:text-[6vw] lg:text-[3.8vw] xl:text-[3.2vw] font-display font-extrabold tracking-[-0.05em] uppercase leading-tight" />
-              </motion.div>
+                Crafting bold brands{" "}
+                <span className="font-serif italic font-normal lowercase tracking-normal text-accent">&amp;</span>{" "}
+                digital experiences.
+              </motion.h1>
 
-              <motion.div 
-                className="space-y-6 w-full"
-                variants={{
-                  hidden: { opacity: 0, y: 25 },
-                  visible: { opacity: 1, y: 0 }
-                }}
-                transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-                style={{ translateZ: 0 }}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                className="space-y-8 max-w-2xl"
               >
-                <p className="text-[10px] tracking-[0.6em] font-bold opacity-30 uppercase">
-                  Design Studio International / Global Presence
+                <p className="text-base sm:text-lg md:text-xl text-ink/60 dark:text-white/60 font-light leading-relaxed">
+                  We turn ambitious ideas into iconic brand identities, bespoke websites, and digital experiences that convert.
                 </p>
-                <div className="flex items-center gap-6 justify-center lg:justify-start">
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: 32 }}
-                    transition={{ delay: 1.2, duration: 1 }}
-                    className="h-[1px] bg-ink/20 hidden md:block" 
-                  />
-                  <p className="text-base md:text-xl italic font-serif opacity-60">
-                    Creative Studio focused on visceral design
-                  </p>
-                  <motion.div 
-                    initial={{ width: 0 }}
-                    animate={{ width: 32 }}
-                    transition={{ delay: 1.2, duration: 1 }}
-                    className="h-[1px] bg-ink/20 hidden md:block lg:hidden" 
-                  />
-                </div>
 
-                <div className="pt-6 md:pt-8 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                  <Link to="/packages">
-                    <Magnetic>
-                      <motion.button 
-                        whileHover={{ scale: 1.05, backgroundColor: "var(--color-accent)", color: "var(--color-bg)" }}
-                        whileTap={{ scale: 0.95 }}
-                        className="px-8 py-4 bg-ink text-bg rounded-full text-[10px] uppercase tracking-[0.3em] font-bold border border-transparent transition-all shadow-2xl shadow-accent/15 w-48 sm:w-auto"
-                      >
-                        Explore Packages
-                      </motion.button>
-                    </Magnetic>
+                <div className="flex flex-wrap items-center gap-4 pt-2">
+                  <Link
+                    to="/packages"
+                    className="px-8 py-4 bg-ink text-white dark:bg-white dark:text-zinc-950 text-xs font-mono uppercase tracking-[0.2em] font-bold rounded-full hover:bg-accent hover:text-white dark:hover:bg-accent dark:hover:text-white transition-all shadow-md"
+                  >
+                    Explore Packages
                   </Link>
 
-                  <Link to="/contact">
-                    <Magnetic>
-                      <motion.button 
-                        whileHover={{ scale: 1.05, backgroundColor: "var(--color-overlay)" }}
-                        whileTap={{ scale: 0.95 }}
-                        className="px-8 py-4 bg-transparent text-ink rounded-full text-[10px] uppercase tracking-[0.3em] font-bold border border-ink/20 transition-all w-48 sm:w-auto"
-                      >
-                        Contact Us
-                      </motion.button>
-                    </Magnetic>
+                  <Link
+                    to="/contact"
+                    className="px-8 py-4 border border-ink/20 dark:border-white/20 text-ink dark:text-white text-xs font-mono uppercase tracking-[0.2em] font-bold rounded-full hover:border-ink dark:hover:border-white transition-all"
+                  >
+                    Get in Touch
                   </Link>
 
-                  <Link to="/internship">
-                    <Magnetic>
-                      <motion.button 
-                        whileHover={{ scale: 1.05, backgroundColor: "var(--color-ink)", color: "var(--color-bg)" }}
-                        whileTap={{ scale: 0.95 }}
-                        className="px-8 py-4 bg-accent text-bg border border-transparent rounded-full text-[10px] uppercase tracking-[0.3em] font-bold transition-all w-48 sm:w-auto shadow-2xl shadow-accent/25"
-                      >
-                        Internships
-                      </motion.button>
-                    </Magnetic>
-                  </Link>
+                  <button
+                    onClick={() => setIsOfferModalOpen(true)}
+                    className="px-6 py-4 text-xs font-mono uppercase tracking-[0.2em] font-bold text-accent hover:underline flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Sparkles size={14} />
+                    <span>Free Offer (₹0)</span>
+                  </button>
                 </div>
               </motion.div>
-            </motion.div>
+            </div>
 
-            {/* Right Side: Slideshow */}
-            <motion.div 
-              className="lg:col-span-5 w-full flex justify-center items-center overflow-visible"
-              initial={{ opacity: 0, x: 50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
+            {/* Right Hero Column: Editorial Portrait */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="lg:col-span-4 w-full flex justify-end"
             >
-              <LogosSlideshow />
+              <div className="relative w-full max-w-sm sm:max-w-md aspect-[3/4] overflow-hidden rounded-2xl bg-zinc-900 shadow-xl border border-ink/10 dark:border-white/10 group">
+                <img
+                  src={founderImage}
+                  onError={(e) => {
+                    // Fallback to static public path if asset bundle encounters any issues
+                    const target = e.currentTarget;
+                    if (target.src !== window.location.origin + "/founder.jpg") {
+                      target.src = "/founder.jpg";
+                    }
+                  }}
+                  alt="Founder & Creative Director - Editable Creative Studio"
+                  className="w-full h-full object-cover object-center transition-all duration-700 group-hover:scale-105"
+                  referrerPolicy="no-referrer"
+                  loading="eager"
+                />
+                
+                {/* Subtle Studio Badge on Image */}
+                <div className="absolute bottom-4 left-4 right-4 bg-bg/85 dark:bg-black/85 backdrop-blur-md px-4 py-2.5 rounded-xl border border-ink/10 dark:border-white/10 flex justify-between items-center text-[10px] font-mono uppercase tracking-wider text-ink dark:text-white">
+                  <span className="font-bold">Editable Creative Studio</span>
+                  <span className="text-ink/60 dark:text-white/60 font-medium">Est. 2024</span>
+                </div>
+              </div>
             </motion.div>
 
           </div>
-
-          <motion.div 
-            className="absolute bottom-6 md:bottom-12 flex flex-col items-center gap-4 left-1/2 -translate-x-1/2"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 1.5 }}
-          >
-            <span className="text-[10px] uppercase tracking-widest opacity-40">Scroll</span>
-            <motion.div 
-              animate={{ height: [24, 48, 24] }}
-              transition={{ duration: 2, repeat: Infinity }}
-              className="w-px bg-gradient-to-b from-ink/20 to-transparent" 
-            />
-          </motion.div>
         </section>
 
-        {/* Interactive Portfolio Section */}
+        {/* 3. SELECTED WORK SECTION (MATCHING BOTTOM-LEFT OF REFERENCE IMAGE "(17) Selected Work") */}
         <Portfolio />
 
-        {/* Simplified Packages List - Moved to Top */}
-        <section id="packages-section" className="py-20 md:py-32 max-w-[1440px] mx-auto px-6 lg:px-20 relative">
-          <div className="mb-12 md:mb-16 flex items-center gap-6">
-            <CharacterReveal 
-              text="Our Packages"
-              className="text-4xl md:text-6xl font-display font-bold uppercase tracking-tight mb-0"
-              stagger={0.04}
-            />
-            <div className="h-[1px] flex-1 bg-gradient-to-r from-ink/10 to-transparent" />
+        {/* 4. PACKAGES & SERVICES LIST (Editorial Minimalist Architecture) */}
+        <section id="packages-section" className="py-24 md:py-32 border-t border-ink/10 dark:border-white/10 max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12">
+          
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 mb-16">
+            <div className="space-y-2">
+              <span className="text-xs font-mono uppercase tracking-[0.2em] text-ink/40 dark:text-white/40 block">
+                [ 05 PACKAGES AVAILABLE ]
+              </span>
+              <h2 className="text-4xl sm:text-5xl md:text-6xl font-display font-bold tracking-tight uppercase text-ink">
+                Our Services &amp; Packages
+              </h2>
+            </div>
+            <Link
+              to="/packages"
+              className="text-xs font-mono uppercase tracking-widest text-accent hover:underline font-bold flex items-center gap-1.5"
+            >
+              <span>View Full Packages Guide</span>
+              <ArrowRight size={14} />
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {PACKAGES.map((pkg, index) => (
-              <motion.div
+            {PACKAGES.map((pkg) => (
+              <div
                 key={pkg.id}
-                initial={{ opacity: 0, y: 40, scale: 0.95 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, margin: "-10%" }}
-                transition={{ 
-                  duration: 0.8, 
-                  delay: index * 0.1,
-                  ease: [0.16, 1, 0.3, 1]
-                }}
-                whileHover={{ 
-                  y: -8,
-                  transition: { duration: 0.3, ease: "easeOut" }
-                }}
-                className="group p-6 md:p-8 flex flex-col justify-start rounded-2xl bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl border-2 border-ink/20 dark:border-white/15 hover:border-accent transition-all duration-500 overflow-hidden relative min-h-[200px] shadow-xl shadow-black/10"
-                style={{ willChange: "transform, opacity" }}
+                className="p-8 border border-ink/10 dark:border-white/10 rounded-2xl flex flex-col justify-between hover:border-accent transition-all duration-300 group bg-surface/50 dark:bg-surface/20"
               >
-                {/* Visual Glass highlights & Hover Accent flow */}
-                <motion.div 
-                  className="absolute inset-0 bg-accent/[0.02] dark:bg-accent/[0.04] translate-y-full group-hover:translate-y-0 transition-transform duration-700 ease-[0.16, 1, 0.3, 1]"
-                />
+                <div className="space-y-4">
+                  <div className="flex justify-between items-start">
+                    <span className="text-xs font-mono font-bold text-ink/40 dark:text-white/40">
+                      {pkg.num}
+                    </span>
+                    <span className="text-xs font-mono font-bold px-3 py-1 bg-ink/5 dark:bg-white/5 rounded-full text-accent border border-ink/10 dark:border-white/10">
+                      {pkg.price}
+                    </span>
+                  </div>
 
-                {/* Technical Blueprint Elements */}
-                <div className="absolute inset-2 border border-dashed border-ink/5 dark:border-white/5 rounded-[24px] pointer-events-none" />
-                <span className="absolute top-4 left-4 w-3.5 h-3.5 border-t border-l border-ink/20 dark:border-white/20 group-hover:border-accent/40 transition-colors pointer-events-none" />
-                <span className="absolute top-4 right-4 w-3.5 h-3.5 border-t border-r border-ink/20 dark:border-white/20 group-hover:border-accent/40 transition-colors pointer-events-none" />
-                <span className="absolute bottom-4 left-4 w-3.5 h-3.5 border-b border-l border-ink/20 dark:border-white/20 group-hover:border-accent/40 transition-colors pointer-events-none" />
-                <span className="absolute bottom-4 right-4 w-3.5 h-3.5 border-b border-r border-ink/20 dark:border-white/20 group-hover:border-accent/40 transition-colors pointer-events-none" />
-
-                {/* Top Metabar */}
-                <div className="flex items-center justify-between select-none relative z-10 mb-4">
-                  <span className="font-mono text-[9px] uppercase tracking-[0.25em] opacity-40 font-black">
-                    [ 0{index + 1} / PKG ]
-                  </span>
-                  <span className="font-mono text-[10px] font-black uppercase tracking-wider text-accent bg-accent/5 dark:bg-accent/10 px-2.5 py-1 rounded-lg">
-                    {pkg.price}
-                  </span>
-                </div>
-
-                {/* Title */}
-                <div className="space-y-2 relative z-10 mb-4">
-                  <h3 className="text-xl md:text-2xl font-display font-black uppercase tracking-tight group-hover:text-accent transition-colors leading-none">
+                  <h3 className="text-2xl font-display font-bold uppercase text-ink group-hover:text-accent transition-colors">
                     {pkg.name}
                   </h3>
+
+                  <p className="text-xs text-ink/60 dark:text-white/60 font-light leading-relaxed">
+                    {pkg.desc}
+                  </p>
+
+                  <ul className="space-y-2 pt-3 border-t border-ink/5 dark:border-white/5">
+                    {pkg.includes.map((item, idx) => (
+                      <li key={idx} className="text-xs text-ink/70 dark:text-white/70 flex items-center gap-2 font-mono">
+                        <span className="w-1 h-1 rounded-full bg-accent" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
 
-                {/* Bottom Details Arrow Action */}
-                <div className="mt-auto pt-4 flex justify-end relative z-10">
-                  <Link to="/packages">
-                    <motion.span 
-                      whileHover={{ x: 5 }}
-                      className="text-[10px] uppercase tracking-[0.25em] font-black text-accent transition-all flex items-center gap-1.5"
-                    >
-                      View Details <span className="text-xs">→</span>
-                    </motion.span>
+                <div className="pt-8 mt-6 border-t border-ink/10 dark:border-white/10 flex items-center justify-between">
+                  <Link
+                    to={`/booking?pkg=${pkg.id}`}
+                    className="text-xs font-mono font-bold uppercase tracking-widest text-ink hover:text-accent flex items-center gap-1.5 group-hover:translate-x-1 transition-all"
+                  >
+                    <span>Book Package</span>
+                    <ArrowUpRight size={14} />
+                  </Link>
+
+                  <Link
+                    to="/packages"
+                    className="text-[11px] font-mono uppercase tracking-widest text-ink/40 hover:text-ink transition-colors"
+                  >
+                    Details
                   </Link>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
+
         </section>
 
-        {/* 2. Statement with TextReveal */}
-        <section className="section-spacing flex items-center justify-center px-6 relative overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-purple/20 to-transparent" />
-          <TextReveal 
-            text="We create digital artifacts that resonate. No templates. No noise. Just pure intent."
-            className="text-4xl md:text-7xl lg:text-8xl font-display font-medium leading-[1.05] text-center max-w-6xl tracking-tight bg-clip-text text-transparent bg-gradient-to-br from-zinc-950 via-zinc-900 to-zinc-800 dark:from-blue-700 dark:via-purple-700 dark:to-indigo-600"
-          />
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-[1px] bg-gradient-to-r from-transparent via-accent-blue/20 to-transparent" />
+        {/* 5. EDITORIAL STATEMENT */}
+        <section className="py-24 md:py-36 border-t border-ink/10 dark:border-white/10 max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 text-center">
+          <p className="text-xs font-mono uppercase tracking-[0.3em] text-ink/40 dark:text-white/40 mb-8">
+            STUDIO PHILOSOPHY
+          </p>
+          <h3 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-medium max-w-5xl mx-auto leading-tight tracking-tight text-ink">
+            &ldquo;We create digital artifacts that resonate. No templates. No noise. Just pure intent.&rdquo;
+          </h3>
         </section>
 
-        {/* Featured Content / Immersive Image */}
-        <section className="py-20 md:py-32 px-6 md:px-12 lg:px-20 max-w-[1440px] mx-auto">
-          <motion.div 
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            className="relative max-w-4xl mx-auto aspect-square md:aspect-[4/3] rounded-[40px] md:rounded-[60px] overflow-hidden bg-neutral-900 group shadow-[0_0_100px_rgba(0,0,0,0.1)] forced-color-adjust-none border border-zinc-200/10"
-          >
-            <motion.img 
-              src="/logo.jpg" 
-              alt="Editable Creative Direction" 
-              className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-              referrerPolicy="no-referrer"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+        {/* 6. WHY US — MINIMALIST SWISS NUMBERED GRID */}
+        <section className="py-20 md:py-28 border-t border-ink/10 dark:border-white/10 max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
             
-            <div className="absolute bottom-8 left-8 md:bottom-12 md:left-12 z-20 opacity-0 group-hover:opacity-100 translate-y-4 group-hover:translate-y-0 transition-all duration-700">
-              <motion.div>
-                <span className="text-[10px] md:text-xs uppercase tracking-[0.4em] text-accent-blue font-bold mb-3 block">Perspective</span>
-                <h2 className="text-3xl md:text-5xl font-display font-bold text-white uppercase tracking-tighter leading-none mb-4">
-                  Pure Aesthetic.
-                </h2>
-                <div className="flex items-center gap-4 text-white/50 text-[10px] uppercase tracking-widest font-medium">
-                  <span>Visual Identity</span>
-                  <div className="w-1 h-1 rounded-full bg-white/20" />
-                  <span>2024 Showcase</span>
-                </div>
+            <div className="space-y-4">
+              <span className="text-xs font-mono font-bold text-accent uppercase tracking-widest block">
+                01 / PRECISION
+              </span>
+              <h4 className="text-2xl font-display font-bold uppercase text-ink">
+                Strategic Minimalism
+              </h4>
+              <p className="text-xs text-ink/60 dark:text-white/60 font-light leading-relaxed">
+                We strip away unnecessary decoration to find the sharpest core essence of your brand. Purposeful aesthetics that command instant respect.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <span className="text-xs font-mono font-bold text-accent uppercase tracking-widest block">
+                02 / IMPACT
+              </span>
+              <h4 className="text-2xl font-display font-bold uppercase text-ink">
+                Visceral Conversion
+              </h4>
+              <p className="text-xs text-ink/60 dark:text-white/60 font-light leading-relaxed">
+                Every layout, animation, and typography decision is engineered to capture buyer attention and drive tangible business revenue.
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <span className="text-xs font-mono font-bold text-accent uppercase tracking-widest block">
+                03 / VELOCITY
+              </span>
+              <h4 className="text-2xl font-display font-bold uppercase text-ink">
+                Rapid Deployment
+              </h4>
+              <p className="text-xs text-ink/60 dark:text-white/60 font-light leading-relaxed">
+                Agile sprints and seamless delivery. We turn briefs into production-ready web platforms and brand suites in record time.
+              </p>
+            </div>
+
+          </div>
+        </section>
+
+        {/* 7. INDEPENDENCE DAY OFFER MODAL (Positioned at the Top) */}
+        <AnimatePresence>
+          {isOfferModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-start justify-center p-3 sm:p-6 pt-6 sm:pt-10 md:pt-14 bg-black/75 backdrop-blur-md overflow-y-auto">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.96, y: -24 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: -24 }}
+                transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                className="relative w-full max-w-lg bg-bg border border-ink/15 dark:border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden mb-12 max-h-[90vh] overflow-y-auto"
+              >
+                <button
+                  onClick={() => {
+                    setIsOfferModalOpen(false);
+                    setIsSuccess(false);
+                  }}
+                  className="absolute top-5 right-5 w-8 h-8 rounded-full bg-ink/5 dark:bg-white/5 border border-ink/10 dark:border-white/10 flex items-center justify-center text-ink/60 hover:text-ink transition-all cursor-pointer"
+                  title="Close modal"
+                >
+                  ✕
+                </button>
+
+                {!isSuccess ? (
+                  <div className="space-y-5">
+                    <div>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-mono font-bold uppercase tracking-wider mb-2 border border-emerald-500/20">
+                        <span>Slot #{selectedSlotNumber} of 15 • 100% Free (₹0)</span>
+                      </div>
+                      <h3 className="text-2xl font-display font-bold text-ink uppercase tracking-tight">
+                        Independence Day Free Website
+                      </h3>
+                      <p className="text-xs text-ink/60 dark:text-white/60 font-light mt-1">
+                        Valid Aug 15 – Aug 30, 2026 for the first 15 businesses. ₹0 design &amp; development fee.
+                      </p>
+                    </div>
+
+                    <form onSubmit={handleSubmitClaim} className="space-y-3.5">
+                      <div>
+                        <label className="text-[10px] uppercase font-mono font-bold tracking-wider text-ink/60 dark:text-white/60 block mb-1">
+                          Full Name *
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="Your Name"
+                          value={formData.fullName}
+                          onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                          className="glass-input w-full text-sm"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                          <label className="text-[10px] uppercase font-mono font-bold tracking-wider text-ink/60 dark:text-white/60 block mb-1">
+                            Email *
+                          </label>
+                          <input
+                            type="email"
+                            required
+                            placeholder="you@email.com"
+                            value={formData.email}
+                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                            className="glass-input w-full text-sm"
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] uppercase font-mono font-bold tracking-wider text-ink/60 dark:text-white/60 block mb-1">
+                            WhatsApp / Phone *
+                          </label>
+                          <input
+                            type="tel"
+                            required
+                            placeholder="+91 Phone"
+                            value={formData.phone}
+                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                            className="glass-input w-full text-sm"
+                          />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] uppercase font-mono font-bold tracking-wider text-ink/60 dark:text-white/60 block mb-1">
+                          Business / Brand Name
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="Brand Name"
+                          value={formData.businessName}
+                          onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
+                          className="glass-input w-full text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-[10px] uppercase font-mono font-bold tracking-wider text-ink/60 dark:text-white/60 block mb-1">
+                          Website Type &amp; Goals
+                        </label>
+                        <textarea
+                          rows={2}
+                          placeholder="Tell us what you want to build."
+                          value={formData.details}
+                          onChange={(e) => setFormData({ ...formData, details: e.target.value })}
+                          className="glass-input w-full text-sm resize-none"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        disabled={isSubmitting || !formData.fullName || !formData.email || !formData.phone}
+                        className="w-full py-3.5 bg-accent hover:opacity-90 text-white rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer mt-2"
+                      >
+                        {isSubmitting ? (
+                          <span>Reserving Slot #{selectedSlotNumber}...</span>
+                        ) : (
+                          <>
+                            <Check size={14} />
+                            <span>Confirm Slot #{selectedSlotNumber} Reservation (₹0)</span>
+                          </>
+                        )}
+                      </button>
+                    </form>
+                  </div>
+                ) : (
+                  <div className="text-center py-6 space-y-4">
+                    <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto">
+                      <Check size={24} />
+                    </div>
+                    <h3 className="text-2xl font-display font-bold text-ink uppercase">
+                      Slot #{selectedSlotNumber} Reserved!
+                    </h3>
+                    <p className="text-xs text-ink/60 dark:text-white/60 leading-relaxed">
+                      Thank you, <strong>{formData.fullName}</strong>. We've registered your free website claim. Our director will contact you via WhatsApp / Email shortly.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setIsOfferModalOpen(false);
+                        setIsSuccess(false);
+                      }}
+                      className="px-6 py-2 bg-ink/10 dark:bg-white/10 text-ink dark:text-white rounded-xl text-xs font-mono font-bold uppercase cursor-pointer"
+                    >
+                      Close
+                    </button>
+                  </div>
+                )}
               </motion.div>
             </div>
-          </motion.div>
-        </section>
+          )}
+        </AnimatePresence>
 
-        {/* Why Us Section */}
-        <section className="py-20 md:py-32 px-6 md:px-12 lg:px-20 max-w-[1440px] mx-auto">
-          <motion.div 
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-10%" }}
-            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-            className="mb-12 md:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-6 md:gap-10"
-          >
-            <div className="flex flex-col">
-              <CharacterReveal 
-                text="Why Us?"
-                className="text-4xl md:text-6xl lg:text-7xl font-display font-bold uppercase tracking-tighter leading-[0.9] mb-0"
-                stagger={0.1}
-              />
-            </div>
-            <div className="text-[10px] md:text-xs uppercase tracking-[0.3em] opacity-40 max-w-[280px] leading-relaxed">
-              Design is a competitive advantage. We ensure yours is unparalleled through precision and vision.
-            </div>
-          </motion.div>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-            {reasons.map((reason, i) => (
-              <TiltCard 
-                key={i}
-                i={i}
-                color={reason.color}
-                className="group relative p-8 md:p-10 bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl rounded-2xl overflow-hidden min-h-[300px] border-2 border-ink/20 dark:border-white/15 hover:border-accent transition-all duration-500 shadow-xl shadow-black/10"
-              >
-                <div className="flex items-center justify-between mb-8">
-                  <div className="w-10 h-10 rounded-full border border-ink/10 flex items-center justify-center text-[10px] font-bold group-hover:border-accent transition-colors group-hover:bg-accent group-hover:text-bg">
-                    0{i + 1}
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <h3 className="text-2xl md:text-3xl font-display font-bold uppercase leading-none">{reason.title}</h3>
-                  <p className="text-sm opacity-50 leading-relaxed font-light">
-                    {reason.desc}
-                  </p>
-                </div>
-
-                <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.8 + i * 0.1 }}
-                  className="mt-8 pt-6 border-t border-ink/5"
-                >
-                  <span className="text-[10px] uppercase tracking-[0.2em] text-accent font-black block mb-2">Case Study Impact</span>
-                  <p className="text-xs font-serif italic text-ink/70">
-                    &ldquo;{reason.impact}&rdquo;
-                  </p>
-                </motion.div>
-              </TiltCard>
-            ))}
-          </div>
-        </section>
-
-        {/* Client Logos Marquee */}
-        <motion.section 
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-10%" }}
-          transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-          className="py-20 border-y border-ink/5 overflow-hidden"
-        >
-          <div className="px-6 mb-12 text-center">
-            <span className="text-[10px] uppercase tracking-[0.5em] opacity-30 font-bold">In Trusted Partnership With</span>
-          </div>
-          <div className="flex gap-20 overflow-hidden relative group">
-            <motion.div 
-              animate={{ x: [0, -1000] }}
-              transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-              className="flex gap-20 items-center justify-around min-w-full"
-            >
-              {[...clientLogos, ...clientLogos].map((logo, index) => (
-                <div 
-                  key={index} 
-                  className="text-2xl md:text-4xl font-display font-black tracking-tighter opacity-20 hover:opacity-100 hover:text-accent transition-all duration-500 cursor-default px-4"
-                >
-                  {logo}.
-                </div>
-              ))}
-            </motion.div>
-          </div>
-        </motion.section>
-
-        {/* Marquee Section */}
-        <Marquee 
-          text="Identity / UI-UX / Development / Motion / Strategy / "
-          className="text-[10vw] font-display font-bold uppercase opacity-[0.03] select-none"
-        />
-
-
-
-
-        {/* 6. Final Moment */}
-        <section className="h-screen flex flex-col items-center justify-center text-center px-4 overflow-hidden relative">
-          <div className="space-y-16 z-10 max-w-6xl">
-            <CharacterReveal
-              text="Let’s craft your distinctive edge."
-              className="text-4xl sm:text-5xl md:text-[6vw] font-display font-bold leading-[0.95] tracking-[-0.04em] uppercase"
-              stagger={0.03}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8, y: 40 }}
-              whileInView={{ opacity: 1, scale: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.5, duration: 1.2, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <Link to="/contact">
-                <Magnetic>
-                  <motion.button 
-                    whileHover={{ 
-                      scale: 1.05, 
-                      backgroundColor: "#ff4d00", 
-                      color: "#121212",
-                      boxShadow: "0 0 40px rgba(255,77,0,0.4)"
-                    }}
-                    whileTap={{ scale: 0.95 }}
-                    className="px-20 py-8 bg-ink text-bg rounded-full text-xs uppercase tracking-[0.4em] font-bold border border-transparent transition-all shadow-2xl shadow-accent-purple/20"
-                  >
-                    Contact Us
-                  </motion.button>
-                </Magnetic>
-              </Link>
-            </motion.div>
-          </div>
-
-          {/* Floating background text */}
-          <motion.div 
-            className="absolute text-[30vw] font-display font-black opacity-[0.05] select-none pointer-events-none whitespace-nowrap text-gradient-alt"
-            style={{ 
-              x: useTransform(smoothProgress, [0.8, 1], [200, -200]),
-              y: useTransform(smoothProgress, [0.8, 1], [0, 100])
-            }}
-          >
-            CREATIVE STUDIO
-          </motion.div>
-        </section>
-
-        <footer className="py-12 border-t border-ink/5 flex flex-col md:flex-row justify-between items-center gap-8 px-12 opacity-40 text-[10px] uppercase tracking-widest font-bold bg-ink/[0.02] relative z-10 w-full overflow-hidden">
-          <p>© {new Date().getFullYear()} Editable. / Design Studio International</p>
-          <div className="flex flex-wrap gap-4 md:gap-8 items-center justify-center">
-            {[
-              { label: "WhatsApp: +91 76049 69891", href: "https://wa.me/917604969891", target: "_blank" },
-              { label: "Instagram", href: "https://www.instagram.com/official_editable?igsh=MWt6OWtvYm41bTEyZQ==", target: "_blank" },
-              { label: "LinkedIn", href: "https://linkedin.com", target: "_blank" },
-              { label: "Gmail", href: "mailto:editablecreativestudio@gmail.com" }
-            ].map((link) => (
-              <Magnetic key={link.label}>
-                <motion.a 
-                  href={link.href} 
-                  target={link.target}
-                  rel={link.target === "_blank" ? "noreferrer" : undefined}
-                  className={cn(
-                    "group relative hover:text-accent transition-colors duration-300 py-2 px-4 inline-block",
-                    link.label.startsWith("WhatsApp") && "text-accent font-black"
-                  )}
-                  whileHover={{ 
-                    scale: 1.05,
-                    y: -2,
-                    transition: { type: "spring", stiffness: 400, damping: 10 }
-                  }}
-                >
-                  <span className="relative z-10">{link.label}</span>
-                  <motion.span 
-                    className="absolute bottom-1 left-4 right-4 h-[1px] bg-accent origin-left"
-                    initial={{ scaleX: 0 }}
-                    whileHover={{ scaleX: 1 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                  />
-                </motion.a>
-              </Magnetic>
-            ))}
-          </div>
-        </footer>
       </div>
     </PageTransition>
   );
 }
+

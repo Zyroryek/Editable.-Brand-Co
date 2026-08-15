@@ -1,35 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
-import { Menu, X, Moon, Sun, Volume2, VolumeX } from "lucide-react";
+import { Menu, X, Moon, Sun, Volume2, VolumeX, ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Lenis from "lenis";
 import Magnetic from "./Magnetic";
 import { playNavigationSound, getSoundEnabled, setSoundEnabled } from "../lib/audio";
-import ColorwaySwitch from "./ColorwaySwitch";
-
-const NavLink = ({ to, label, onClick }: { to: string; label: string; onClick?: () => void }) => {
-  const location = useLocation();
-  const isActive = location.pathname === to;
-  const handleClick = () => {
-    playNavigationSound();
-    if (onClick) onClick();
-  };
-  return (
-    <Link to={to} onClick={handleClick} className="block py-1 md:py-1.5 pointer-events-auto">
-      <motion.span
-        className={cn(
-          "block text-lg md:text-2xl font-display font-medium hover:text-accent transition-all duration-300 pointer-events-auto uppercase tracking-tight",
-          isActive ? "text-accent" : "text-black dark:text-white"
-        )}
-        whileHover={{ x: 8 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
-      >
-        {label}
-      </motion.span>
-    </Link>
-  );
-};
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -51,7 +27,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     setSoundEnabledState(nextVal);
     setSoundEnabled(nextVal);
     if (nextVal) {
-      // Small deferred timeout so current thread context handles storage sync
       setTimeout(() => {
         playNavigationSound();
       }, 30);
@@ -59,12 +34,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    // Initialize Lenis
     const lenis = new Lenis({
       duration: 1.2,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      gestureOrientation: 'vertical',
+      orientation: "vertical",
+      gestureOrientation: "vertical",
       smoothWheel: true,
       wheelMultiplier: 1,
       touchMultiplier: 2,
@@ -82,11 +56,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     const handleScroll = () => {
       const totalScroll = document.documentElement.scrollHeight - window.innerHeight;
       const currentScroll = window.scrollY;
-      setScrollProgress(currentScroll / totalScroll);
+      setScrollProgress(totalScroll > 0 ? currentScroll / totalScroll : 0);
     };
 
-    lenis.on('scroll', handleScroll);
-    
+    lenis.on("scroll", handleScroll);
+
     return () => {
       lenis.destroy();
     };
@@ -100,207 +74,329 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
   }, [theme]);
 
-  // Scroll to top on route change
   useEffect(() => {
     if (lenisRef.current) {
       lenisRef.current.scrollTo(0, { immediate: true });
     } else {
       window.scrollTo({ top: 0 });
     }
-    setIsMenuOpen(false); // Ensure menu closes on navigation
+    setIsMenuOpen(false);
   }, [location.pathname]);
 
+  const navLinks = [
+    { to: "/", label: "Home" },
+    { to: "/about", label: "About" },
+    { to: "/#portfolio-section", label: "Work (17)" },
+    { to: "/packages", label: "Packages" },
+    { to: "/internship", label: "Internship" },
+    { to: "/profile", label: "Profile" },
+    { to: "/contact", label: "Contact" },
+    { to: "/admin", label: "Admin" },
+  ];
+
   return (
-    <div className="relative min-h-screen bg-transparent">
-      {/* Scroll Progress Bar */}
-      <motion.div 
-        className="fixed top-0 left-0 h-1 z-[1000] origin-left shadow-[0_0_8px_rgba(255,255,255,0.4)]"
-        style={{ 
-          scaleX: scrollProgress,
-          background: `linear-gradient(90deg, 
-            hsl(${(scrollProgress * 360) % 360}, 90%, 55%) 0%, 
-            hsl(${(scrollProgress * 360 + 120) % 360}, 90%, 55%) 50%, 
-            hsl(${(scrollProgress * 360 + 240) % 360}, 90%, 55%) 100%
-          )`
-        }}
+    <div className="relative min-h-screen bg-bg text-ink flex flex-col font-sans transition-colors duration-300">
+      {/* Subtle Top Scroll Progress Line */}
+      <motion.div
+        className="fixed top-0 left-0 h-[2px] z-[100] origin-left bg-accent"
+        style={{ scaleX: scrollProgress }}
       />
 
-      {/* Top Fixed Actions */}
-      <div className="fixed top-0 right-0 z-[999] p-6 md:p-8 lg:p-12 flex items-center gap-3 pointer-events-none">
-        
-        {/* Separate Theme Toggle Capsule */}
-        <div className={cn(
-          "flex items-center justify-center p-1.5 md:p-2 rounded-full backdrop-blur-2xl shadow-[0_24px_64px_rgba(0,0,0,0.12)] pointer-events-auto border transition-all duration-300",
-          theme === "light" 
-            ? "bg-stone-950 border-stone-850 text-white" 
-            : "bg-white border-neutral-200 text-neutral-950"
-        )}>
-          <Magnetic>
-            <button 
-              onClick={toggleTheme}
-              className={cn(
-                "w-9 h-9 md:w-11 md:h-11 flex items-center justify-center rounded-full bg-transparent transition-all relative overflow-hidden",
-                theme === "light"
-                  ? "text-white hover:text-accent hover:bg-white/10"
-                  : "text-neutral-950 hover:text-accent hover:bg-neutral-100"
-              )}
-              title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+      {/* Swiss Editorial Top Navigation Bar (Exact match to reference top) */}
+      <header className="sticky top-0 z-50 w-full bg-bg/90 backdrop-blur-md border-b border-ink/10 dark:border-white/10 transition-all">
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 h-16 sm:h-20 flex items-center justify-between gap-6">
+          
+          {/* Left: Brand Logo */}
+          <div className="flex items-center gap-6 sm:gap-10">
+            <Link
+              to="/"
+              onClick={playNavigationSound}
+              className="font-display font-extrabold text-lg sm:text-xl tracking-tighter uppercase text-ink hover:text-accent transition-colors"
             >
-              <AnimatePresence mode="wait">
-                {theme === "light" ? (
-                  <motion.div
-                    key="light"
-                    initial={{ y: 8, opacity: 0, rotate: -40 }}
-                    animate={{ y: 0, opacity: 1, rotate: 0 }}
-                    exit={{ y: -8, opacity: 0, rotate: 40 }}
-                    transition={{ duration: 0.25, ease: "easeOut" }}
+              EDITABLE
+            </Link>
+          </div>
+
+          {/* Right: Clean Minimal Text Nav Links */}
+          <nav className="hidden md:flex items-center gap-6 lg:gap-8">
+            {navLinks.map((link) => {
+              const isHash = link.to.includes("#");
+              const isActive = !isHash && location.pathname === link.to;
+
+              if (isHash) {
+                return (
+                  <a
+                    key={link.label}
+                    href={link.to}
+                    onClick={playNavigationSound}
+                    className="text-xs font-mono uppercase tracking-wider text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white transition-colors"
                   >
-                    <Moon size={15} className="md:size-[17px]" />
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="dark"
-                    initial={{ y: 8, opacity: 0, rotate: -40 }}
-                    animate={{ y: 0, opacity: 1, rotate: 0 }}
-                    exit={{ y: -8, opacity: 0, rotate: 40 }}
-                    transition={{ duration: 0.25, ease: "easeOut" }}
-                  >
-                    <Sun size={15} className="md:size-[17px] text-accent" />
-                  </motion.div>
+                    {link.label}
+                  </a>
+                );
+              }
+
+              return (
+                <Link
+                  key={link.to}
+                  to={link.to}
+                  onClick={playNavigationSound}
+                  className={cn(
+                    "text-xs font-mono uppercase tracking-wider transition-colors relative py-1",
+                    isActive
+                      ? "text-ink dark:text-white font-bold"
+                      : "text-ink/60 dark:text-white/60 hover:text-ink dark:hover:text-white"
+                  )}
+                >
+                  {link.label}
+                  {isActive && (
+                    <motion.div
+                      layoutId="activeNavIndicator"
+                      className="absolute bottom-0 left-0 right-0 h-[1.5px] bg-accent"
+                    />
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+
+          {/* Rightmost Controls (Theme, Audio, Mobile Hamburger) */}
+          <div className="flex items-center gap-3">
+            <Magnetic>
+              <button
+                onClick={toggleTheme}
+                className="w-8 h-8 flex items-center justify-center rounded-full border border-ink/10 dark:border-white/15 text-ink hover:border-accent hover:text-accent transition-all cursor-pointer"
+                title={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+              >
+                <AnimatePresence mode="wait">
+                  {theme === "light" ? (
+                    <motion.div
+                      key="light"
+                      initial={{ opacity: 0, rotate: -20 }}
+                      animate={{ opacity: 1, rotate: 0 }}
+                      exit={{ opacity: 0, rotate: 20 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <Moon size={14} />
+                    </motion.div>
+                  ) : (
+                    <motion.div
+                      key="dark"
+                      initial={{ opacity: 0, rotate: -20 }}
+                      animate={{ opacity: 1, rotate: 0 }}
+                      exit={{ opacity: 0, rotate: 20 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <Sun size={14} className="text-accent" />
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </button>
+            </Magnetic>
+
+            <Magnetic>
+              <button
+                onClick={toggleSound}
+                className={cn(
+                  "w-8 h-8 hidden sm:flex items-center justify-center rounded-full border border-ink/10 dark:border-white/15 text-ink hover:border-accent hover:text-accent transition-all cursor-pointer",
+                  !soundEnabled && "opacity-40"
                 )}
-              </AnimatePresence>
-            </button>
-          </Magnetic>
-        </div>
+                title={soundEnabled ? "Mute interactive audio" : "Enable interactive audio"}
+              >
+                {soundEnabled ? <Volume2 size={13} /> : <VolumeX size={13} />}
+              </button>
+            </Magnetic>
 
-        {/* Separate Colorway Switch Capsule */}
-        <div className={cn(
-          "flex items-center justify-center p-1.5 md:p-2 rounded-full backdrop-blur-2xl shadow-[0_24px_64px_rgba(0,0,0,0.12)] pointer-events-auto border transition-all duration-300",
-          theme === "light" 
-            ? "bg-stone-950 border-stone-850 text-white" 
-            : "bg-white border-neutral-200 text-neutral-950"
-        )}>
-          <ColorwaySwitch theme={theme} />
-        </div>
-
-        {/* Separate Menu Capsule */}
-        <div className="pointer-events-auto">
-          <Magnetic>
-            <button 
-              onClick={() => {
-                playNavigationSound();
-                setIsMenuOpen(!isMenuOpen);
-              }}
-              className="flex items-center gap-2.5 pl-3.5 pr-2.5 py-1.5 md:py-2.5 rounded-full bg-accent text-white hover:opacity-90 shadow-md transition-all duration-300 relative group overflow-hidden"
-            >
-              <div className="absolute inset-0 bg-white/15 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-              <span className="text-[9px] md:text-[10px] uppercase tracking-[0.25em] font-extrabold z-10 leading-none">
-                {isMenuOpen ? "Close" : "Menu"}
-              </span>
-              <div className="relative z-10 w-4 h-4 md:w-4 md:h-4 flex flex-col justify-center gap-[4px] items-center">
-                <motion.span 
-                  className="w-3.5 md:w-3.5 h-[1.5px] bg-white rounded-full origin-center"
-                  animate={isMenuOpen ? { rotate: 45, y: 2.75 } : { rotate: 0, y: 0 }}
-                  transition={{ duration: 0.25, ease: "easeInOut" }}
-                />
-                <motion.span 
-                  className="w-3.5 md:w-3.5 h-[1.5px] bg-white rounded-full origin-center"
-                  animate={isMenuOpen ? { opacity: 0, x: -10 } : { opacity: 1, x: 0 }}
-                  transition={{ duration: 0.2, ease: "easeInOut" }}
-                />
-                <motion.span 
-                  className="w-3.5 md:w-3.5 h-[1.5px] bg-white rounded-full origin-center"
-                  animate={isMenuOpen ? { rotate: -45, y: -2.75 } : { rotate: 0, y: 0 }}
-                  transition={{ duration: 0.25, ease: "easeInOut" }}
-                />
-              </div>
-            </button>
-          </Magnetic>
-        </div>
-
-      </div>
-
-      {/* Persistent Logo */}
-      <div className="fixed top-0 left-0 z-[999] p-6 md:p-8 lg:p-12 pointer-events-none">
-        <Magnetic>
-          <Link to="/" className="pointer-events-auto block">
-            <motion.div 
-              className="relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 group"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              whileHover="hover"
-            >
-              {/* Outer stylized dashed orbit ring */}
-              <motion.div 
-                className="absolute inset-0 rounded-full border border-dashed border-neutral-950 dark:border-white opacity-40 group-hover:opacity-100 animate-[spin_30s_linear_infinite]"
-                variants={{
-                  hover: { scale: 1.1 }
+            {/* Mobile Hamburger */}
+            <div className="md:hidden">
+              <button
+                onClick={() => {
+                  playNavigationSound();
+                  setIsMenuOpen(!isMenuOpen);
                 }}
-                transition={{ type: "spring", stiffness: 100, damping: 15 }}
-              />
-              {/* Inner key-ring with solid borders split */}
-              <motion.div 
-                className="absolute inset-1 rounded-full border-2 border-accent border-r-transparent group-hover:border-r-accent"
-                variants={{
-                  hover: { rotate: -180, scale: 1.05 }
-                }}
-                transition={{ type: "spring", stiffness: 120, damping: 12 }}
-              />
-              {/* Center core holding the logo image */}
-              <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center shadow-lg transition-transform group-hover:scale-95 duration-350 overflow-hidden">
-                <img 
-                  src="/logo.jpg" 
-                  alt="Editable Studio" 
-                  className="w-full h-full object-cover rounded-full"
-                  referrerPolicy="no-referrer"
-                />
-              </div>
-              {/* Dynamic Spark pulse dot */}
-              <span className="absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-accent ring-[2px] ring-white dark:ring-black animate-ping" />
-              <span className="absolute top-0 right-0 w-1.5 h-1.5 rounded-full bg-accent ring-[2px] ring-white dark:ring-black" />
-            </motion.div>
-          </Link>
-        </Magnetic>
-      </div>
-
-      {/* Fullscreen Menu Overlay */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-bg/95 backdrop-blur-3xl flex flex-col justify-start pt-16 px-6 pb-12 md:pt-20 md:px-12 md:pb-16 lg:pt-24 lg:px-20 lg:pb-20 overflow-y-auto"
-          >
-            <div className="w-full max-w-4xl mx-auto flex flex-col items-center justify-start space-y-4 md:space-y-6 pt-4 pb-12 text-center">
-              <div className="flex flex-col gap-3 md:gap-4 text-center">
-                <NavLink to="/" label="Home" onClick={() => setIsMenuOpen(false)} />
-                <NavLink to="/about" label="About" onClick={() => setIsMenuOpen(false)} />
-                <NavLink to="/packages" label="Packages" onClick={() => setIsMenuOpen(false)} />
-                <NavLink to="/profile" label="Profile" onClick={() => setIsMenuOpen(false)} />
-                <NavLink to="/internship" label="Internship" onClick={() => setIsMenuOpen(false)} />
-                <NavLink to="/contact" label="Contact" onClick={() => setIsMenuOpen(false)} />
-                <NavLink to="/admin" label="Admin Login" onClick={() => setIsMenuOpen(false)} />
-              </div>
-              
-              <div className="flex flex-col items-center gap-4 border-t border-neutral-200/50 dark:border-neutral-800/50 pt-12 w-full max-w-sm">
-                <span className="text-[10px] uppercase tracking-[0.2em] font-extrabold text-black dark:text-white opacity-50 leading-relaxed text-center">
-                  Design Studio International // Creative Network
-                </span>
-                <div className="flex flex-wrap gap-8 text-[11px] uppercase tracking-[0.2em] font-extrabold text-black dark:text-white mt-2">
-                  <a href="https://www.instagram.com/official_editable?igsh=MWt6OWtvYm41bTEyZQ==" target="_blank" rel="noreferrer" className="hover:text-accent transition-colors duration-250">Instagram</a>
-                  <a href="https://wa.me/917604969891" target="_blank" rel="noreferrer" className="hover:text-accent transition-colors duration-250">WhatsApp</a>
-                  <a href="mailto:editablecreativestudio@gmail.com" className="hover:text-accent transition-colors duration-250">Gmail</a>
-                </div>
-              </div>
+                className="w-8 h-8 flex items-center justify-center rounded-full border border-ink/10 dark:border-white/15 text-ink hover:text-accent transition-all cursor-pointer"
+                aria-label="Toggle menu"
+              >
+                {isMenuOpen ? <X size={15} /> : <Menu size={15} />}
+              </button>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          </div>
+        </div>
 
-      <main className="app-content px-6 md:px-12 lg:px-20 max-w-[1920px] mx-auto">
+        {/* Mobile Dropdown */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden border-t border-ink/10 dark:border-white/10 bg-bg px-6 py-5 space-y-3"
+            >
+              {navLinks.map((link) => {
+                const isHash = link.to.includes("#");
+                const isActive = !isHash && location.pathname === link.to;
+
+                if (isHash) {
+                  return (
+                    <a
+                      key={link.label}
+                      href={link.to}
+                      onClick={() => {
+                        playNavigationSound();
+                        setIsMenuOpen(false);
+                      }}
+                      className="block text-xs font-mono uppercase tracking-widest text-ink/70 dark:text-white/70 py-1"
+                    >
+                      {link.label}
+                    </a>
+                  );
+                }
+
+                return (
+                  <Link
+                    key={link.to}
+                    to={link.to}
+                    onClick={() => {
+                      playNavigationSound();
+                      setIsMenuOpen(false);
+                    }}
+                    className={cn(
+                      "block text-xs font-mono uppercase tracking-widest py-1 transition-colors",
+                      isActive
+                        ? "text-accent font-bold"
+                        : "text-ink/70 dark:text-white/70 hover:text-ink dark:hover:text-white"
+                    )}
+                  >
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </header>
+
+      {/* Main App Content */}
+      <main className="app-content flex-grow w-full">
         {children}
       </main>
+
+      {/* Editorial Footer (Exact Match to Reference Bottom Section: "Let's Talk / Get in touch" + Watermark) */}
+      <footer className="relative pt-24 pb-16 border-t border-ink/10 dark:border-white/10 overflow-hidden bg-bg">
+        <div className="max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12 relative z-10">
+          
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 mb-20">
+            {/* Left: Let's Talk / Get in touch */}
+            <div className="lg:col-span-7 space-y-2">
+              <h2 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-display font-bold tracking-tight text-ink">
+                Let&apos;s Talk
+              </h2>
+              <p className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-light text-ink/30 dark:text-white/30">
+                Get in touch
+              </p>
+            </div>
+
+            {/* Right: Contact & Follow Us Columns */}
+            <div className="lg:col-span-5 grid grid-cols-1 sm:grid-cols-2 gap-8 sm:gap-12 pt-4">
+              {/* CONTACT COLUMN */}
+              <div className="space-y-4">
+                <span className="text-[11px] uppercase tracking-[0.2em] font-mono font-bold text-ink/40 dark:text-white/40 block">
+                  CONTACT
+                </span>
+                <div className="space-y-2 text-sm text-ink/80 dark:text-white/80 font-mono">
+                  <p>
+                    <a
+                      href="mailto:editablecreativestudio@gmail.com"
+                      className="hover:text-accent transition-colors block"
+                    >
+                      editablecreativestudio@gmail.com
+                    </a>
+                  </p>
+                  <p>
+                    <a
+                      href="https://wa.me/917604969891"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:text-accent transition-colors block"
+                    >
+                      +91 76049 69891
+                    </a>
+                  </p>
+                </div>
+              </div>
+
+              {/* FOLLOW US COLUMN */}
+              <div className="space-y-4">
+                <span className="text-[11px] uppercase tracking-[0.2em] font-mono font-bold text-ink/40 dark:text-white/40 block">
+                  FOLLOW US
+                </span>
+                <ul className="space-y-2 text-sm text-ink/80 dark:text-white/80 font-mono">
+                  <li>
+                    <a
+                      href="https://x.com"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:text-accent transition-colors flex items-center gap-1 group"
+                    >
+                      <span>X</span>
+                      <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://www.instagram.com/official_editable?igsh=MWt6OWtvYm41bTEyZQ=="
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:text-accent transition-colors flex items-center gap-1 group"
+                    >
+                      <span>Instagram</span>
+                      <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://linkedin.com"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:text-accent transition-colors flex items-center gap-1 group"
+                    >
+                      <span>LinkedIn</span>
+                      <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </a>
+                  </li>
+                  <li>
+                    <a
+                      href="https://behance.net"
+                      target="_blank"
+                      rel="noreferrer"
+                      className="hover:text-accent transition-colors flex items-center gap-1 group"
+                    >
+                      <span>Behance</span>
+                      <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Copyright Row */}
+          <div className="pt-8 border-t border-ink/10 dark:border-white/10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-xs font-mono text-ink/50 dark:text-white/40">
+            <p>© {new Date().getFullYear()} Editable Studio. All rights reserved.</p>
+            <p>Designed with pure precision & intent.</p>
+          </div>
+
+        </div>
+
+        {/* Giant Hollow Watermark in Footer (Matching © MOKA in reference) */}
+        <div className="w-full flex justify-center items-center pointer-events-none select-none mt-12 overflow-hidden">
+          <span className="text-watermark font-display uppercase tracking-tighter whitespace-nowrap">
+            © EDITABLE
+          </span>
+        </div>
+      </footer>
     </div>
   );
 }
+

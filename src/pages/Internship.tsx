@@ -156,23 +156,26 @@ export default function Internship() {
 
   return (
     <PageTransition>
-      <div className="min-h-screen pt-40 pb-32 px-6 md:px-12 lg:px-20 max-w-[1440px] mx-auto">
+      <div className="min-h-screen pt-4 sm:pt-8 md:pt-12 pb-16 sm:pb-32 max-w-7xl mx-auto px-4 sm:px-6">
         
         {/* Navigation / Progress Indicator */}
-        <div className="mb-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
+        <div className="mb-6 sm:mb-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-6">
           <div className="flex items-center gap-3">
             {step > 1 && (
               <button 
                 onClick={() => setStep((prev) => (prev - 1) as any)}
-                className="w-10 h-10 rounded-full border border-ink/10 flex items-center justify-center hover:bg-ink hover:text-bg transition-colors"
+                className="w-9 h-9 sm:w-10 sm:h-10 rounded-full glass flex items-center justify-center hover:bg-white/20 transition-all cursor-pointer shadow-sm"
                 title="Go Back"
               >
-                <ArrowLeft size={16} />
+                <ArrowLeft size={14} className="sm:w-4 sm:h-4" />
               </button>
             )}
             <div>
-              <span className="text-[10px] uppercase tracking-[0.4em] text-accent font-bold block">Editable Studio Careers</span>
-              <h2 className="text-sm font-medium opacity-55 mt-1">
+              <div className="glass-badge mb-1">
+                <Sparkles className="w-3 h-3 text-accent animate-pulse" />
+                <span>Editable Studio Careers</span>
+              </div>
+              <h2 className="text-xs sm:text-sm font-medium opacity-60 mt-0.5 sm:mt-1">
                 {step === 1 && "Step 1: Choose Your Specialization"}
                 {step === 2 && "Step 2: Choose Commitment Type"}
                 {step === 3 && `Step 3: Direct Application for ${selectedRole}`}
@@ -181,7 +184,7 @@ export default function Internship() {
           </div>
 
           {/* Stepper bubbles */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 p-1.5 glass-pill">
             {[1, 2, 3].map((num) => (
               <div 
                 key={num}
@@ -194,12 +197,12 @@ export default function Internship() {
                     setStep(3);
                   }
                 }}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-black cursor-pointer transition-all ${
+                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-black cursor-pointer transition-all ${
                   step === num 
-                    ? "bg-accent text-bg scale-110 shadow-lg shadow-accent/20" 
+                    ? "bg-accent text-white scale-105 shadow-md shadow-accent/20" 
                     : (num === 1 || (num === 2 && selectedRole) || (num === 3 && selectedRole && selectedType))
-                      ? "bg-ink/5 hover:bg-ink/10 text-ink"
-                      : "bg-ink/5 opacity-30 cursor-not-allowed text-ink/40"
+                      ? "hover:bg-white/20 text-ink"
+                      : "opacity-30 cursor-not-allowed text-ink/40"
                 }`}
               >
                 {num}
@@ -217,87 +220,87 @@ export default function Internship() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.4 }}
-              className="space-y-12"
+              className="space-y-6 sm:space-y-12"
             >
               <div className="max-w-2xl">
-                <h1 className="text-4xl md:text-[5.5vw] font-display font-medium tracking-tight leading-none text-gradient-alt uppercase">
+                <h1 className="text-3xl sm:text-5xl md:text-[5.5vw] font-display font-medium tracking-tight leading-none text-gradient-alt uppercase">
                   Select Role.
                 </h1>
-                <p className="mt-4 text-base md:text-lg text-ink/60">
+                <p className="mt-2 sm:mt-4 text-sm sm:text-base md:text-lg text-ink/60">
                   Select the path that matches your creative strengths. We are searching for visionary interns ready to make a significant impact.
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8 pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 pt-2 sm:pt-4">
                 {/* Option A: Graphic/UI UX Designer */}
                 <motion.div 
-                  whileHover={{ y: -6, borderColor: "#ff4d00" }}
+                  whileHover={{ y: -4 }}
                   onClick={() => {
                     setSelectedRole("Graphic/UI UX Designer");
                     setStep(2);
                   }}
-                  className={`p-8 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between group min-h-[350px] relative overflow-hidden bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl shadow-xl shadow-black/10 ${
+                  className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all flex flex-col justify-between group min-h-[280px] sm:min-h-[350px] relative overflow-hidden glass-card ${
                     selectedRole === "Graphic/UI UX Designer" 
-                      ? "border-accent" 
-                      : "border-ink/20 dark:border-white/15 hover:border-accent"
+                      ? "border-accent shadow-xl shadow-accent/15" 
+                      : "hover:border-accent/50"
                   }`}
                 >
-                  <div className="absolute top-0 right-0 w-48 h-48 bg-accent/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-accent/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                   
-                  <div className="space-y-6">
-                    <div className="w-14 h-14 rounded-2xl bg-accent/10 text-accent flex items-center justify-center">
-                      <Monitor size={28} />
+                  <div className="space-y-4 sm:space-y-6 relative z-10">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl glass flex items-center justify-center text-accent shadow-inner">
+                      <Monitor size={22} className="sm:w-7 sm:h-7" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-display font-bold uppercase tracking-tight text-ink group-hover:text-accent transition-colors">
+                      <h3 className="text-xl sm:text-2xl font-display font-bold uppercase tracking-tight text-ink group-hover:text-accent transition-colors">
                         Graphic/UI UX Design
                       </h3>
-                      <p className="text-xs text-accent uppercase tracking-widest font-black mt-1">Design & Interface Specialist</p>
+                      <p className="text-[10px] sm:text-xs text-accent uppercase tracking-widest font-black mt-0.5 sm:mt-1 font-mono">Design & Interface Specialist</p>
                     </div>
-                    <p className="text-sm md:text-base text-ink/60 font-light leading-relaxed">
+                    <p className="text-xs sm:text-sm md:text-base text-ink/70 font-light leading-relaxed">
                       Assist in drafting customizable social layouts and brand campaigns, sculpting premium digital interfaces (UI/UX) for websites, launching scalable Canva/Figma templates, and crafting beautifully cohesive user-centric assets.
                     </p>
                   </div>
 
-                  <div className="pt-6 flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-ink/40 group-hover:text-accent transition-colors">
+                  <div className="pt-4 sm:pt-6 flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-ink/50 group-hover:text-accent transition-colors relative z-10">
                     <span>Select this position</span>
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </motion.div>
 
                 {/* Option B: Social Media Manager */}
                 <motion.div 
-                  whileHover={{ y: -6, borderColor: "#ff4d00" }}
+                  whileHover={{ y: -4 }}
                   onClick={() => {
                     setSelectedRole("Social Media Manager");
                     setStep(2);
                   }}
-                  className={`p-8 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between group min-h-[350px] relative overflow-hidden bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl shadow-xl shadow-black/10 ${
+                  className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all flex flex-col justify-between group min-h-[280px] sm:min-h-[350px] relative overflow-hidden glass-card ${
                     selectedRole === "Social Media Manager" 
-                      ? "border-accent" 
-                      : "border-ink/20 dark:border-white/15 hover:border-accent"
+                      ? "border-accent shadow-xl shadow-accent/15" 
+                      : "hover:border-accent/50"
                   }`}
                 >
-                  <div className="absolute top-0 right-0 w-48 h-48 bg-accent/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
+                  <div className="absolute top-0 right-0 w-48 h-48 bg-accent/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
 
-                  <div className="space-y-6">
-                    <div className="w-14 h-14 rounded-2xl bg-accent/10 text-accent flex items-center justify-center">
-                      <Instagram size={28} />
+                  <div className="space-y-4 sm:space-y-6 relative z-10">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl glass flex items-center justify-center text-accent shadow-inner">
+                      <Instagram size={22} className="sm:w-7 sm:h-7" />
                     </div>
                     <div>
-                      <h3 className="text-2xl font-display font-bold uppercase tracking-tight text-ink group-hover:text-accent transition-colors">
+                      <h3 className="text-xl sm:text-2xl font-display font-bold uppercase tracking-tight text-ink group-hover:text-accent transition-colors">
                         Social Media Manager
                       </h3>
-                      <p className="text-xs text-accent uppercase tracking-widest font-black mt-1">Audience & Branding Growth</p>
+                      <p className="text-[10px] sm:text-xs text-accent uppercase tracking-widest font-black mt-0.5 sm:mt-1 font-mono">Audience & Branding Growth</p>
                     </div>
-                    <p className="text-sm md:text-base text-ink/60 font-light leading-relaxed">
+                    <p className="text-xs sm:text-sm md:text-base text-ink/70 font-light leading-relaxed">
                       Lead content calendars, design custom social dissemination media kits, execute digital campaigns, draft trend audits, and optimize brand consistency across feed layouts.
                     </p>
                   </div>
 
-                  <div className="pt-6 flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-ink/40 group-hover:text-accent transition-colors">
+                  <div className="pt-4 sm:pt-6 flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-ink/50 group-hover:text-accent transition-colors relative z-10">
                     <span>Select this position</span>
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </motion.div>
               </div>
@@ -312,80 +315,80 @@ export default function Internship() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.4 }}
-              className="space-y-12"
+              className="space-y-6 sm:space-y-12"
             >
               <div className="max-w-2xl">
-                <span className="text-xs uppercase font-bold tracking-[0.2em] text-accent">Role: {selectedRole}</span>
-                <h1 className="text-4xl md:text-[5.5vw] font-display font-medium tracking-tight leading-none text-gradient-alt uppercase mt-2">
+                <span className="text-[10px] sm:text-xs uppercase font-bold tracking-[0.2em] text-accent font-mono">Role: {selectedRole}</span>
+                <h1 className="text-3xl sm:text-5xl md:text-[5.5vw] font-display font-medium tracking-tight leading-none text-gradient-alt uppercase mt-1 sm:mt-2">
                   Commitment.
                 </h1>
-                <p className="mt-4 text-base md:text-lg text-ink/60">
+                <p className="mt-2 sm:mt-4 text-sm sm:text-base md:text-lg text-ink/60">
                   Select your available weekly dedication level. Both pathways offer complete certificates on completion and extensive executive mentorship.
                 </p>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-8 pt-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-8 pt-2 sm:pt-4">
                 {/* Part-Time choice */}
                 <motion.div 
-                  whileHover={{ y: -6, borderColor: "#ff4d00" }}
+                  whileHover={{ y: -4 }}
                   onClick={() => {
                     setSelectedType("Part-time");
                     setStep(3);
                   }}
-                  className={`p-8 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between group min-h-[250px] relative overflow-hidden bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl shadow-xl shadow-black/10 ${
+                  className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all flex flex-col justify-between group min-h-[200px] sm:min-h-[250px] relative overflow-hidden glass-card ${
                     selectedType === "Part-time" 
-                      ? "border-accent" 
-                      : "border-ink/20 dark:border-white/15 hover:border-accent"
+                      ? "border-accent shadow-xl shadow-accent/15" 
+                      : "hover:border-accent/50"
                   }`}
                 >
-                  <div className="space-y-4">
-                    <div className="w-12 h-12 rounded-xl bg-accent/10 text-accent flex items-center justify-center">
-                      <Clock size={24} />
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl glass flex items-center justify-center text-accent">
+                      <Clock size={22} className="sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                      <h4 className="text-2xl font-display font-bold uppercase text-ink group-hover:text-accent transition-all">Part-Time Internship</h4>
-                      <p className="text-xs text-ink/40 mt-1 uppercase tracking-widest font-black">15 - 20 hours / week</p>
+                      <h4 className="text-xl sm:text-2xl font-display font-bold uppercase text-ink group-hover:text-accent transition-all">Part-Time Internship</h4>
+                      <p className="text-[10px] sm:text-xs text-accent mt-0.5 sm:mt-1 uppercase tracking-widest font-mono font-bold">15 - 20 hours / week</p>
                     </div>
-                    <p className="text-sm text-ink/60 font-light">
+                    <p className="text-xs sm:text-sm text-ink/70 font-light">
                       Ideal for contemporary students working around semester classes, or designers pursuing external certifications simultaneously. Fully remote.
                     </p>
                   </div>
                   
-                  <div className="pt-6 flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-ink/40 group-hover:text-accent transition-colors">
+                  <div className="pt-4 sm:pt-6 flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-ink/50 group-hover:text-accent transition-colors">
                     <span>Choose Part-Time</span>
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </motion.div>
 
                 {/* Full-Time choice */}
                 <motion.div 
-                  whileHover={{ y: -6, borderColor: "#ff4d00" }}
+                  whileHover={{ y: -4 }}
                   onClick={() => {
                     setSelectedType("Full-time");
                     setStep(3);
                   }}
-                  className={`p-8 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between group min-h-[250px] relative overflow-hidden bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl shadow-xl shadow-black/10 ${
+                  className={`p-6 sm:p-8 rounded-2xl cursor-pointer transition-all flex flex-col justify-between group min-h-[200px] sm:min-h-[250px] relative overflow-hidden glass-card ${
                     selectedType === "Full-time" 
-                      ? "border-accent" 
-                      : "border-ink/20 dark:border-white/15 hover:border-accent"
+                      ? "border-accent shadow-xl shadow-accent/15" 
+                      : "hover:border-accent/50"
                   }`}
                 >
-                  <div className="space-y-4">
-                    <div className="w-12 h-12 rounded-xl bg-accent/10 text-accent flex items-center justify-center">
-                      <Globe size={24} />
+                  <div className="space-y-3 sm:space-y-4">
+                    <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl glass flex items-center justify-center text-accent">
+                      <Globe size={22} className="sm:w-6 sm:h-6" />
                     </div>
                     <div>
-                      <h4 className="text-2xl font-display font-bold uppercase text-ink group-hover:text-accent transition-all">Full-Time Internship</h4>
-                      <p className="text-xs text-ink/40 mt-1 uppercase tracking-widest font-black">35 - 40 hours / week</p>
+                      <h4 className="text-xl sm:text-2xl font-display font-bold uppercase text-ink group-hover:text-accent transition-all">Full-Time Internship</h4>
+                      <p className="text-[10px] sm:text-xs text-accent mt-0.5 sm:mt-1 uppercase tracking-widest font-mono font-bold">35 - 40 hours / week</p>
                     </div>
-                    <p className="text-sm text-ink/60 font-light">
+                    <p className="text-xs sm:text-sm text-ink/70 font-light">
                       Immersive daily environment. Directly integrated with leadership, taking charge of robust key accounts. Outstanding acceleration path.
                     </p>
                   </div>
 
-                  <div className="pt-6 flex items-center gap-2 text-xs uppercase tracking-widest font-bold text-ink/40 group-hover:text-accent transition-colors">
+                  <div className="pt-4 sm:pt-6 flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs uppercase tracking-widest font-bold text-ink/50 group-hover:text-accent transition-colors">
                     <span>Choose Full-Time</span>
-                    <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight size={12} className="sm:w-3.5 sm:h-3.5 group-hover:translate-x-1 transition-transform" />
                   </div>
                 </motion.div>
               </div>
@@ -400,66 +403,66 @@ export default function Internship() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -15 }}
               transition={{ duration: 0.4 }}
-              className="space-y-12"
+              className="space-y-6 sm:space-y-12"
             >
               {/* Banner/Title */}
               <header className="max-w-4xl">
-                <div className="flex flex-wrap items-center gap-3 text-xs uppercase font-bold tracking-[0.25em] text-accent mb-4">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 text-[10px] sm:text-xs uppercase font-bold tracking-[0.2em] sm:tracking-[0.25em] text-accent mb-2 sm:mb-4">
                   <span>Careers</span>
                   <div className="w-1 h-1 rounded-full bg-accent/40" />
                   <span>{selectedRole}</span>
                   <div className="w-1 h-1 rounded-full bg-accent/40" />
-                  <span className="bg-accent/10 px-2 py-0.5 rounded text-[10px]">{selectedType}</span>
+                  <span className="glass-badge py-0.5">{selectedType}</span>
                 </div>
-                <h1 className="text-4xl md:text-[6.5vw] font-display font-medium tracking-tight leading-none text-gradient-alt uppercase">
+                <h1 className="text-3xl sm:text-5xl md:text-[6.5vw] font-display font-medium tracking-tight leading-none text-gradient-alt uppercase">
                   {roleDetails.title}.
                 </h1>
-                <p className="mt-4 text-base md:text-xl text-ink/60 max-w-2xl leading-relaxed">
+                <p className="mt-2 sm:mt-4 text-sm sm:text-base md:text-xl text-ink/60 max-w-2xl leading-relaxed">
                   Join Editable Creative Studio as a remote <strong className="font-semibold text-ink">{selectedType}</strong> helper. Check out our description, prerequisites, and submit your application coordinates below.
                 </p>
               </header>
 
               {/* Content split */}
-              <div className="grid lg:grid-cols-12 gap-12 lg:gap-20">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-20">
                 
                 {/* Details Column */}
-                <div className="lg:col-span-7 space-y-16">
+                <div className="lg:col-span-7 space-y-8 sm:space-y-16">
                   
                   {/* The Studio */}
-                  <section className="space-y-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent">
-                        <Sparkles size={16} />
+                  <section className="space-y-3 sm:space-y-6">
+                    <div className="flex items-center gap-2.5 sm:gap-3">
+                      <div className="w-8 h-8 rounded-full glass flex items-center justify-center text-accent">
+                        <Sparkles size={14} className="sm:w-4 sm:h-4" />
                       </div>
-                      <h2 className="text-xs uppercase tracking-[0.3em] font-black opacity-40">Company Description</h2>
+                      <h2 className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] font-black opacity-40 font-mono">Company Description</h2>
                     </div>
-                    <p className="text-base md:text-lg text-ink/70 leading-relaxed font-light">
+                    <p className="text-sm sm:text-base md:text-lg text-ink/75 leading-relaxed font-light">
                       {companyDescription}
                     </p>
                   </section>
 
                   {/* The Role */}
-                  <section className="space-y-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent">
-                        <Briefcase size={16} />
+                  <section className="space-y-3 sm:space-y-6">
+                    <div className="flex items-center gap-2.5 sm:gap-3">
+                      <div className="w-8 h-8 rounded-full glass flex items-center justify-center text-accent">
+                        <Briefcase size={14} className="sm:w-4 sm:h-4" />
                       </div>
-                      <h2 className="text-xs uppercase tracking-[0.3em] font-black opacity-40">Role Description</h2>
+                      <h2 className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] font-black opacity-40 font-mono">Role Description</h2>
                     </div>
-                    <p className="text-base md:text-lg text-ink/70 leading-relaxed font-light">
+                    <p className="text-sm sm:text-base md:text-lg text-ink/75 leading-relaxed font-light">
                       {roleDetails.desc}
                     </p>
                   </section>
 
                   {/* Qualifications */}
-                  <section className="space-y-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent">
-                        <GraduationCap size={16} />
+                  <section className="space-y-3 sm:space-y-6">
+                    <div className="flex items-center gap-2.5 sm:gap-3">
+                      <div className="w-8 h-8 rounded-full glass flex items-center justify-center text-accent">
+                        <GraduationCap size={14} className="sm:w-4 sm:h-4" />
                       </div>
-                      <h2 className="text-xs uppercase tracking-[0.3em] font-black opacity-40">Qualifications</h2>
+                      <h2 className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] font-black opacity-40 font-mono">Qualifications</h2>
                     </div>
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4">
                       {roleDetails.qualifications.map((qual, index) => (
                         <motion.div 
                           key={index}
@@ -467,28 +470,28 @@ export default function Internship() {
                           whileInView={{ opacity: 1, y: 0 }}
                           viewport={{ once: true }}
                           transition={{ delay: index * 0.05 }}
-                          className="flex gap-3 items-start p-4 bg-[var(--color-surface)] border-2 border-ink/20 dark:border-white/20 rounded-2xl shadow-md transition-all hover:border-accent/40"
+                          className="flex gap-2.5 sm:gap-3 items-start p-4 glass-card rounded-2xl shadow-sm transition-all hover:border-accent/40"
                         >
                           <CheckCircle2 size={16} className="text-accent shrink-0 mt-0.5" />
-                          <span className="text-sm text-ink/80 font-light">{qual}</span>
+                          <span className="text-xs sm:text-sm text-ink/80 font-light">{qual}</span>
                         </motion.div>
                       ))}
                     </div>
                   </section>
 
                   {/* Benefits */}
-                  <section className="space-y-6">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center text-accent">
-                        <Award size={16} />
+                  <section className="space-y-3 sm:space-y-6">
+                    <div className="flex items-center gap-2.5 sm:gap-3">
+                      <div className="w-8 h-8 rounded-full glass flex items-center justify-center text-accent">
+                        <Award size={14} className="sm:w-4 sm:h-4" />
                       </div>
-                      <h2 className="text-xs uppercase tracking-[0.3em] font-black opacity-40">Program Perks</h2>
+                      <h2 className="text-[10px] sm:text-xs uppercase tracking-[0.25em] sm:tracking-[0.3em] font-black opacity-40 font-mono">Program Perks</h2>
                     </div>
-                    <div className="p-6 bg-[var(--color-surface)] border-2 border-accent/20 hover:border-accent rounded-2xl flex items-center gap-4 transition-all shadow-md">
-                      <span className="text-3xl">🎓</span>
+                    <div className="p-5 sm:p-6 glass-card border-accent/20 hover:border-accent rounded-2xl flex items-center gap-4 transition-all shadow-lg">
+                      <span className="text-3xl sm:text-4xl">🎓</span>
                       <div>
-                        <h4 className="font-semibold text-base text-ink">Certificate of Completion</h4>
-                        <p className="text-sm text-ink/60 font-light">
+                        <h4 className="font-bold text-sm sm:text-base text-ink">Certificate of Completion</h4>
+                        <p className="text-xs sm:text-sm text-ink/70 font-light mt-0.5">
                           A certified internship certificate is awarded to validate your stellar contributions and visual accomplishments upon successful completion of the period.
                         </p>
                       </div>
@@ -498,9 +501,9 @@ export default function Internship() {
 
                 {/* Form Column */}
                 <div className="lg:col-span-5 relative">
-                  <div className="sticky top-28">
-                    <div className="bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl p-8 md:p-12 rounded-2xl border-2 border-ink/20 dark:border-white/15 relative overflow-hidden shadow-xl shadow-black/10">
-                      <div className="absolute top-0 right-0 w-32 h-32 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+                  <div className="sticky top-24 sm:top-28">
+                    <div className="glass-panel p-6 sm:p-8 md:p-10 rounded-2xl relative overflow-hidden shadow-2xl">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 rounded-full blur-3xl pointer-events-none" />
                       
                       <AnimatePresence mode="wait">
                         {!isSubmitted ? (
@@ -510,28 +513,28 @@ export default function Internship() {
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            className="space-y-6"
+                            className="space-y-4 sm:space-y-5"
                           >
                             <div>
-                              <h3 className="text-2xl font-display font-medium tracking-tight">Apply Online</h3>
-                              <p className="text-xs text-ink/50 mt-1 uppercase tracking-widest font-bold">Submit Your Candidacy</p>
+                              <h3 className="text-xl sm:text-2xl font-display font-medium tracking-tight">Apply Online</h3>
+                              <p className="text-[10px] sm:text-xs text-ink/50 mt-0.5 sm:mt-1 uppercase tracking-widest font-bold font-mono">Submit Your Candidacy</p>
                             </div>
 
                             {errorMsg && (
-                              <div className="p-4 bg-rose-500/10 text-rose-500 rounded-xl text-sm font-medium border border-rose-500/10">
+                              <div className="p-3 sm:p-4 bg-rose-500/10 text-rose-500 rounded-xl text-xs sm:text-sm font-medium border border-rose-500/10">
                                 {errorMsg}
                               </div>
                             )}
 
-                            <div className="space-y-5">
+                            <div className="space-y-3 sm:space-y-4">
                               {/* Name */}
                               <div>
-                                <label className="text-[10px] uppercase tracking-widest text-ink/40 font-bold block mb-2">Full Name *</label>
+                                <label className="text-[9px] sm:text-[10px] uppercase tracking-widest text-ink/50 font-bold block mb-1 font-mono">Full Name *</label>
                                 <input 
                                   required
                                   type="text" 
                                   placeholder="e.g. Robin Sen"
-                                  className="w-full bg-bg/50 border border-ink/10 rounded-xl px-5 py-4 focus:outline-none focus:border-accent transition-colors font-light text-base"
+                                  className="glass-input text-sm sm:text-base font-light"
                                   value={form.fullName}
                                   onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                                 />
@@ -539,12 +542,12 @@ export default function Internship() {
 
                               {/* Email */}
                               <div>
-                                <label className="text-[10px] uppercase tracking-widest text-ink/40 font-bold block mb-2">Email Address *</label>
+                                <label className="text-[9px] sm:text-[10px] uppercase tracking-widest text-ink/50 font-bold block mb-1 font-mono">Email Address *</label>
                                 <input 
                                   required
                                   type="email" 
                                   placeholder="name@example.com"
-                                  className="w-full bg-bg/50 border border-ink/10 rounded-xl px-5 py-4 focus:outline-none focus:border-accent transition-colors font-light text-base"
+                                  className="glass-input text-sm sm:text-base font-light"
                                   value={form.email}
                                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                                 />
@@ -552,12 +555,12 @@ export default function Internship() {
 
                               {/* Education */}
                               <div>
-                                <label className="text-[10px] uppercase tracking-widest text-ink/40 font-bold block mb-2">Education / Degree *</label>
+                                <label className="text-[9px] sm:text-[10px] uppercase tracking-widest text-ink/50 font-bold block mb-1 font-mono">Education / Degree *</label>
                                 <input 
                                   required
                                   type="text" 
                                   placeholder="e.g. BFA in Graphic Design / Self-taught"
-                                  className="w-full bg-bg/50 border border-ink/10 rounded-xl px-5 py-4 focus:outline-none focus:border-accent transition-colors font-light text-base"
+                                  className="glass-input text-sm sm:text-base font-light"
                                   value={form.degree}
                                   onChange={(e) => setForm({ ...form, degree: e.target.value })}
                                 />
@@ -565,12 +568,12 @@ export default function Internship() {
 
                               {/* Portfolio */}
                               <div>
-                                <label className="text-[10px] uppercase tracking-widest text-ink/40 font-bold block mb-2">Portfolio / Drive / Behance Link *</label>
+                                <label className="text-[9px] sm:text-[10px] uppercase tracking-widest text-ink/50 font-bold block mb-1 font-mono">Portfolio / Drive / Behance Link *</label>
                                 <input 
                                   required
                                   type="url" 
                                   placeholder="https://behance.net/work"
-                                  className="w-full bg-bg/50 border border-ink/10 rounded-xl px-5 py-4 focus:outline-none focus:border-accent transition-colors font-light text-base"
+                                  className="glass-input text-sm sm:text-base font-light"
                                   value={form.portfolioUrl}
                                   onChange={(e) => setForm({ ...form, portfolioUrl: e.target.value })}
                                 />
@@ -578,27 +581,27 @@ export default function Internship() {
 
                               {/* Canva Proficiency */}
                               <div>
-                                <label className="text-[10px] uppercase tracking-widest text-ink/40 font-bold block mb-2">Canva Experience Level *</label>
+                                <label className="text-[9px] sm:text-[10px] uppercase tracking-widest text-ink/50 font-bold block mb-1 font-mono">Canva Experience Level *</label>
                                 <select 
-                                  className="w-full bg-bg/50 border border-ink/10 rounded-xl px-5 py-4 focus:outline-none focus:border-accent transition-colors font-light text-base appearance-none"
+                                  className="glass-input text-sm sm:text-base font-light appearance-none cursor-pointer"
                                   value={form.canvaExperience}
                                   onChange={(e) => setForm({ ...form, canvaExperience: e.target.value })}
                                 >
-                                  <option value="Beginner" className="bg-bg text-ink">Beginner (Basic usage)</option>
-                                  <option value="Intermediate" className="bg-bg text-ink">Intermediate (Design custom templates)</option>
-                                  <option value="Advanced" className="bg-bg text-ink">Advanced (Expert Canva layout & features)</option>
-                                  <option value="None" className="bg-bg text-ink">None / Use other tools (e.g. Photoshop, Illustrator)</option>
+                                  <option value="Beginner" className="bg-slate-900 text-white">Beginner (Basic usage)</option>
+                                  <option value="Intermediate" className="bg-slate-900 text-white">Intermediate (Design custom templates)</option>
+                                  <option value="Advanced" className="bg-slate-900 text-white">Advanced (Expert Canva layout & features)</option>
+                                  <option value="None" className="bg-slate-900 text-white">None / Use other tools (e.g. Photoshop, Illustrator)</option>
                                 </select>
                               </div>
 
                               {/* Cover Letter / Interest */}
                               <div>
-                                <label className="text-[10px] uppercase tracking-widest text-ink/40 font-bold block mb-2">Why do you want to join and brief background *</label>
+                                <label className="text-[9px] sm:text-[10px] uppercase tracking-widest text-ink/50 font-bold block mb-1 font-mono">Why do you want to join and brief background *</label>
                                 <textarea 
                                   required
                                   rows={4}
-                                  placeholder="Share your experience and motivation to work with us'..."
-                                  className="w-full bg-bg/50 border border-ink/10 rounded-xl px-5 py-4 focus:outline-none focus:border-accent transition-colors font-light text-base resize-none"
+                                  placeholder="Share your experience and motivation to work with us..."
+                                  className="glass-input text-sm sm:text-base font-light resize-none"
                                   value={form.interest}
                                   onChange={(e) => setForm({ ...form, interest: e.target.value })}
                                 />
@@ -609,7 +612,7 @@ export default function Internship() {
                               <button
                                 type="submit"
                                 disabled={isSubmitting}
-                                className="w-full py-5 bg-accent text-bg rounded-xl font-bold uppercase tracking-[0.2em] text-xs hover:opacity-90 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-30 mt-4 shadow-xl shadow-accent/10"
+                                className="w-full py-4 bg-gradient-to-r from-accent to-accent-alt text-white rounded-xl font-bold uppercase tracking-[0.2em] text-[10px] sm:text-xs hover:opacity-95 active:scale-[0.98] transition-all flex items-center justify-center gap-2 sm:gap-3 disabled:opacity-30 mt-3 sm:mt-4 shadow-xl shadow-accent/20 cursor-pointer border border-white/20"
                               >
                                 {isSubmitting ? (
                                   "Sending application..."
@@ -649,7 +652,7 @@ export default function Internship() {
                                 onClick={() => {
                                   _resetForm();
                                 }}
-                                className="px-8 py-3.5 border border-ink/10 hover:bg-ink hover:text-bg rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all"
+                                className="px-8 py-3.5 glass hover:bg-white/20 rounded-xl text-[10px] uppercase tracking-widest font-bold transition-all cursor-pointer shadow-md"
                               >
                                 Back to selection
                               </button>

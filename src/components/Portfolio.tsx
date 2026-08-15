@@ -83,30 +83,30 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ project }) => {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-10%" }}
       transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-      className="group relative flex flex-col rounded-2xl overflow-hidden bg-[var(--color-surface)]/85 dark:bg-[var(--color-surface)]/65 backdrop-blur-xl border-2 border-ink/20 dark:border-white/15 p-4 md:p-5 h-full cursor-pointer select-none transition-all duration-500 hover:border-accent shadow-xl shadow-black/10"
+      className="group relative flex flex-col glass-card p-4 md:p-5 h-full cursor-pointer select-none transition-all duration-500 overflow-hidden"
     >
       {/* Interactive Canvas/Image Stage */}
-      <div className="relative w-full aspect-[4/5] sm:aspect-square md:aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-950">
+      <div className="relative w-full aspect-[4/5] sm:aspect-square md:aspect-[4/5] rounded-2xl overflow-hidden bg-zinc-950/80">
         <motion.img
           src={project.image}
           alt={project.title}
           className="w-full h-full object-cover transition-transform duration-700 ease-[0.25, 1, 0.5, 1]"
           style={{
             transform: hovered ? "scale(1.08)" : "scale(1)",
-            filter: "brightness(0.9)"
+            filter: "brightness(0.95)"
           }}
         />
 
         {/* Hover Grid overlay */}
         <div 
-          className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-between p-6 pointer-events-none"
+          className="absolute inset-0 bg-black/50 backdrop-blur-xs opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col justify-between p-6 pointer-events-none"
         >
           {/* Top Info Bar */}
           <div className="flex justify-between items-start translate-y-[-10px] group-hover:translate-y-0 transition-transform duration-500">
-            <span className="text-[9px] uppercase tracking-[0.25em] bg-bg/10 backdrop-blur-md text-bg py-1.5 px-3 rounded-full border border-bg/10 font-black">
+            <span className="text-[9px] uppercase tracking-[0.25em] bg-white/20 backdrop-blur-md text-white py-1.5 px-3 rounded-full border border-white/20 font-black">
               {project.categoryLabel}
             </span>
-            <span className="text-xs font-mono text-bg/70">{project.year}</span>
+            <span className="text-xs font-mono text-white/80">{project.year}</span>
           </div>
 
           {/* Bottom Info Bar */}
@@ -128,14 +128,14 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ project }) => {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.5 }}
               transition={{ type: "spring", stiffness: 400, damping: 25 }}
-              className="absolute pointer-events-none w-20 h-20 rounded-full bg-accent/90 text-bg backdrop-blur-sm shadow-xl flex flex-col items-center justify-center gap-1 overflow-hidden z-20 hidden md:flex"
+              className="absolute pointer-events-none w-20 h-20 rounded-full bg-gradient-to-r from-accent to-accent-alt text-white backdrop-blur-md shadow-2xl flex flex-col items-center justify-center gap-1 overflow-hidden z-20 hidden md:flex border border-white/30"
               style={{
                 left: coords.x - 40,
                 top: coords.y - 40,
                 willChange: "transform"
               }}
             >
-              <Eye className="w-4 h-4 text-bg" />
+              <Eye className="w-4 h-4 text-white" />
               <span className="text-[8px] uppercase tracking-widest font-black font-sans">
                 Observe
               </span>
@@ -148,7 +148,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ project }) => {
       <div className="mt-5 space-y-2 flex-grow flex flex-col justify-between">
         <div>
           <div className="flex items-center justify-between mb-1">
-            <h3 className="text-base md:text-lg font-display font-bold uppercase tracking-tight text-ink">
+            <h3 className="text-base md:text-lg font-display font-bold uppercase tracking-tight text-ink group-hover:text-accent transition-colors">
               {project.title}
             </h3>
             <ArrowUpRight className="w-4 h-4 text-ink/30 group-hover:text-accent group-hover:translate-x-1 group-hover:-translate-y-1 transition-all duration-300" />
@@ -158,7 +158,7 @@ const PortfolioCard: React.FC<PortfolioCardProps> = ({ project }) => {
           </p>
         </div>
         
-        <div className="pt-3 border-t border-ink/5 mt-2 flex justify-between items-center text-[10px] uppercase tracking-widest text-[#9333EA] dark:text-[#A855F7] font-bold">
+        <div className="pt-3 border-t border-ink/5 mt-2 flex justify-between items-center text-[10px] uppercase tracking-widest text-accent font-bold">
           <span>{project.categoryLabel}</span>
           <span className="font-mono text-ink/40">{project.year}</span>
         </div>
@@ -186,29 +186,28 @@ export default function Portfolio() {
         className="mb-12 md:mb-16 flex flex-col md:flex-row md:items-end justify-between gap-8"
       >
         <div>
-          <div className="flex items-center gap-2 mb-3">
-            <Sparkles className="w-4 h-4 text-accent animate-pulse" />
-            <span className="text-[10px] uppercase tracking-[0.4em] text-accent font-black">Featured Direction</span>
+          <div className="flex items-baseline gap-3">
+            <span className="text-2xl sm:text-3xl font-display text-ink/40 font-light">(17)</span>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-display font-bold tracking-tight uppercase leading-none text-ink">
+              Selected Work
+            </h2>
           </div>
-          <h2 className="text-4xl md:text-6xl font-display font-medium tracking-tight uppercase leading-none">
-            Selected Work
-          </h2>
         </div>
 
         {/* Categories Filtering Tabs */}
-        <div className="flex items-center gap-2 p-1.5 bg-ink/5 border border-ink/5 rounded-full self-start md:self-auto">
+        <div className="flex items-center gap-1.5 p-1.5 border border-ink/10 dark:border-white/10 rounded-full self-start md:self-auto bg-surface/50">
           {([
             { id: "all", label: "All Cases" },
-            { id: "logo", label: "Logos" },
+            { id: "logo", label: "Identity" },
             { id: "poster", label: "Posters" }
           ] as const).map((tab) => (
             <button
               key={tab.id}
               onClick={() => setFilter(tab.id)}
-              className={`px-5 py-2.5 rounded-full text-[10px] font-sans font-bold uppercase tracking-widest transition-all ${
+              className={`px-5 py-2 rounded-full text-xs font-mono font-bold uppercase tracking-widest transition-all cursor-pointer ${
                 filter === tab.id
-                  ? "bg-ink text-bg shadow-md"
-                  : "text-ink/60 hover:text-ink hover:bg-ink/[0.03]"
+                  ? "bg-ink text-bg dark:bg-white dark:text-ink shadow-sm"
+                  : "text-ink/60 hover:text-ink hover:bg-ink/5 dark:hover:bg-white/5"
               }`}
             >
               {tab.label}
