@@ -155,15 +155,15 @@ export default function Home() {
             <span className="font-semibold">INDEPENDENCE SPECIAL (AUG 15 – AUG 30): 100% FREE WEBSITE BUILD ({remainingSlots} OF 15 SLOTS LEFT)</span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-14 items-center">
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center">
             
             {/* Left Hero Column: Massive Stacked Bold Typography */}
-            <div className="md:col-span-7 lg:col-span-7 space-y-6 md:space-y-8">
+            <div className="md:col-span-6 lg:col-span-6 space-y-6 md:space-y-8">
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="text-4xl sm:text-6xl md:text-7xl lg:text-[5vw] font-display font-black tracking-[-0.03em] text-ink leading-[0.98] uppercase"
+                className="text-4xl sm:text-6xl md:text-6xl lg:text-[4.6vw] font-display font-black tracking-[-0.03em] text-ink leading-[0.98] uppercase"
               >
                 CRAFTING<br />
                 BOLD<br />
@@ -209,8 +209,6 @@ export default function Home() {
                   </button>
                 </div>
 
-
-
               </motion.div>
             </div>
 
@@ -219,9 +217,9 @@ export default function Home() {
               initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="md:col-span-5 lg:col-span-5 w-full flex justify-center md:justify-end"
+              className="md:col-span-6 lg:col-span-6 w-full flex justify-center md:justify-end"
             >
-              <div className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-zinc-900 shadow-2xl border border-ink/10 dark:border-white/10 group">
+              <div className="relative w-full max-w-xl md:max-w-none overflow-hidden rounded-3xl bg-zinc-900 shadow-2xl border border-ink/10 dark:border-white/10 group">
                 <img
                   src={heroDeskWorkspace}
                   onError={(e) => {
