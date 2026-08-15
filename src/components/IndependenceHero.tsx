@@ -659,7 +659,7 @@ export default function IndependenceHero({ onScrollToStudioHero }: IndependenceH
                       <button
                         type="submit"
                         disabled={isSubmitting || !formData.fullName || !formData.email || !formData.phone}
-                        className="w-full py-3.5 bg-gradient-to-r from-[#E11D48] to-[#be123c] hover:opacity-90 text-white rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer mt-2 shadow-lg shadow-rose-500/25 min-h-[44px]"
+                        className="w-full py-3.5 bg-gradient-to-r from-[#E11D48] to-[#be123c] hover:opacity-90 text-white rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-all disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer mt-2 shadow-lg shadow-rose-500/25 min-h-[44px]"
                       >
                         {isSubmitting ? (
                           <span>Reserving Slot #{selectedSlotNumber} in Database...</span>
@@ -732,7 +732,7 @@ export default function IndependenceHero({ onScrollToStudioHero }: IndependenceH
                     <div className="pt-2 flex gap-3">
                       <button
                         onClick={() => setActiveTab("claim")}
-                        className="flex-1 py-3.5 bg-gradient-to-r from-[#E11D48] to-[#be123c] hover:opacity-90 text-white rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px] shadow-lg shadow-rose-500/25"
+                        className="flex-1 py-3.5 bg-gradient-to-r from-[#E11D48] to-[#be123c] hover:opacity-90 text-white rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px] shadow-lg shadow-rose-500/25"
                       >
                         <span>Claim Your Slot #{selectedSlotNumber} Now</span>
                         <ArrowRight size={13} />

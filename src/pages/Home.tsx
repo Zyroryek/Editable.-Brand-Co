@@ -6,7 +6,8 @@ import { ArrowUpRight, Sparkles, ArrowRight, Check, Info, ShieldCheck, Clock, Gl
 import Portfolio from "../components/Portfolio";
 import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
 import { collection, addDoc, getDocs, query, where, serverTimestamp } from "firebase/firestore";
-import founderImage from "../assets/images/founder_portrait_1786780454996.jpg";
+
+import heroDeskWorkspace from "../assets/images/hero_desk_workspace_1786799868803.jpg";
 
 const PACKAGES = [
   { 
@@ -127,104 +128,122 @@ export default function Home() {
       <div className="relative w-full">
 
         {/* 1. TOP SPECIAL OFFER NOTICE BAR (Aug 15 - Aug 30 Independence Day Free Website Offer) */}
-        <div className="w-full bg-ink text-bg px-6 py-2.5 flex items-center justify-between text-xs font-mono border-b border-ink/20">
-          <div className="max-w-[1440px] mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div className="w-full bg-gradient-to-r from-[#FF9933] via-amber-500/10 to-[#138808] text-slate-900 dark:text-white px-4 sm:px-6 py-3 border-b border-amber-500/30 shadow-sm">
+          <div className="max-w-[1440px] mx-auto w-full flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-accent animate-ping" />
-              <span className="font-bold tracking-wider uppercase text-[11px]">
-                Independence Special (Aug 15 – Aug 30): 100% Free Website Build ({remainingSlots} of 15 Slots Left)
+              <span className="w-2 h-2 rounded-full bg-[#000080] dark:bg-amber-400 animate-ping shrink-0" />
+              <span className="font-mono font-bold tracking-wider uppercase text-[10px] sm:text-[11px] drop-shadow-xs">
+                🇮🇳 Independence Special (Aug 15 – Aug 30): 100% Free Website Build ({remainingSlots} of 15 Slots Left)
               </span>
             </div>
             <button
               onClick={() => setIsOfferModalOpen(true)}
-              className="text-[11px] uppercase tracking-widest text-accent hover:underline font-bold flex items-center gap-1 cursor-pointer"
+              className="text-[10px] sm:text-[11px] uppercase tracking-widest text-[#000080] dark:text-amber-400 font-mono font-extrabold flex items-center gap-1.5 cursor-pointer bg-white/90 dark:bg-black/70 hover:bg-white dark:hover:bg-black px-3.5 py-1.5 rounded-full shadow-xs transition-all hover:scale-105 active:scale-95"
             >
-              <span>Claim Free Slot #{nextAvailableSlot} (₹0)</span>
+              <span>CLAIM FREE SLOT #{nextAvailableSlot} (₹0)</span>
               <ArrowRight size={12} />
             </button>
           </div>
         </div>
 
-        {/* 2. HERO SECTION (EXACT REPLICA OF THE TOP PART OF REFERENCE IMAGE) */}
-        <section className="pt-16 sm:pt-24 md:pt-32 pb-20 md:pb-28 max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+        {/* 2. HERO SECTION */}
+        <section className="pt-10 sm:pt-16 md:pt-20 pb-16 md:pb-24 max-w-[1440px] mx-auto px-6 sm:px-8 lg:px-12">
+          
+          {/* Sub-Notice line for desktop matching screenshot 2 */}
+          <div className="hidden lg:flex items-center gap-2 text-xs font-mono tracking-wider uppercase text-ink/80 dark:text-white/80 mb-8">
+            <span className="w-2 h-2 rounded-full bg-accent animate-pulse shrink-0" />
+            <span className="font-semibold">INDEPENDENCE SPECIAL (AUG 15 – AUG 30): 100% FREE WEBSITE BUILD ({remainingSlots} OF 15 SLOTS LEFT)</span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-14 items-center">
             
-            {/* Left Hero Column: Massive High-Contrast Typography */}
-            <div className="lg:col-span-8 space-y-8 md:space-y-12">
+            {/* Left Hero Column: Massive Stacked Bold Typography */}
+            <div className="md:col-span-7 lg:col-span-7 space-y-6 md:space-y-8">
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                className="text-4xl sm:text-6xl md:text-7xl lg:text-[5.4vw] font-display font-bold tracking-[-0.035em] text-ink leading-[1.04] uppercase"
+                className="text-4xl sm:text-6xl md:text-7xl lg:text-[5vw] font-display font-black tracking-[-0.03em] text-ink leading-[0.98] uppercase"
               >
-                Crafting bold brands{" "}
-                <span className="font-serif italic font-normal lowercase tracking-normal text-accent">&amp;</span>{" "}
-                digital experiences.
+                CRAFTING<br />
+                BOLD<br />
+                BRANDS <span className="text-accent font-sans font-normal">&amp;</span><br />
+                DIGITAL<br />
+                EXPERIENCES.
               </motion.h1>
 
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                className="space-y-8 max-w-2xl"
+                className="space-y-6 max-w-xl"
               >
-                <p className="text-base sm:text-lg md:text-xl text-ink/60 dark:text-white/60 font-light leading-relaxed">
+                <p className="text-base sm:text-lg md:text-xl text-ink/70 dark:text-white/70 font-normal leading-relaxed">
                   We turn ambitious ideas into iconic brand identities, bespoke websites, and digital experiences that convert.
                 </p>
 
-                <div className="flex flex-wrap items-center gap-4 pt-2">
+                {/* Pill Action Buttons Row */}
+                <div className="flex flex-wrap items-center gap-3 pt-2">
                   <Link
                     to="/packages"
-                    className="px-8 py-4 bg-ink text-white dark:bg-white dark:text-zinc-950 text-xs font-mono uppercase tracking-[0.2em] font-bold rounded-full hover:bg-accent hover:text-white dark:hover:bg-accent dark:hover:text-white transition-all shadow-md"
+                    className="px-7 py-3.5 bg-ink text-white dark:bg-accent dark:text-white text-xs font-mono uppercase tracking-[0.16em] font-bold rounded-full hover:bg-accent hover:text-white dark:hover:opacity-90 transition-all shadow-md flex items-center gap-2 cursor-pointer group"
                   >
-                    Explore Packages
+                    <span>EXPLORE PACKAGES</span>
+                    <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
                   </Link>
 
                   <Link
                     to="/contact"
-                    className="px-8 py-4 border border-ink/20 dark:border-white/20 text-ink dark:text-white text-xs font-mono uppercase tracking-[0.2em] font-bold rounded-full hover:border-ink dark:hover:border-white transition-all"
+                    className="px-7 py-3.5 border border-ink/30 dark:border-white/30 text-ink dark:text-white text-xs font-mono uppercase tracking-[0.16em] font-bold rounded-full hover:bg-ink/5 dark:hover:bg-white/10 transition-all flex items-center gap-2 cursor-pointer group"
                   >
-                    Get in Touch
+                    <span>GET IN TOUCH</span>
+                    <ArrowRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
                   </Link>
 
                   <button
                     onClick={() => setIsOfferModalOpen(true)}
-                    className="px-6 py-4 text-xs font-mono uppercase tracking-[0.2em] font-bold text-accent hover:underline flex items-center gap-1.5 cursor-pointer"
+                    className="px-6 py-3.5 bg-amber-500/10 dark:bg-white/10 border border-amber-500/30 dark:border-white/20 text-accent dark:text-amber-400 text-xs font-mono uppercase tracking-[0.16em] font-bold rounded-full flex items-center gap-2 transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-xs"
                   >
-                    <Sparkles size={14} />
-                    <span>Free Offer (₹0)</span>
+                    <Sparkles size={14} className="text-accent animate-pulse" />
+                    <span>FREE OFFER (₹0)</span>
                   </button>
                 </div>
+
+
+
               </motion.div>
             </div>
 
-            {/* Right Hero Column: Editorial Portrait */}
+            {/* Right Hero Column: High Quality Desk Laptop Workspace Photo */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.96 }}
+              initial={{ opacity: 0, scale: 0.97 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-              className="lg:col-span-4 w-full flex justify-end"
+              transition={{ duration: 0.9, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+              className="md:col-span-5 lg:col-span-5 w-full flex justify-center md:justify-end"
             >
-              <div className="relative w-full max-w-sm sm:max-w-md aspect-[3/4] overflow-hidden rounded-2xl bg-zinc-900 shadow-xl border border-ink/10 dark:border-white/10 group">
+              <div className="relative w-full max-w-lg overflow-hidden rounded-3xl bg-zinc-900 shadow-2xl border border-ink/10 dark:border-white/10 group">
                 <img
-                  src={founderImage}
+                  src={heroDeskWorkspace}
                   onError={(e) => {
-                    // Fallback to static public path if asset bundle encounters any issues
+                    // Fallback to high resolution desk mockup URL if local bundle asset path ever varies
                     const target = e.currentTarget;
-                    if (target.src !== window.location.origin + "/founder.jpg") {
-                      target.src = "/founder.jpg";
+                    if (!target.src.includes("unsplash")) {
+                      target.src = "https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1200&auto=format&fit=crop";
                     }
                   }}
-                  alt="Founder & Creative Director - Editable Creative Studio"
-                  className="w-full h-full object-cover object-center transition-all duration-700 group-hover:scale-105"
+                  alt="Editable Creative Studio - Laptop Desk Workspace"
+                  className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-103"
                   referrerPolicy="no-referrer"
                   loading="eager"
                 />
                 
-                {/* Subtle Studio Badge on Image */}
-                <div className="absolute bottom-4 left-4 right-4 bg-bg/85 dark:bg-black/85 backdrop-blur-md px-4 py-2.5 rounded-xl border border-ink/10 dark:border-white/10 flex justify-between items-center text-[10px] font-mono uppercase tracking-wider text-ink dark:text-white">
-                  <span className="font-bold">Editable Creative Studio</span>
-                  <span className="text-ink/60 dark:text-white/60 font-medium">Est. 2024</span>
+                {/* Overlay Studio Badge */}
+                <div className="absolute bottom-4 left-4 right-4 bg-bg/90 dark:bg-black/85 backdrop-blur-md px-4 py-3 rounded-2xl border border-ink/10 dark:border-white/10 flex justify-between items-center text-[10px] font-mono uppercase tracking-wider text-ink dark:text-white shadow-md">
+                  <span className="font-bold flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                    BRAND STRATEGY &amp; DIGITAL DESIGN
+                  </span>
+                  <span className="text-accent font-bold">EDITABLE STUDIO</span>
                 </div>
               </div>
             </motion.div>
@@ -474,7 +493,7 @@ export default function Home() {
                       <button
                         type="submit"
                         disabled={isSubmitting || !formData.fullName || !formData.email || !formData.phone}
-                        className="w-full py-3.5 bg-accent hover:opacity-90 text-white rounded-xl text-xs font-mono font-bold uppercase tracking-wider transition-all disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer mt-2"
+                        className="w-full py-3.5 bg-accent hover:opacity-90 text-white rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-all disabled:opacity-40 flex items-center justify-center gap-2 cursor-pointer mt-2"
                       >
                         {isSubmitting ? (
                           <span>Reserving Slot #{selectedSlotNumber}...</span>

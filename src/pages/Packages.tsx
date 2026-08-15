@@ -1,10 +1,11 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import PageTransition from "../components/PageTransition";
-import { cn } from "@/lib/utils";
-import { Link } from "react-router-dom";
 import Magnetic from "../components/Magnetic";
 import TextReveal from "../components/TextReveal";
+import { db, handleFirestoreError, OperationType } from "@/lib/firebase";
+import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { X, CheckCircle2, Sparkles, ArrowRight } from "lucide-react";
 
 const PACKAGES = [
   { 
@@ -74,13 +75,57 @@ const PACKAGES = [
 ];
 
 export default function Packages() {
-  const [selected, setSelected] = useState(PACKAGES[0]);
+  const [selectedPackage, setSelectedPackage] = useState<typeof PACKAGES[0] | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    businessName: "",
+    details: ""
+  });
+
+  const handleBookSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedPackage || !form.name.trim() || !form.email.trim() || !form.phone.trim()) return;
+
+    setIsSubmitting(true);
+    try {
+      const payload = {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim(),
+        businessName: form.businessName.trim() || "Independent Client",
+        package: selectedPackage.name,
+        details: `[Package Booking: ${selectedPackage.name}] Needs/Requirements: ${form.details.trim() || "No specific notes provided"}`
+      };
+
+      const res = await fetch('/api/inquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to submit inquiry');
+      }
+
+      setIsSuccess(true);
+    } catch (err: any) {
+      console.error("Error submitting package booking:", err);
+      alert(err?.message || "Failed to submit booking. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <PageTransition>
-      <div className="min-h-screen pt-4 sm:pt-8 md:pt-12 pb-16 sm:pb-24 max-w-7xl mx-auto flex flex-col px-4 sm:px-6">
-        <div className="mb-8 sm:mb-16">
-          <div className="glass-badge mb-3 sm:mb-4">
+      <div className="min-h-screen pt-4 sm:pt-8 md:pt-12 pb-16 sm:pb-24 max-w-4xl mx-auto flex flex-col px-4 sm:px-6">
+        <div className="mb-10 text-center">
+          <div className="glass-badge mb-3 sm:mb-4 inline-flex">
             <span className="w-1.5 h-1.5 rounded-full bg-accent animate-ping" />
             <span>Creative Solutions</span>
           </div>
@@ -92,116 +137,201 @@ export default function Packages() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="text-xs sm:text-sm md:text-base font-light opacity-60 max-w-xl uppercase tracking-widest font-mono"
+            className="text-xs sm:text-sm md:text-base font-light opacity-60 max-w-xl mx-auto uppercase tracking-widest font-mono"
           >
-            Explore our tailored creative solutions, purpose-built from identity foundations through digital user experiences to immersive video motion frameworks.
+            Explore our tailored creative solutions. Select any ecosystem below to submit your project needs directly to our studio database.
           </motion.p>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-8 sm:gap-12 md:gap-16 items-start">
-        {/* Left Side - Package List */}
-        <div className="w-full md:w-1/3 flex flex-col">
-          <span className="text-[10px] sm:text-xs uppercase tracking-widest opacity-40 font-mono mb-4 sm:mb-6 block font-bold">Offerings Menu</span>
-          <div className="flex flex-row md:flex-col gap-2 sm:gap-3 overflow-x-auto md:overflow-visible pb-2 md:pb-0 scrollbar-none">
-            {PACKAGES.map((pkg) => (
-              <button
-                key={pkg.id}
-                onClick={() => setSelected(pkg)}
-                className={cn(
-                  "text-left group relative whitespace-nowrap md:whitespace-normal px-4 py-3 rounded-2xl transition-all duration-300 flex-shrink-0 md:flex-shrink cursor-pointer",
-                  selected.id === pkg.id 
-                    ? "glass-card border-accent/40 shadow-lg shadow-accent/10" 
-                    : "glass hover:border-white/20 opacity-70 hover:opacity-100"
-                )}
-              >
-                <div className="flex items-center justify-between">
-                  <motion.div 
-                    className={cn(
-                      "text-sm sm:text-xl md:text-2xl font-display font-bold transition-all duration-300",
-                      selected.id === pkg.id ? "text-accent" : "text-ink group-hover:text-accent"
-                    )}
-                  >
-                    {pkg.name}
-                  </motion.div>
-                  {selected.id === pkg.id && (
-                    <motion.div 
-                      layoutId="package-active-dot" 
-                      className="w-2 h-2 rounded-full bg-accent ml-2 shrink-0 hidden sm:block" 
-                    />
-                  )}
-                </div>
-                <div className="text-[10px] opacity-50 font-mono mt-1 hidden md:block">{pkg.bestFor}</div>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Right Side - Dynamic Content */}
-        <div className="w-full md:w-2/3">
-          <AnimatePresence mode="wait">
+        {/* TOP BOOKING TILE (Appears when customer clicks Book This Ecosystem) */}
+        <AnimatePresence>
+          {selectedPackage && (
             <motion.div
-              key={selected.id}
-              initial={{ opacity: 0, scale: 0.96 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.04 }}
+              initial={{ opacity: 0, height: 0, y: -20 }}
+              animate={{ opacity: 1, height: "auto", y: 0 }}
+              exit={{ opacity: 0, height: 0, y: -20 }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              className="glass-panel p-6 sm:p-10 md:p-14 space-y-6 sm:space-y-10 md:space-y-12 relative overflow-hidden"
+              className="overflow-hidden mb-12"
             >
-              {/* Background ambient lighting */}
-              <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl pointer-events-none" />
+              <div className="glass-panel p-6 sm:p-10 border-accent/40 shadow-2xl relative bg-ink/[0.03] dark:bg-white/[0.03]">
+                <button
+                  onClick={() => {
+                    setSelectedPackage(null);
+                    setIsSuccess(false);
+                  }}
+                  className="absolute top-4 right-4 w-9 h-9 rounded-full bg-ink/5 dark:bg-white/5 border border-ink/10 dark:border-white/10 flex items-center justify-center text-ink/70 hover:text-ink dark:hover:text-white transition-all cursor-pointer"
+                >
+                  <X size={18} />
+                </button>
 
-              <div className="space-y-2 sm:space-y-3 relative z-10">
-                <p className="text-[9px] sm:text-[10px] uppercase tracking-[0.25em] opacity-40 font-mono font-bold">Investment Range</p>
-                <h2 className="text-3xl sm:text-5xl md:text-6xl font-display font-black text-accent">{selected.price}</h2>
+                {isSuccess ? (
+                  <div className="text-center py-8 space-y-4">
+                    <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 border border-emerald-500/20 rounded-full flex items-center justify-center mx-auto">
+                      <CheckCircle2 size={32} />
+                    </div>
+                    <h3 className="text-2xl font-display font-bold">Booking Request Received!</h3>
+                    <p className="text-xs font-mono uppercase tracking-widest opacity-70 max-w-md mx-auto">
+                      We have logged your request for <span className="text-accent font-bold">{selectedPackage.name}</span> in our secure database. Our team will review your needs and contact you within 24 hours.
+                    </p>
+                    <button
+                      onClick={() => {
+                        setIsSuccess(false);
+                        setSelectedPackage(null);
+                      }}
+                      className="px-6 py-3 bg-ink text-white dark:bg-white dark:text-ink text-xs font-mono uppercase tracking-widest font-bold rounded-xl cursor-pointer mt-4"
+                    >
+                      Close & Explore More
+                    </button>
+                  </div>
+                ) : (
+                  <form onSubmit={handleBookSubmit} className="space-y-6">
+                    <div className="flex items-center gap-2 text-accent font-mono text-xs uppercase tracking-widest font-bold">
+                      <Sparkles size={14} />
+                      <span>Booking Ecosystem: {selectedPackage.name} ({selectedPackage.price})</span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-[10px] font-mono uppercase tracking-widest opacity-60 block mb-1">Your Name *</label>
+                        <input
+                          type="text"
+                          required
+                          placeholder="e.g. Alex Taylor"
+                          className="w-full glass-input text-sm px-4 py-3 rounded-xl"
+                          value={form.name}
+                          onChange={(e) => setForm({ ...form, name: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-mono uppercase tracking-widest opacity-60 block mb-1">Email Address *</label>
+                        <input
+                          type="email"
+                          required
+                          placeholder="alex@example.com"
+                          className="w-full glass-input text-sm px-4 py-3 rounded-xl"
+                          value={form.email}
+                          onChange={(e) => setForm({ ...form, email: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-mono uppercase tracking-widest opacity-60 block mb-1">Phone / WhatsApp *</label>
+                        <input
+                          type="tel"
+                          required
+                          placeholder="+91 98765 43210"
+                          className="w-full glass-input text-sm px-4 py-3 rounded-xl"
+                          value={form.phone}
+                          onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] font-mono uppercase tracking-widest opacity-60 block mb-1">Company / Brand Name</label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Studio Vertex"
+                          className="w-full glass-input text-sm px-4 py-3 rounded-xl"
+                          value={form.businessName}
+                          onChange={(e) => setForm({ ...form, businessName: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[10px] font-mono uppercase tracking-widest opacity-60 block mb-1">Your Project Needs & Goals</label>
+                      <textarea
+                        rows={3}
+                        placeholder="Describe your vision, specific requirements, timeline or goals..."
+                        className="w-full glass-input text-sm p-4 rounded-xl resize-none"
+                        value={form.details}
+                        onChange={(e) => setForm({ ...form, details: e.target.value })}
+                      />
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-2">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPackage(null)}
+                        className="px-6 py-3 rounded-xl text-xs font-mono uppercase tracking-wider border border-ink/10 dark:border-white/10 hover:border-ink/30 cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="px-8 py-3 bg-gradient-to-r from-accent to-accent-alt text-white rounded-xl text-xs font-mono uppercase tracking-widest font-bold cursor-pointer shadow-lg shadow-accent/20 disabled:opacity-50"
+                      >
+                        {isSubmitting ? "Storing in Database..." : "Confirm & Save to Admin Portal →"}
+                      </button>
+                    </div>
+                  </form>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* OFFERINGS MENU: Centered Tiles Stacked One by One */}
+        <div className="space-y-6">
+          {PACKAGES.map((pkg, index) => (
+            <motion.div
+              key={pkg.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.1, duration: 0.5 }}
+              className="glass-panel p-6 sm:p-8 md:p-10 space-y-6 relative overflow-hidden group hover:border-accent/40 transition-all duration-500 shadow-xl"
+            >
+              <div className="absolute top-0 right-0 w-48 h-48 bg-accent/5 rounded-full blur-3xl pointer-events-none group-hover:bg-accent/10 transition-all" />
+
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-ink/10 pb-6 relative z-10">
+                <div>
+                  <span className="text-[10px] font-mono uppercase tracking-widest opacity-50 block mb-1">Offer #{index + 1} • {pkg.bestFor}</span>
+                  <h3 className="text-2xl sm:text-3xl font-display font-bold text-ink dark:text-white group-hover:text-accent transition-colors">{pkg.name}</h3>
+                </div>
+                <div className="text-right md:text-right">
+                  <span className="text-[10px] font-mono uppercase tracking-widest opacity-50 block">Investment</span>
+                  <span className="text-xl sm:text-2xl font-display font-black text-accent">{pkg.price}</span>
+                </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 md:gap-12 relative z-10">
-                <div className="space-y-3 sm:space-y-4">
-                  <p className="text-[10px] sm:text-xs uppercase tracking-widest opacity-40 font-mono font-bold">Purpose</p>
-                  <p className="text-base sm:text-xl md:text-2xl leading-relaxed font-light text-ink/90">
-                    {selected.desc}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 relative z-10">
+                <div className="space-y-2">
+                  <h4 className="text-[10px] font-mono uppercase tracking-widest opacity-50 font-bold">Purpose</h4>
+                  <p className="text-sm sm:text-base font-light text-ink/80 leading-relaxed">
+                    {pkg.desc}
                   </p>
-                  <div className="glass px-3 py-1.5 rounded-xl inline-block text-xs italic opacity-70">
-                    Best for: {selected.bestFor}
-                  </div>
                 </div>
-
-                <div className="space-y-3 sm:space-y-4">
-                  <p className="text-[10px] sm:text-xs uppercase tracking-widest opacity-40 font-mono font-bold">What's Inside</p>
-                  <ul className="space-y-2.5 sm:space-y-3">
-                    {selected.includes.map((item, i) => (
-                      <motion.li 
-                        key={i} 
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 + i * 0.05, duration: 0.4 }}
-                        className="flex items-start gap-2.5 sm:gap-3 text-xs sm:text-sm uppercase font-medium tracking-wide text-ink/80"
-                      >
-                        <span className="text-accent font-bold mt-0.5">•</span> {item}
-                      </motion.li>
+                <div className="space-y-2">
+                  <h4 className="text-[10px] font-mono uppercase tracking-widest opacity-50 font-bold">What's Included</h4>
+                  <ul className="space-y-1.5">
+                    {pkg.includes.map((item, i) => (
+                      <li key={i} className="flex items-center gap-2 text-xs uppercase font-medium text-ink/70">
+                        <span className="text-accent">•</span> {item}
+                      </li>
                     ))}
                   </ul>
                 </div>
               </div>
 
-              <div className="pt-4 sm:pt-8 md:pt-10 flex justify-center relative z-10 border-t border-ink/5">
-                <Link to="/contact" className="w-full">
-                  <Magnetic>
-                    <motion.button 
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      className="w-full py-4 sm:py-5 md:py-6 bg-gradient-to-r from-accent to-accent-alt text-white rounded-2xl text-[10px] sm:text-xs uppercase tracking-[0.3em] sm:tracking-[0.4em] font-black transition-all duration-300 shadow-xl shadow-accent/25 cursor-pointer border border-white/20"
-                    >
-                      Book This Ecosystem →
-                    </motion.button>
-                  </Magnetic>
-                </Link>
+              <div className="pt-4 flex justify-center relative z-10 border-t border-ink/5">
+                <div className="w-full">
+                  <motion.button
+                    onClick={() => {
+                      setSelectedPackage(pkg);
+                      window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }}
+                    whileHover={{ scale: 1.01 }}
+                    whileTap={{ scale: 0.99 }}
+                    className="w-full py-4 bg-gradient-to-r from-accent to-accent-alt text-white rounded-full text-xs font-mono uppercase tracking-[0.25em] font-bold transition-all shadow-md shadow-accent/20 cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <span>Book This Ecosystem</span>
+                    <ArrowRight size={14} />
+                  </motion.button>
+                </div>
               </div>
             </motion.div>
-          </AnimatePresence>
+          ))}
         </div>
       </div>
-    </div>
     </PageTransition>
   );
 }

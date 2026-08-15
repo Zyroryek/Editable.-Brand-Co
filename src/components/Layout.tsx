@@ -220,6 +220,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 {isMenuOpen ? <X size={15} /> : <Menu size={15} />}
               </button>
             </div>
+
+            {/* Desktop Claim Free Slot CTA Button matching reference screenshot */}
+            <Link
+              to="/booking?offer=independence"
+              onClick={playNavigationSound}
+              className="hidden lg:inline-flex items-center gap-2 px-5 py-2.5 bg-accent text-white rounded-full text-xs font-mono font-bold uppercase tracking-wider transition-all shadow-md shadow-accent/20 hover:scale-105 active:scale-95 whitespace-nowrap cursor-pointer"
+            >
+              <span>CLAIM FREE SLOT #1 (₹0)</span>
+            </Link>
           </div>
         </div>
 

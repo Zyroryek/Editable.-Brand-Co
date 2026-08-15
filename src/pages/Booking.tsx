@@ -48,24 +48,37 @@ export default function Booking() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
-      const inquiryPath = 'inquiries';
-      // 1. Save to Firestore
-      await addDoc(collection(db, inquiryPath), {
-        ...form,
-        status: 'pending',
-        isIndependenceOffer: isFreeOffer,
-        createdAt: serverTimestamp()
+      const payload = {
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        businessName: form.businessName || "Independent Client",
+        package: form.package,
+        details: form.details,
+        isIndependenceOffer: isFreeOffer
+      };
+
+      const res = await fetch('/api/inquiries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
 
-      // 2. If it's a free offer, complete directly to step 3! If paid, show QR Code modal
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to submit booking');
+      }
+
+      // If it's a free offer, complete directly to step 3! If paid, show QR Code modal
       if (isFreeOffer) {
         setStep(3);
       } else {
         setShowQR(true);
       }
       
-    } catch (error) {
-      handleFirestoreError(error, OperationType.WRITE, 'inquiries');
+    } catch (error: any) {
+      console.error("Booking error:", error);
+      alert(error?.message || "Failed to submit booking. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -226,7 +239,7 @@ export default function Booking() {
                   <button 
                     onClick={handleSubmit}
                     disabled={isSubmitting}
-                    className="w-full py-5 bg-gradient-to-r from-accent to-accent-alt text-white rounded-2xl hover:opacity-95 transition-all text-base sm:text-lg font-display text-center px-8 group flex justify-center items-center gap-3 disabled:opacity-50 shadow-xl shadow-accent/25 cursor-pointer border border-white/20"
+                    className="w-full py-5 bg-gradient-to-r from-accent to-accent-alt text-white rounded-full hover:opacity-95 transition-all text-base sm:text-lg font-display text-center px-8 group flex justify-center items-center gap-3 disabled:opacity-50 shadow-xl shadow-accent/25 cursor-pointer border border-white/20"
                   >
                     {isSubmitting 
                       ? "Processing Claim..." 

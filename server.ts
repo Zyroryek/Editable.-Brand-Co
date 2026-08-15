@@ -101,10 +101,145 @@ function getSMTPOptions(): SMTPOptions {
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   // Parse JSON bodies
   app.use(express.json());
+
+  // Health check endpoint for Cloud Run and monitoring
+  app.get("/api/health", (req, res) => {
+    res.json({ status: "ok", timestamp: new Date().toISOString() });
+  });
+
+  // API endpoint for general / package inquiries and automated confirmation emails
+  app.post("/api/inquiries", async (req, res) => {
+    const { name, email, phone, businessName, package: packageName, details, slotNumber, isIndependenceOffer } = req.body;
+
+    if (!name || !email || !phone) {
+      res.status(400).json({ error: "Name, email, and phone are required fields." });
+      return;
+    }
+
+    try {
+      const db = getAdminDb();
+      const payload = {
+        name: name.trim(),
+        email: email.trim(),
+        phone: phone.trim(),
+        businessName: businessName?.trim() || "Independent Client",
+        package: packageName || null,
+        details: details?.trim() || "",
+        slotNumber: slotNumber || null,
+        isIndependenceOffer: isIndependenceOffer || false,
+        status: "pending",
+        createdAt: new Date()
+      };
+
+      const docRef = await db.collection("inquiries").add(payload);
+
+      const { host, port, user, pass, recipient } = getSMTPOptions();
+      let emailSent = false;
+      let emailNote = "";
+
+      if (user && pass) {
+        try {
+          const transporter = nodemailer.createTransport({
+            host,
+            port,
+            secure: port === 465,
+            auth: { user, pass },
+            tls: { rejectUnauthorized: false }
+          });
+
+          // 1. Send confirmation email to the user
+          const userMailOptions = {
+            from: `"Editable Creative Studio" <${user}>`,
+            to: email.trim(),
+            subject: `✨ Booking Confirmation: ${packageName || "Creative Project"}`,
+            html: `
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e4e4e7; border-radius: 16px; padding: 32px; color: #18181b; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                <div style="text-align: center; margin-bottom: 24px;">
+                  <span style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.2em; color: #ff4d00; font-weight: bold; display: block; margin-bottom: 4px;">Editable Creative Studio</span>
+                  <h2 style="font-size: 24px; font-weight: 800; color: #0f172a; margin: 0; text-transform: uppercase; letter-spacing: -0.02em;">Booking & Inquiry Received</h2>
+                </div>
+                
+                <p style="font-size: 15px; color: #334155; line-height: 1.6;">
+                  Hello <strong style="color: #0f172a;">${name.trim()}</strong>,
+                </p>
+                
+                <p style="font-size: 14.5px; color: #334155; line-height: 1.6;">
+                  Thank you for reaching out to us! We have successfully received your request for <strong style="color: #ff4d00;">${packageName || "Custom Creative Services"}</strong>. Our design leads are reviewing your project requirements and will get in touch with you within 24 hours.
+                </p>
+
+                <div style="background-color: #f8fafc; border-radius: 12px; padding: 20px; border: 1px solid #f1f5f9; margin: 24px 0;">
+                  <h4 style="font-size: 12px; text-transform: uppercase; letter-spacing: 0.1em; color: #64748b; margin-top: 0; margin-bottom: 12px; font-weight: 700;">Your Submission Summary</h4>
+                  <table style="width: 100%; border-collapse: collapse;">
+                    <tr>
+                      <td style="padding: 6px 0; font-size: 13px; font-weight: 600; color: #64748b; width: 130px;">Ecosystem:</td>
+                      <td style="padding: 6px 0; font-size: 13px; color: #0f172a; font-weight: bold;">${packageName || "General Inquiry"}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 6px 0; font-size: 13px; font-weight: 600; color: #64748b;">Company / Brand:</td>
+                      <td style="padding: 6px 0; font-size: 13px; color: #0f172a;">${businessName || "N/A"}</td>
+                    </tr>
+                    <tr>
+                      <td style="padding: 6px 0; font-size: 13px; font-weight: 600; color: #64748b;">Contact Email:</td>
+                      <td style="padding: 6px 0; font-size: 13px; color: #ff4d00;">${email}</td>
+                    </tr>
+                  </table>
+                </div>
+
+                <div style="margin-top: 32px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 20px;">
+                  <p style="font-size: 11px; color: #94a3b8; margin: 0;">
+                    Editable Creative Studio • Premium Branding & Digital Engineering
+                  </p>
+                </div>
+              </div>
+            `,
+          };
+
+          await transporter.sendMail(userMailOptions);
+
+          // 2. Send notification email to admin/recipient
+          const adminMailOptions = {
+            from: `"Editable Studio Bot" <${user}>`,
+            to: recipient,
+            subject: `🚨 New Package Inquiry / Booking: ${name.trim()} (${packageName || "General"})`,
+            html: `
+              <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: auto; border: 1px solid #e4e4e7; border-radius: 16px; padding: 32px; color: #18181b; background-color: #ffffff;">
+                <h3 style="color: #ff4d00; text-transform: uppercase;">New Package Inquiry / Booking</h3>
+                <p><strong>Name:</strong> ${name}</p>
+                <p><strong>Email:</strong> ${email}</p>
+                <p><strong>Phone:</strong> ${phone}</p>
+                <p><strong>Company:</strong> ${businessName || "N/A"}</p>
+                <p><strong>Package:</strong> ${packageName || "N/A"}</p>
+                <p><strong>Details:</strong> ${details || "N/A"}</p>
+              </div>
+            `
+          };
+          await transporter.sendMail(adminMailOptions);
+
+          emailSent = true;
+          console.log(`[Email Service] Confirmation email sent to user (${email}) and notification sent to admin (${recipient})`);
+        } catch (mailErr: any) {
+          console.error("[Email Service] Failed to send SMTP mail:", mailErr);
+          emailNote = `Inquiry saved to database, but email dispatch encountered SMTP error: ${mailErr?.message}`;
+        }
+      } else {
+        emailNote = "Inquiry saved to database successfully. SMTP credentials are not configured.";
+      }
+
+      res.json({
+        success: true,
+        id: docRef.id,
+        emailSent,
+        note: emailNote
+      });
+    } catch (err: any) {
+      console.error("Error processing inquiry booking:", err);
+      res.status(500).json({ error: "Failed to store inquiry in database", details: err?.message });
+    }
+  });
 
   // API endpoint for internship notifications
   app.post("/api/internship/apply", async (req, res) => {
@@ -419,7 +554,7 @@ async function startServer() {
   } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
-    app.get("*all", (req, res) => {
+    app.use((req, res) => {
       res.sendFile(path.join(distPath, "index.html"));
     });
   }
